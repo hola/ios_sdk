@@ -4,10 +4,10 @@ This document describes integration of a native iOS app to HolaCDN
 
 ## Initialization
 
-- Include HolaCDN.framework to your project.
+- Include `HolaCDN.framework` to your project.
 
-- In this class, create a new instance of HolaCDN with your customer id as
-a parameter and calling load method. Example:
+- Create a new instance of `HolaCDN` with your customer id as
+a parameter and call `load` method. Example:
 
 ```swift
 let cdn = HolaCDN(customer: "demo")
