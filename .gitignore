@@ -17,3 +17,7 @@ xcuserdata/
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
+
+Carthage/
+Cartfile.resolved
+*.zip
