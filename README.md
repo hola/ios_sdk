@@ -39,6 +39,9 @@ let cdn = HolaCDN()
 ```
 
 - Call the config method with desired parameters
+  - `customer`: String – required parameter, your customerId
+  - `zone`: String? – optional parameter to force zone selection. In case of `nil` will be selected automatically according to your customer's HolaCDN config
+  - `mode`: String? – optional parameter to force cdn mode selection. In case of `nil` will be selected automatically according to your customer's HolaCDN config; supported options are: `nil`, `"stats"`, `"cdn"`.
 
 ```swift
 cdn.config(customer: "your_customer_id")
