@@ -1,3 +1,0 @@
-framework module HolaCDN {
-    header "HolaCDN-Swift.h"
-}

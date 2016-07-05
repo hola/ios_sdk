@@ -7,17 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9748B1121D2AA6B30086F311 /* hola_log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9748B1111D2AA6B30086F311 /* hola_log.swift */; };
+		979886E61D1AC03C00BAF22A /* hola_loader_delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979886E51D1AC03C00BAF22A /* hola_loader_delegate.swift */; };
+		97A624601D1C01EC007CE910 /* hola_hls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A6245F1D1C01EC007CE910 /* hola_hls.swift */; };
 		97D0EB2C1D1141F30016925F /* hola_cdn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D0EB2B1D1141F30016925F /* hola_cdn.swift */; };
 		97D0EB2E1D1141FF0016925F /* hola_player_proxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D0EB2D1D1141FF0016925F /* hola_player_proxy.swift */; };
 		97E2168F1D1046DB00063D36 /* hola_cdn.h in Headers */ = {isa = PBXBuildFile; fileRef = 97E2168E1D1046DB00063D36 /* hola_cdn.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		97F66AEA1D196925003AB057 /* hola_asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F66AE91D196925003AB057 /* hola_asset.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9748B1111D2AA6B30086F311 /* hola_log.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = hola_log.swift; sourceTree = "<group>"; };
+		979886E51D1AC03C00BAF22A /* hola_loader_delegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = hola_loader_delegate.swift; sourceTree = "<group>"; };
+		97A6245F1D1C01EC007CE910 /* hola_hls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = hola_hls.swift; sourceTree = "<group>"; };
 		97D0EB2B1D1141F30016925F /* hola_cdn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = hola_cdn.swift; sourceTree = "<group>"; };
 		97D0EB2D1D1141FF0016925F /* hola_player_proxy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = hola_player_proxy.swift; sourceTree = "<group>"; };
 		97E2168B1D1046DB00063D36 /* HolaCDN.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = HolaCDN.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		97E2168E1D1046DB00063D36 /* hola_cdn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hola_cdn.h; sourceTree = "<group>"; };
 		97E216901D1046DB00063D36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		97F66AE91D196925003AB057 /* hola_asset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = hola_asset.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +62,10 @@
 				97D0EB2D1D1141FF0016925F /* hola_player_proxy.swift */,
 				97E216901D1046DB00063D36 /* Info.plist */,
 				97D0EB2B1D1141F30016925F /* hola_cdn.swift */,
+				97F66AE91D196925003AB057 /* hola_asset.swift */,
+				979886E51D1AC03C00BAF22A /* hola_loader_delegate.swift */,
+				97A6245F1D1C01EC007CE910 /* hola_hls.swift */,
+				9748B1111D2AA6B30086F311 /* hola_log.swift */,
 			);
 			path = hola_cdn;
 			sourceTree = "<group>";
@@ -137,7 +149,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				97F66AEA1D196925003AB057 /* hola_asset.swift in Sources */,
+				979886E61D1AC03C00BAF22A /* hola_loader_delegate.swift in Sources */,
 				97D0EB2C1D1141F30016925F /* hola_cdn.swift in Sources */,
+				97A624601D1C01EC007CE910 /* hola_hls.swift in Sources */,
+				9748B1121D2AA6B30086F311 /* hola_log.swift in Sources */,
 				97D0EB2E1D1141FF0016925F /* hola_player_proxy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -239,12 +255,18 @@
 		97E216941D1046DB00063D36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = hola_cdn/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -259,12 +281,18 @@
 		97E216951D1046DB00063D36 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = hola_cdn/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;

@@ -2,20 +2,50 @@
 
 This document describes integration of a native iOS app to HolaCDN
 
+## Requirements
+
+At the moment, HolaCDN works only with `AVPlayer`+`AVURLAsset`+HLS videos.
+
+Custom `AVAssetResourceLoaderDelegate` is not yet supported.
+
+## Install
+
+### Manually
+
+- Download the latest [release](https://github.com/hola/ios_sdk/releases)
+
+- Add hola_cdn.xcodeproj into your project
+
+- In your Target, click + in `Linked Frameworks and Libraries`, add `HolaCDN.framework`
+
+### via Carthage
+
+- Install [Carthage](https://github.com/Carthage/Carthage#installing-carthage)
+
+- Add `github "hola/ios_sdk" ~> 1.1` to your Cartfile
+
+- Run `$ carthage update` and add the generated frameworks to your Xcode projects (see [Carthage instructions](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)).
+
+### via CocoaPods
+
+- Will be available later
+
 ## Initialization
 
-- Include `HolaCDN.framework` to your project.
-
-- Create a new instance of `HolaCDN` with your customer id as
-a parameter and call `load` method. Example:
+- Create a new instance of `HolaCDN`
 
 ```swift
-let cdn = HolaCDN(customer: "demo")
-cdn.load()
+let cdn = HolaCDN()
 ```
 
-- You can create a class which conforms to `HolaCDNDelegate` protocol to
-handling some HolaCDN callbacks:
+- Call the config method with desired parameters
+
+```swift
+cdn.config(customer: "your_customer_id")
+```
+
+- Create a class which conforms to `HolaCDNDelegate` protocol to
+handle some HolaCDN callbacks:
 
 ```swift
 protocol HolaCDNDelegate: NSObjectProtocol {
@@ -27,6 +57,14 @@ protocol HolaCDNDelegate: NSObjectProtocol {
 }
 ```
 
+- Set the delegate and call `load` method
+
+```swift
+// in case if you have implemented the protocol for the current ViewController
+cdn.delegate = self
+try! cdn.load() // could throw an error in case if no "customerId" provided with cdn.config method
+```
+
 - Loading occurs asynchronically. During that process some delegate
 methods could be called:
 
@@ -36,14 +74,17 @@ when something goes wrong while executing HolaCDN code
 
 - How to check `HolaCDN` state:
 
-  - `cdn.ready`: Bool - returns true if service is inited
-  - `cdn.attached`: Bool – returns true if service exists and the wrapper
-  is attached to AVPlayer
+  - `cdn.get_mode()`: String – returns current cdn mode:
+
+    - `"loading"` – CDN js code is loading
+    - `"detached"` – CDN is loaded, not attached to a player
+    - `"disabled"` – CDN is in automatic mode and disabled for current config
+    - `"stats"` – CDN is attached and working in stats-only mode
+    - `"cdn"` – CDN is attached and working in cdn mode
 
 ## Attach
 
-Attachment is required to activate HolaCDN features. At the moment, cdn mode
-for `AVPlayer` object is functional in stats-only mode. Example:
+Attachment is required to activate HolaCDN features. Example:
 
 ```swift
 let myAVPlayer = AVPlayer(URL: url)
@@ -54,20 +95,24 @@ cdn.attach(myAVPlayer)
 
 ## Example
 
+### Swift
+
 ```swift
+import HolaCDN
+
 class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
-    let urlString = "https://example.com/your/video.m3u8"
-    lazy var cdn = HolaCDN(customer: "demo")
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let cdn = HolaCDN()
+        cdn.config(customer: "demo", zone: nil, mode: "cdn")
         cdn.delegate = self
 
-        let url = NSURL(string: urlString)!
+        let url = NSURL(string: "https://example.com/your/video.m3u8")!
         self.player = AVPlayer(URL: url)
 
-        cdn.load()
+        try! cdn.load()
     }
 
     func cdnDidLoaded(cdn: HolaCDN) {
@@ -75,5 +120,41 @@ class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
 
         cdn.attach(self.player!)
     }
+
+    func cdnDidAttached(cdn: HolaCDN) {
+        NSLog("cdn did attached! \(cdn.get_mode())")
+    }
 }
+```
+
+### Objective-C
+
+```objc
+@import HolaCDN;
+
+@implementation PlayerViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    HolaCDN *cdn = [[HolaCDN alloc] init];
+    [cdn setDelegate:self];
+    [cdn config:@"demo" zone:nil mode:@"cdn"];
+
+    NSURL *url = [NSURL URLWithString:@"https://example.com/your/video.m3u8"];
+    self.player = [AVPlayer playerWithURL:url];
+
+    NSError *err = [NSError alloc];
+    [cdn loadAndReturnError:&err];
+}
+
+-(void)cdnDidLoaded:(HolaCDN *)cdn {
+    [cdn attach:[self playerTmp]];
+}
+
+-(void)cdnDidAttached:(HolaCDN *)cdn {
+    NSLog(@"cdn did attached! %@", [cdn get_mode]);
+}
+
+@end
 ```
