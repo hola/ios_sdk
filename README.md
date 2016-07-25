@@ -4,6 +4,8 @@ This document describes integration of a native iOS app to HolaCDN
 
 ## Requirements
 
+iOS version 8+ required.
+
 At the moment, HolaCDN works only with `AVPlayer`+`AVURLAsset`+HLS videos.
 
 Custom `AVAssetResourceLoaderDelegate` is not yet supported.
