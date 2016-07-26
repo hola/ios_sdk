@@ -9,7 +9,7 @@
 import Foundation
 import AVFoundation
 import JavaScriptCore
-import GCDWebServers
+import GCDWebServer
 
 enum HolaScheme {
     case HTTP
