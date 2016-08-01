@@ -1,0 +1,379 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		975745C91D4B7B1B00CD1E70 /* hola_cdn_asset.h in Headers */ = {isa = PBXBuildFile; fileRef = 975745C71D4B7B1B00CD1E70 /* hola_cdn_asset.h */; };
+		975745CA1D4B7B1B00CD1E70 /* hola_cdn_asset.m in Sources */ = {isa = PBXBuildFile; fileRef = 975745C81D4B7B1B00CD1E70 /* hola_cdn_asset.m */; };
+		975745CD1D4B7D3B00CD1E70 /* hola_hls_segment_info.h in Headers */ = {isa = PBXBuildFile; fileRef = 975745CB1D4B7D3B00CD1E70 /* hola_hls_segment_info.h */; };
+		975745CE1D4B7D3B00CD1E70 /* hola_hls_segment_info.m in Sources */ = {isa = PBXBuildFile; fileRef = 975745CC1D4B7D3B00CD1E70 /* hola_hls_segment_info.m */; };
+		975745D11D4B7E3000CD1E70 /* hola_hls_level_info.h in Headers */ = {isa = PBXBuildFile; fileRef = 975745CF1D4B7E3000CD1E70 /* hola_hls_level_info.h */; };
+		975745D21D4B7E3000CD1E70 /* hola_hls_level_info.m in Sources */ = {isa = PBXBuildFile; fileRef = 975745D01D4B7E3000CD1E70 /* hola_hls_level_info.m */; };
+		975745D51D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 975745D31D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.h */; };
+		975745D61D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 975745D41D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m */; };
+		97A0D3481D4A0CB000EF7C1A /* hola_cdn_sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = 97A21CF91D488E09008066A4 /* hola_cdn_sdk.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		97A0D3491D4A0CB000EF7C1A /* hola_log.h in Headers */ = {isa = PBXBuildFile; fileRef = 97A21D101D489E09008066A4 /* hola_log.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		97A0D3871D4A360400EF7C1A /* hola_cdn_player_proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 97A0D3851D4A360400EF7C1A /* hola_cdn_player_proxy.h */; };
+		97A0D3881D4A360400EF7C1A /* hola_cdn_player_proxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A0D3861D4A360400EF7C1A /* hola_cdn_player_proxy.m */; };
+		97A0D38B1D4A366D00EF7C1A /* hola_hls_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 97A0D3891D4A366D00EF7C1A /* hola_hls_parser.h */; };
+		97A0D38C1D4A366D00EF7C1A /* hola_hls_parser.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A0D38A1D4A366D00EF7C1A /* hola_hls_parser.m */; };
+		97A21CFA1D488E09008066A4 /* hola_cdn_sdk.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 97A21CF91D488E09008066A4 /* hola_cdn_sdk.h */; };
+		97A21CFC1D488E09008066A4 /* hola_cdn_sdk.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A21CFB1D488E09008066A4 /* hola_cdn_sdk.m */; };
+		97A21D091D488EAD008066A4 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A21D081D488EAD008066A4 /* JavaScriptCore.framework */; };
+		97A21D0B1D488EB3008066A4 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A21D0A1D488EB3008066A4 /* AVFoundation.framework */; };
+		97A21D0D1D488EB9008066A4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A21D0C1D488EB9008066A4 /* AVKit.framework */; };
+		97A21D0F1D488EBF008066A4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A21D0E1D488EBF008066A4 /* UIKit.framework */; };
+		97A21D121D489E09008066A4 /* hola_log.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A21D111D489E09008066A4 /* hola_log.m */; };
+		97DFA14D1D48B0FF00021AB1 /* hola_log.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 97A21D101D489E09008066A4 /* hola_log.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		97A21CF41D488E09008066A4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				97DFA14D1D48B0FF00021AB1 /* hola_log.h in CopyFiles */,
+				97A21CFA1D488E09008066A4 /* hola_cdn_sdk.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		975745C71D4B7B1B00CD1E70 /* hola_cdn_asset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_cdn_asset.h; sourceTree = "<group>"; };
+		975745C81D4B7B1B00CD1E70 /* hola_cdn_asset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_cdn_asset.m; sourceTree = "<group>"; };
+		975745CB1D4B7D3B00CD1E70 /* hola_hls_segment_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_hls_segment_info.h; sourceTree = "<group>"; };
+		975745CC1D4B7D3B00CD1E70 /* hola_hls_segment_info.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_hls_segment_info.m; sourceTree = "<group>"; };
+		975745CF1D4B7E3000CD1E70 /* hola_hls_level_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_hls_level_info.h; sourceTree = "<group>"; };
+		975745D01D4B7E3000CD1E70 /* hola_hls_level_info.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_hls_level_info.m; sourceTree = "<group>"; };
+		975745D31D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_cdn_loader_delegate.h; sourceTree = "<group>"; };
+		975745D41D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_cdn_loader_delegate.m; sourceTree = "<group>"; };
+		97A0D3851D4A360400EF7C1A /* hola_cdn_player_proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_cdn_player_proxy.h; sourceTree = "<group>"; };
+		97A0D3861D4A360400EF7C1A /* hola_cdn_player_proxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_cdn_player_proxy.m; sourceTree = "<group>"; };
+		97A0D3891D4A366D00EF7C1A /* hola_hls_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_hls_parser.h; sourceTree = "<group>"; };
+		97A0D38A1D4A366D00EF7C1A /* hola_hls_parser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_hls_parser.m; sourceTree = "<group>"; };
+		97A21CF61D488E09008066A4 /* libHolaCDN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHolaCDN.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		97A21CF91D488E09008066A4 /* hola_cdn_sdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hola_cdn_sdk.h; sourceTree = "<group>"; };
+		97A21CFB1D488E09008066A4 /* hola_cdn_sdk.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = hola_cdn_sdk.m; sourceTree = "<group>"; };
+		97A21D081D488EAD008066A4 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		97A21D0A1D488EB3008066A4 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		97A21D0C1D488EB9008066A4 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
+		97A21D0E1D488EBF008066A4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		97A21D101D489E09008066A4 /* hola_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_log.h; sourceTree = "<group>"; };
+		97A21D111D489E09008066A4 /* hola_log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_log.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		97A21CF31D488E09008066A4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				97A21D0F1D488EBF008066A4 /* UIKit.framework in Frameworks */,
+				97A21D0D1D488EB9008066A4 /* AVKit.framework in Frameworks */,
+				97A21D0B1D488EB3008066A4 /* AVFoundation.framework in Frameworks */,
+				97A21D091D488EAD008066A4 /* JavaScriptCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		97A21CED1D488E09008066A4 = {
+			isa = PBXGroup;
+			children = (
+				97A21D0E1D488EBF008066A4 /* UIKit.framework */,
+				97A21D0C1D488EB9008066A4 /* AVKit.framework */,
+				97A21D0A1D488EB3008066A4 /* AVFoundation.framework */,
+				97A21D081D488EAD008066A4 /* JavaScriptCore.framework */,
+				97A21CF81D488E09008066A4 /* hola-cdn-sdk */,
+				97A21CF71D488E09008066A4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		97A21CF71D488E09008066A4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				97A21CF61D488E09008066A4 /* libHolaCDN.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		97A21CF81D488E09008066A4 /* hola-cdn-sdk */ = {
+			isa = PBXGroup;
+			children = (
+				97A21CF91D488E09008066A4 /* hola_cdn_sdk.h */,
+				97A21CFB1D488E09008066A4 /* hola_cdn_sdk.m */,
+				97A21D101D489E09008066A4 /* hola_log.h */,
+				97A21D111D489E09008066A4 /* hola_log.m */,
+				97A0D3851D4A360400EF7C1A /* hola_cdn_player_proxy.h */,
+				97A0D3861D4A360400EF7C1A /* hola_cdn_player_proxy.m */,
+				97A0D3891D4A366D00EF7C1A /* hola_hls_parser.h */,
+				97A0D38A1D4A366D00EF7C1A /* hola_hls_parser.m */,
+				975745C71D4B7B1B00CD1E70 /* hola_cdn_asset.h */,
+				975745C81D4B7B1B00CD1E70 /* hola_cdn_asset.m */,
+				975745CB1D4B7D3B00CD1E70 /* hola_hls_segment_info.h */,
+				975745CC1D4B7D3B00CD1E70 /* hola_hls_segment_info.m */,
+				975745CF1D4B7E3000CD1E70 /* hola_hls_level_info.h */,
+				975745D01D4B7E3000CD1E70 /* hola_hls_level_info.m */,
+				975745D31D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.h */,
+				975745D41D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m */,
+			);
+			path = "hola-cdn-sdk";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		97A0D3471D4A0C9D00EF7C1A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				975745D51D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.h in Headers */,
+				97A0D3481D4A0CB000EF7C1A /* hola_cdn_sdk.h in Headers */,
+				975745C91D4B7B1B00CD1E70 /* hola_cdn_asset.h in Headers */,
+				97A0D38B1D4A366D00EF7C1A /* hola_hls_parser.h in Headers */,
+				97A0D3491D4A0CB000EF7C1A /* hola_log.h in Headers */,
+				975745D11D4B7E3000CD1E70 /* hola_hls_level_info.h in Headers */,
+				975745CD1D4B7D3B00CD1E70 /* hola_hls_segment_info.h in Headers */,
+				97A0D3871D4A360400EF7C1A /* hola_cdn_player_proxy.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		97A21CF51D488E09008066A4 /* HolaCDN */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97A21CFF1D488E09008066A4 /* Build configuration list for PBXNativeTarget "HolaCDN" */;
+			buildPhases = (
+				97A21CF21D488E09008066A4 /* Sources */,
+				97A21CF31D488E09008066A4 /* Frameworks */,
+				97A21CF41D488E09008066A4 /* CopyFiles */,
+				97A0D3461D4A0C8000EF7C1A /* ShellScript */,
+				97A0D3471D4A0C9D00EF7C1A /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HolaCDN;
+			productName = "hola-cdn-sdk";
+			productReference = 97A21CF61D488E09008066A4 /* libHolaCDN.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		97A21CEE1D488E09008066A4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = hola;
+				TargetAttributes = {
+					97A21CF51D488E09008066A4 = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 97A21CF11D488E09008066A4 /* Build configuration list for PBXProject "hola-cdn-sdk" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 97A21CED1D488E09008066A4;
+			productRefGroup = 97A21CF71D488E09008066A4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				97A21CF51D488E09008066A4 /* HolaCDN */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		97A0D3461D4A0C8000EF7C1A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "##########################################\n#\n# c.f. http://stackoverflow.com/questions/3520977/build-fat-static-library-device-simulator-using-xcode-and-sdk-4\n#\n# Version 2.7\n#\n# Latest Change:\n# - Supports iPhone 5 / iPod Touch 5 (uses Apple's workaround to lipo bug)\n# \n# Purpose:\n#   Automatically create a Universal static library for iPhone + iPad + iPhone Simulator from within XCode\n#\n# Author: Adam Martin - http://twitter.com/redglassesapps\n# Based on: original script from Eonil (main changes: Eonil's script WILL NOT WORK in Xcode GUI - it WILL CRASH YOUR COMPUTER)\n#\n\nset -e\nset -o pipefail\n\n#################[ Tests: helps workaround any future bugs in Xcode ]########\n#\nDEBUG_THIS_SCRIPT=\"false\"\n\nif [ $DEBUG_THIS_SCRIPT = \"true\" ]\nthen\necho \"########### TESTS #############\"\necho \"Use the following variables when debugging this script; note that they may change on recursions\"\necho \"BUILD_DIR = $BUILD_DIR\"\necho \"BUILD_ROOT = $BUILD_ROOT\"\necho \"CONFIGURATION_BUILD_DIR = $CONFIGURATION_BUILD_DIR\"\necho \"BUILT_PRODUCTS_DIR = $BUILT_PRODUCTS_DIR\"\necho \"CONFIGURATION_TEMP_DIR = $CONFIGURATION_TEMP_DIR\"\necho \"TARGET_BUILD_DIR = $TARGET_BUILD_DIR\"\nfi\n\n#####################[ part 1 ]##################\n# First, work out the BASESDK version number (NB: Apple ought to report this, but they hide it)\n#    (incidental: searching for substrings in sh is a nightmare! Sob)\n\nSDK_VERSION=$(echo ${SDK_NAME} | grep -o '.\\{3\\}$')\n\n# Next, work out if we're in SIM or DEVICE\n\nif [ ${PLATFORM_NAME} = \"iphonesimulator\" ]\nthen\nOTHER_SDK_TO_BUILD=iphoneos${SDK_VERSION}\nelse\nOTHER_SDK_TO_BUILD=iphonesimulator${SDK_VERSION}\nfi\n\necho \"XCode has selected SDK: ${PLATFORM_NAME} with version: ${SDK_VERSION} (although back-targetting: ${IPHONEOS_DEPLOYMENT_TARGET})\"\necho \"...therefore, OTHER_SDK_TO_BUILD = ${OTHER_SDK_TO_BUILD}\"\n#\n#####################[ end of part 1 ]##################\n\n#####################[ part 2 ]##################\n#\n# IF this is the original invocation, invoke WHATEVER other builds are required\n#\n# Xcode is already building ONE target...\n#\n# ...but this is a LIBRARY, so Apple is wrong to set it to build just one.\n# ...we need to build ALL targets\n# ...we MUST NOT re-build the target that is ALREADY being built: Xcode WILL CRASH YOUR COMPUTER if you try this (infinite recursion!)\n#\n#\n# So: build ONLY the missing platforms/configurations.\n\nif [ \"true\" == ${ALREADYINVOKED:-false} ]\nthen\necho \"RECURSION: I am NOT the root invocation, so I'm NOT going to recurse\"\nelse\n# CRITICAL:\n# Prevent infinite recursion (Xcode sucks)\nexport ALREADYINVOKED=\"true\"\n\necho \"RECURSION: I am the root ... recursing all missing build targets NOW...\"\necho \"RECURSION: ...about to invoke: xcodebuild -configuration \\\"${CONFIGURATION}\\\" -project \\\"${PROJECT_NAME}.xcodeproj\\\" -target \\\"${TARGET_NAME}\\\" -sdk \\\"${OTHER_SDK_TO_BUILD}\\\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO\" BUILD_DIR=\\\"${BUILD_DIR}\\\" BUILD_ROOT=\\\"${BUILD_ROOT}\\\" SYMROOT=\\\"${SYMROOT}\\\"\n\nxcodebuild -configuration \"${CONFIGURATION}\" -project \"${PROJECT_NAME}.xcodeproj\" -target \"${TARGET_NAME}\" -sdk \"${OTHER_SDK_TO_BUILD}\" ${ACTION} RUN_CLANG_STATIC_ANALYZER=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" SYMROOT=\"${SYMROOT}\"\n\nACTION=\"build\"\n\n#Merge all platform binaries as a fat binary for each configurations.\n\n# Calculate where the (multiple) built files are coming from:\nCURRENTCONFIG_DEVICE_DIR=${SYMROOT}/${CONFIGURATION}-iphoneos\nCURRENTCONFIG_SIMULATOR_DIR=${SYMROOT}/${CONFIGURATION}-iphonesimulator\n\necho \"Taking device build from: ${CURRENTCONFIG_DEVICE_DIR}\"\necho \"Taking simulator build from: ${CURRENTCONFIG_SIMULATOR_DIR}\"\n\nCREATING_UNIVERSAL_DIR=${SYMROOT}/${CONFIGURATION}-universal\necho \"...I will output a universal build to: ${CREATING_UNIVERSAL_DIR}\"\n\n# ... remove the products of previous runs of this script\n#      NB: this directory is ONLY created by this script - it should be safe to delete!\n\nrm -rf \"${CREATING_UNIVERSAL_DIR}\"\nmkdir \"${CREATING_UNIVERSAL_DIR}\"\n\n#\necho \"lipo: for current configuration (${CONFIGURATION}) creating output file: ${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\"\nxcrun -sdk iphoneos lipo -create -output \"${CREATING_UNIVERSAL_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_DEVICE_DIR}/${EXECUTABLE_NAME}\" \"${CURRENTCONFIG_SIMULATOR_DIR}/${EXECUTABLE_NAME}\"\n\n#########\n#\n# Added: StackOverflow suggestion to also copy \"include\" files\n#    (untested, but should work OK)\n#\necho \"Fetching headers from ${PUBLIC_HEADERS_FOLDER_PATH}\"\necho \"  (if you embed your library project in another project, you will need to add\"\necho \"   a \"User Search Headers\" build setting of: (NB INCLUDE THE DOUBLE QUOTES BELOW!)\"\necho '        \"$(TARGET_BUILD_DIR)/usr/local/include/\"'\nif [ -d \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\" ]\nthen\nmkdir -p \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\n# * needs to be outside the double quotes?\ncp -r \"${CURRENTCONFIG_DEVICE_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"* \"${CREATING_UNIVERSAL_DIR}${PUBLIC_HEADERS_FOLDER_PATH}\"\nfi\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		97A21CF21D488E09008066A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				975745D21D4B7E3000CD1E70 /* hola_hls_level_info.m in Sources */,
+				97A0D3881D4A360400EF7C1A /* hola_cdn_player_proxy.m in Sources */,
+				975745CE1D4B7D3B00CD1E70 /* hola_hls_segment_info.m in Sources */,
+				975745CA1D4B7B1B00CD1E70 /* hola_cdn_asset.m in Sources */,
+				97A21D121D489E09008066A4 /* hola_log.m in Sources */,
+				975745D61D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m in Sources */,
+				97A0D38C1D4A366D00EF7C1A /* hola_hls_parser.m in Sources */,
+				97A21CFC1D488E09008066A4 /* hola_cdn_sdk.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		97A21CFD1D488E09008066A4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+					x86_64,
+					i386,
+				);
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+			};
+			name = Debug;
+		};
+		97A21CFE1D488E09008066A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+					x86_64,
+					i386,
+				);
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s i386 x86_64";
+			};
+			name = Release;
+		};
+		97A21D001D488E09008066A4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s";
+			};
+			name = Debug;
+		};
+		97A21D011D488E09008066A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VALID_ARCHS = "arm64 armv7 armv7s";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		97A21CF11D488E09008066A4 /* Build configuration list for PBXProject "hola-cdn-sdk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97A21CFD1D488E09008066A4 /* Debug */,
+				97A21CFE1D488E09008066A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		97A21CFF1D488E09008066A4 /* Build configuration list for PBXNativeTarget "HolaCDN" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97A21D001D488E09008066A4 /* Debug */,
+				97A21D011D488E09008066A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 97A21CEE1D488E09008066A4 /* Project object */;
+}
