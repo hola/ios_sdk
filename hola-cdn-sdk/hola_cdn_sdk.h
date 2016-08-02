@@ -52,7 +52,7 @@
 
 // public func config(customer: String, zone: String? = nil, mode: String? = nil) {
 
--(BOOL)load:(NSError**)error;
+-(BOOL)load:(NSError * _Nullable * _Nullable)error;
 -(void)attach:(nonnull AVPlayer*)player;
 
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;

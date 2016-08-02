@@ -110,7 +110,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     if (error != nil) {
-        [_log err:[NSString stringWithFormat:@"webview: ", error]];
+        [_log err:[NSString stringWithFormat:@"webview: %@", error]];
     }
 }
 
