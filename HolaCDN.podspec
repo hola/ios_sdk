@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.author       = "hola.org"
 
   s.platform     = :ios, "7.0"
-  s.source       = { :git => "https://github.com/hola/ios_sdk.git", :tag => "1.1.1" }
+  s.source       = { :git => "https://github.com/hola/ios_sdk.git", :tag => "1.1.2" }
   s.source_files  = "hola-cdn-sdk/*.{h,m}"
 
   s.public_header_files = "hola-cdn-sdk/*.h"
