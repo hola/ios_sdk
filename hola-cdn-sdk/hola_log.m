@@ -37,11 +37,11 @@ static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
         break;
 
       case HolaCDNLogLevelInfo:
-        levelString = @"INFO ";
+        levelString = @"INFO";
         break;
 
       case HolaCDNLogLevelWarning:
-        levelString = @"WARN ";
+        levelString = @"WARN";
         break;
 
       case HolaCDNLogLevelError:
@@ -49,11 +49,11 @@ static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
         break;
 
       case HolaCDNLogLevelCritical:
-        levelString = @"CRIT ";
+        levelString = @"CRIT";
         break;
     }
 
-    return [NSString stringWithFormat:@"[%@]/%@", levelString, _module];
+    return [NSString stringWithFormat:@"[%@/%@]", levelString, _module];
 }
 
 -(void) rawLogWithLevel:(HolaCDNLogLevel)level andMessage:(NSString *)msg {
@@ -61,7 +61,7 @@ static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
         return;
     }
 
-    NSLog(@"%@", msg);
+    NSLog(@"%@%@", [self prefixForLevel:level], msg);
 }
 
 -(void) debug:(NSString*) msg {

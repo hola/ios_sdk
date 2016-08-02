@@ -12,13 +12,15 @@
 @import JavaScriptCore;
 @import AVFoundation;
 
+@class HolaCDN;
+
 @protocol HolaPlayerExports <JSExport>
 
 @property(readonly) BOOL ready;
 
 -(NSString*)get_state;
 
--(NSNumber*)fetch:(NSString*)url :(int)req_id :(BOOL)rate;
+-(int)fetch:(NSString*)url :(int)req_id :(BOOL)rate;
 
 -(void)fetch_remove:(int)req_id;
 
@@ -56,4 +58,7 @@
 -(instancetype)initWithPlayer:(AVPlayer*)player andCDN:(HolaCDN*)cdn;
 
 -(void)proxyUninit;
+-(void)execute:(NSString*)method;
+-(void)execute:(NSString*)method withValue:(id)value;
+
 @end

@@ -15,8 +15,6 @@
 
 @property NSString* url;
 @property NSNumber* duration;
-@property(readonly) NSNumber* bitrate;
-@property(readonly) NSNumber* size;
 
 @property(weak) HolaHLSLevelInfo* level;
 

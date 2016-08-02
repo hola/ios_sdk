@@ -11,12 +11,13 @@
 @implementation HolaCDNAsset
 
 -(instancetype)initWithURL:(NSURL*)url andCDN:(HolaCDN*)cdn {
-    // let url = HolaCDNLoaderDelegate.applyCDNScheme(URL, type: HolaCDNScheme.Fetch)
-    // loader = HolaCDNLoaderDelegate(cdn)
+    NSURL* cdnURL = [HolaCDNLoaderDelegate applyCDNScheme:url andType:HolaCDNSchemeFetch];
+    
+    _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:cdn];
 
-    self = [super initWithURL:url options:nil];
+    self = [super initWithURL:cdnURL options:nil];
     if (self) {
-        //self.resourceLoader.setDelegate(loader, queue: loader.queue)
+        [self.resourceLoader setDelegate:_loader queue:_loader.queue];
     }
 
     return self;

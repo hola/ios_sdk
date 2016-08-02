@@ -12,10 +12,14 @@
 
 @implementation HolaHLSSegmentInfo
 
+-(NSNumber*)getBitrate {
+    return _level.bitrate;
+}
+
 -(NSDictionary*)getInfo {
     return @{
         @"playlist_url": _level.url,
-        @"bitrate": _bitrate,
+        @"bitrate": [self getBitrate],
         @"url": _url,
         @"duration": _duration,
         @"media_index": [NSNumber numberWithUnsignedInteger:[_level.segments indexOfObject:self]]

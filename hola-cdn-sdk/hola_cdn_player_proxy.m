@@ -9,6 +9,7 @@
 #import "hola_cdn_player_proxy.h"
 #import "hola_log.h"
 #import "hola_cdn_asset.h"
+#import "hola_cdn_loader_delegate.h"
 
 @interface HolaCDNPlayerProxy()
 
@@ -17,18 +18,18 @@
 @property AVPlayerItem* originalItem;
 @property AVPlayerItem* cdnItem;
 @property id timeObserver;
+@property int req_id;
 
 @end
 
 @implementation HolaCDNPlayerProxy
 
-HolaCDNLog* _log;
+static HolaCDNLog* _LOG;
 
 @synthesize state = _state;
 @synthesize ready = _ready;
 
 BOOL attached = false;
-int req_id = 1;
 
 -(void)setState:(NSString*)state {
     _state = state;
@@ -46,24 +47,26 @@ int req_id = 1;
 -(instancetype)initWithPlayer:(AVPlayer *)player andCDN:(HolaCDN *)cdn {
     self = [super init];
     if (self) {
-        _log = [HolaCDNLog new];
-        [_log setModule:@"player"];
+        _LOG = [HolaCDNLog new];
+        [_LOG setModule:@"player"];
 
         _ready = false;
         _duration = 0;
+        _req_id = 1;
+        _state = @"IDLE";
 
         _cdn = cdn;
         _player = player;
 
         if (player.currentItem == nil) {
-            [_log err:@"AVPlayer must have a playerItem!"];
+            [_LOG err:@"AVPlayer must have a playerItem!"];
             return self;
         }
 
         _originalItem = player.currentItem;
-        
+
         if (![player.currentItem.asset isKindOfClass:[AVURLAsset class]]) {
-            [_log err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
+            [_LOG err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
             return self;
         }
 
@@ -78,7 +81,7 @@ int req_id = 1;
 }
 
 -(void)dealloc {
-    [_log debug:@"proxy dealloc"];
+    [_LOG debug:@"proxy dealloc"];
 
     [self proxyUninit];
 }
@@ -87,18 +90,52 @@ int req_id = 1;
 
 }
 
+-(AVURLAsset*)getAsset {
+    if (_cdnItem != nil) {
+        return (AVURLAsset*)_cdnItem.asset;
+    }
+
+    return nil;
+}
+
+-(HolaCDNLoaderDelegate*)getLoader {
+    AVURLAsset* asset = [self getAsset];
+    if (asset != nil) {
+        return (HolaCDNLoaderDelegate*)asset.resourceLoader.delegate;
+    }
+
+    return nil;
+}
+
 // JS Proxy methods
 
 -(NSString*)get_state {
     return _state;
 }
 
--(NSNumber*)fetch:(NSString*)url :(int)req_id :(BOOL)rate {
-    return 0;
+-(int)fetch:(NSString*)url :(int)arg_req_id :(BOOL)rate {
+    HolaCDNLoaderDelegate* loader = [self getLoader];
+
+    if (loader == nil) {
+        return 0;
+    }
+
+    int currentId = _req_id;
+
+    [loader processRequest:url forFrag:arg_req_id withReq:currentId isRate:rate];
+
+    _req_id += 1;
+    return currentId;
 }
 
 -(void)fetch_remove:(int)req_id {
+    HolaCDNLoaderDelegate* loader = [self getLoader];
 
+    if (loader == nil) {
+        return;
+    }
+
+    [loader remove:req_id];
 }
 
 -(NSString*)get_url {
@@ -138,7 +175,7 @@ int req_id = 1;
 }
 
 -(NSDictionary*)get_levels {
-    [_log debug:@"not implemented"];
+    [_LOG debug:@"not implemented"];
     return [NSDictionary new];
 }
 
@@ -153,7 +190,13 @@ int req_id = 1;
 }
 
 -(NSDictionary*)get_segment_info:(NSString*)url {
-    return [NSDictionary new];
+    HolaCDNLoaderDelegate* loader = [self getLoader];
+
+    if (loader == nil) {
+        return @{};
+    }
+
+    return [loader getSegmentInfo:url];
 }
 
 -(void)wrapper_attached {
@@ -161,6 +204,7 @@ int req_id = 1;
         return;
     }
 
+    [_LOG debug:@"wrapper_attached: attaching..."];
     attached = YES;
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -182,7 +226,7 @@ int req_id = 1;
 }
 
 -(void)log:(NSString*)msg {
-    [_log debug:[NSString stringWithFormat:@"JS: %@", msg]];
+    [_LOG debug:[NSString stringWithFormat:@"JS: %@", msg]];
 }
 
 -(NSDictionary*)settings:(NSDictionary*)opt {
@@ -196,14 +240,14 @@ int req_id = 1;
         return;
     }
 
-    [_log info:@"proxy uninit"];
+    [_LOG info:@"proxy uninit"];
     attached = NO;
 
     [self removeObservers];
     [_player removeObserver:self forKeyPath:@"currentItem"];
 
     _duration = 0;
-    self.state = @"IDLE";
+    [self setState:@"IDLE"];
 
     [self execute:@"on_ended"];
     [_cdn.ctx setObject:nil forKeyedSubscript:@"hola_ios_proxy"];
@@ -290,17 +334,17 @@ int req_id = 1;
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     if (_player == nil) {
-        [_log warn:@"no player found in observer!"];
+        [_LOG warn:@"no player found in observer!"];
     }
 
     if (keyPath == nil) {
-        [_log warn:@"null keyPath"];
+        [_LOG warn:@"null keyPath"];
         return;
     }
 
     if ([keyPath isEqualToString:@"currentItem"]) {
         if (![[[_player currentItem] asset] isKindOfClass:[HolaCDNAsset class]]) {
-            [_log warn:@"CurrentItem changed from outside, calling uninit"];
+            [_LOG warn:@"CurrentItem changed from outside, calling uninit"];
             [self uninit];
             return;
         }
@@ -343,7 +387,7 @@ int req_id = 1;
             [self executeSeeking];
         }
     } else if ([keyPath isEqualToString:@"currentItem.error"]) {
-        [_log err:[NSString stringWithFormat:@"currentItem.error: %@", change]];
+        [_LOG err:[NSString stringWithFormat:@"currentItem.error: %@", change]];
 
         AVPlayerItemErrorLog* log = [_player.currentItem errorLog];
         if (log != nil) {
@@ -370,11 +414,13 @@ int req_id = 1;
     JSValue* proxy = [_cdn.ctx objectForKeyedSubscript:@"hola_ios_proxy"];
 
     if ([proxy isUndefined]) {
+        [_LOG warn:@"getDelegate: proxy is undefined"];
         return nil;
     }
 
     JSValue* delegate = [proxy objectForKeyedSubscript:@"delegate"];
     if ([delegate isUndefined]) {
+        [_LOG warn:@"getDelegate: delegate is undefined"];
         return nil;
     }
 
@@ -390,13 +436,13 @@ int req_id = 1;
         JSValue* delegate = [self getDelegate];
 
         if (delegate == nil) {
-            [_log err:[NSString stringWithFormat:@"Trying to execute js: '%@'; no delegate found!", method]];
+            [_LOG err:[NSString stringWithFormat:@"Trying to execute js: '%@'; no delegate found!", method]];
             return;
         }
 
-        JSValue* callback = [delegate objectForKeyedSubscript:@"delegate"];
+        JSValue* callback = [delegate objectForKeyedSubscript:method];
         if ([callback isUndefined]) {
-            [_log warn:[NSString stringWithFormat:@"Trying to execute js: '%@'; no callback found!", method]];
+            [_LOG warn:[NSString stringWithFormat:@"Trying to execute js: '%@'; no callback found!", method]];
             return;
         }
 

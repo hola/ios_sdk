@@ -8,6 +8,7 @@
 
 #import "hola_hls_parser.h"
 #import "hola_log.h"
+#import "hola_cdn_loader_delegate.h"
 
 @interface HolaHLSParser()
 {
@@ -41,7 +42,7 @@ typedef NS_ENUM(int, HolaHLSError) {
 
 @implementation HolaHLSParser
 
-HolaCDNLog* _log;
+static HolaCDNLog* _log;
 
 -(instancetype)init {
     self = [super init];
@@ -49,6 +50,8 @@ HolaCDNLog* _log;
     if (self) {
         _log = [HolaCDNLog new];
         [_log setModule:@"parser"];
+
+        levels = [NSMutableArray new];
     }
 
     return self;
@@ -90,14 +93,14 @@ HolaCDNLog* _log;
                 return nil;
             }
 
-            NSRange toEnd = NSMakeRange(bwPos.location, line.length);
+            NSRange toEnd = NSMakeRange(bwPos.location, line.length-bwPos.location);
             NSRange bwEnd = [line rangeOfString:@"," options:NSCaseInsensitiveSearch range:toEnd];
             if (bwEnd.location == NSNotFound) {
                 level.bitrate = [NSNumber numberWithInt:[line substringFromIndex:bwPos.location+bwPos.length].intValue];
                 continue;
             }
 
-            NSRange toBwEnd = NSMakeRange(bwPos.location+bwPos.length+1, bwEnd.location);
+            NSRange toBwEnd = NSMakeRange(bwPos.location+bwPos.length+1, bwEnd.location - (bwPos.location+bwPos.length+1));
             level.bitrate = [NSNumber numberWithInt:[line substringWithRange:toBwEnd].intValue];
             break;
         }
@@ -113,15 +116,15 @@ HolaCDNLog* _log;
                 [levels addObject:level];
             }
 
-            NSRange toEnd = NSMakeRange(8, line.length);
+            NSRange toEnd = NSMakeRange(8, line.length-8);
             NSRange durEnd = [line rangeOfString:@"," options:NSCaseInsensitiveSearch range:toEnd];
             if (durEnd.location == NSNotFound) {
                 *error = [NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:HolaHLSErrorDuration userInfo:nil];
                 return nil;
             }
 
-            NSRange toDurEnd = NSMakeRange(8, durEnd.location);
-            segment.duration = [NSNumber numberWithInt:[line substringWithRange:toDurEnd].intValue];
+            NSRange toDurEnd = NSMakeRange(8, durEnd.location-8);
+            segment.duration = [NSNumber numberWithDouble:[line substringWithRange:toDurEnd].doubleValue];
             break;
         }
         case HolaHLSEntryUrl:
@@ -133,13 +136,13 @@ HolaCDNLog* _log;
                 level.url = levelUrl.absoluteString;
                 [levels addObject:level];
                 level = [HolaHLSLevelInfo new];
-                cdnLevelUrl = levelUrl; // HolaCDNLoaderDelegate.applyCDNScheme(levelUrl, type: HolaCDNScheme.Fetch)
+                cdnLevelUrl = [HolaCDNLoaderDelegate applyCDNScheme:levelUrl andType:HolaCDNSchemeFetch];
             } else {
                 segment.url = levelUrl.absoluteString;
                 segment.level = level;
                 [level.segments addObject:segment];
                 segment = [HolaHLSSegmentInfo new];
-                cdnLevelUrl = levelUrl; //HolaCDNLoaderDelegate.applyCDNScheme(levelUrl, type: HolaCDNScheme.Redirect)
+                cdnLevelUrl = [HolaCDNLoaderDelegate applyCDNScheme:levelUrl andType:HolaCDNSchemeRedirect];
             }
 
             lines[i] = cdnLevelUrl.absoluteString;
@@ -152,17 +155,17 @@ HolaCDNLog* _log;
                 break;
             }
 
-            NSRange keyPosEnd = NSMakeRange(keyPos.location+keyPos.length+1, line.length);
+            NSRange keyPosEnd = NSMakeRange(keyPos.location+keyPos.length+1, line.length-(keyPos.location+keyPos.length+1));
             NSRange keyEnd = [line rangeOfString:@"\"" options:NSCaseInsensitiveSearch range:keyPosEnd];
             if (keyEnd.location == NSNotFound) {
                 break;
             }
 
-            NSRange keyRange = NSMakeRange(keyPosEnd.location, keyEnd.location);
+            NSRange keyRange = NSMakeRange(keyPosEnd.location, keyEnd.location-keyPosEnd.location);
             NSString* keyUrlString = [line substringWithRange:keyRange];
             NSURL* keyUrl = [NSURL URLWithString:keyUrlString relativeToURL:master];
 
-            NSURL* customKeyUrl = keyUrl; // HolaCDNLoaderDelegate.applyCDNScheme(keyUrl, type: HolaCDNScheme.Key)
+            NSURL* customKeyUrl = [HolaCDNLoaderDelegate applyCDNScheme:keyUrl andType:HolaCDNSchemeKey];
             lines[i] = [line stringByReplacingCharactersInRange:keyRange withString:customKeyUrl.absoluteString];
             break;
         }
@@ -184,18 +187,6 @@ HolaCDNLog* _log;
     }
 
     return [NSDictionary new];
-}
-
--(NSNumber*)getSegmentSize:(NSString*)url {
-    for (HolaHLSLevelInfo* level in levels) {
-        for (HolaHLSSegmentInfo* segment in level.segments) {
-            if ([segment.url hasSuffix:url]) {
-                return segment.size;
-            }
-        }
-    }
-
-    return 0;
 }
 
 -(NSDictionary*)getLevels {
@@ -259,7 +250,7 @@ HolaCDNLog* _log;
         return HolaHLSEntryOther;
     }
 
-    if ([entry hasPrefix:@"#"]) {
+    if (![entry hasPrefix:@"#"]) {
         return HolaHLSEntryUrl;
     }
 

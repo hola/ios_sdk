@@ -9,10 +9,12 @@
 #import <Foundation/Foundation.h>
 @import UIKit;
 @import JavaScriptCore;
-@import AVKit;
+@import AVFoundation;
 #import "hola_log.h"
+#import "hola_cdn_player_proxy.h"
 
 @class HolaCDN;
+@class HolaCDNPlayerProxy;
 
 @protocol HolaCDNDelegate <NSObject>
 
@@ -36,10 +38,13 @@
 @interface HolaCDN : NSObject <UIWebViewDelegate>
 
 +(void)setLogLevel:(HolaCDNLogLevel)level;
+@property(readonly) int serverPort;
 
 @property(nonnull, nonatomic, assign) id<HolaCDNDelegate> delegate;
 @property(nonnull, readonly) NSString* customer;
 @property(nullable, readonly) JSContext* ctx;
+@property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
+@property BOOL graphEnabled;
 
 /*-(void)configWithCustomer:(NSString*)customer;
 -(void)configWithCustomer:(NSString*)customer usingZone:(NSString*)zone;*/
@@ -56,6 +61,7 @@
 -(void)unload;
 
 -(nullable NSDictionary*) get_stats;
+-(nullable NSDictionary*) get_timeline;
 -(nonnull NSString*) get_mode;
 
 @end
