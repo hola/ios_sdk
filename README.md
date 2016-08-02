@@ -4,7 +4,7 @@ This document describes integration of a native iOS app to HolaCDN
 
 ## Requirements
 
-iOS version 8+ required.
+iOS version 7+ required.
 
 At the moment, HolaCDN works only with `AVPlayer`+`AVURLAsset`+HLS videos.
 
@@ -16,21 +16,21 @@ Custom `AVAssetResourceLoaderDelegate` is not yet supported.
 
 - Download the latest [release](https://github.com/hola/ios_sdk/releases)
 
-- Add hola_cdn.xcodeproj into your project
+- Add hola-cdn-sdk.xcodeproj into your project
 
-- In your Target, click + in `Linked Frameworks and Libraries`, add `HolaCDN.framework`
-
-### via Carthage
-
-- Install [Carthage](https://github.com/Carthage/Carthage#installing-carthage)
-
-- Add `github "hola/ios_sdk" ~> 1.1` to your Cartfile
-
-- Run `$ carthage update` and add the generated frameworks to your Xcode projects (see [Carthage instructions](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)).
+- In your Target, click + in `Linked Frameworks and Libraries`, add `libHolaCDN.a`
 
 ### via CocoaPods
 
-- Will be available later
+- Add the pod into your Podfile:
+
+```
+pod "HolaCDN", "~> 1.0"
+```
+
+- Run `$ pod install`
+
+- For any questions about CocoaPods usage, please check [their documentation](http://cocoapods.org/)
 
 ## Initialization
 
@@ -46,7 +46,7 @@ let cdn = HolaCDN()
   - `mode`: String? – optional parameter to force cdn mode selection. In case of `nil` will be selected automatically according to your customer's HolaCDN config; supported options are: `nil`, `"stats"`, `"cdn"`.
 
 ```swift
-cdn.config(customer: "your_customer_id")
+cdn.configWithCustomer("your_customer_id", usingZone: nil, andMode: nil)
 ```
 
 - Create a class which conforms to `HolaCDNDelegate` protocol to
@@ -57,8 +57,8 @@ protocol HolaCDNDelegate: NSObjectProtocol {
     optional func cdnDidLoaded(cdn: HolaCDN) -> Void
     optional func cdnDidAttached(cdn: HolaCDN) -> Void
     optional func cdnDidDetached(cdn: HolaCDN) -> Void
-    optional func cdnStateChanged(cdn: HolaCDN, state: String) -> Void
-    optional func cdnExceptionOccured(cdn: HolaCDN, error: JSValue) -> Void
+    optional func cdnStateChanged(cdn: HolaCDN, toState state: String) -> Void
+    optional func cdnExceptionOccured(cdn: HolaCDN, withError: JSValue) -> Void
 }
 ```
 
@@ -74,7 +74,7 @@ try! cdn.load() // could throw an error in case if no "customerId" provided with
 methods could be called:
 
   - `cdnDidLoaded(cdn: HolaCDN) -> Void`: when HolaCDN code is loaded & inited
-  - `cdnExceptionOccured(cdn: HolaCDN, error: JSValue) -> Void`:
+  - `cdnExceptionOccured(cdn: HolaCDN, withError: JSValue) -> Void`:
 when something goes wrong while executing HolaCDN code
 
 - How to check `HolaCDN` state:
@@ -111,7 +111,7 @@ class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
         super.viewDidLoad()
 
         let cdn = HolaCDN()
-        cdn.config(customer: "demo", zone: nil, mode: "cdn")
+        cdn.configWithCustomer(customer: "demo", usingZone: nil, andMode: "cdn")
         cdn.delegate = self
 
         let url = NSURL(string: "https://example.com/your/video.m3u8")!
@@ -139,22 +139,25 @@ class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
 
 @implementation PlayerViewController
 
+HolaCDN* cdn;
+AVPlayer* player;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    HolaCDN *cdn = [[HolaCDN alloc] init];
+    cdn = [HolaCDN new];
     [cdn setDelegate:self];
-    [cdn config:@"demo" zone:nil mode:@"cdn"];
+    [cdn configWithCustomer:@"demo" usingZone:nil andMode:@"cdn"];
 
     NSURL *url = [NSURL URLWithString:@"https://example.com/your/video.m3u8"];
-    self.player = [AVPlayer playerWithURL:url];
+    player = [AVPlayer playerWithURL:url];
 
     NSError *err = [NSError alloc];
-    [cdn loadAndReturnError:&err];
+    [cdn load:&err];
 }
 
 -(void)cdnDidLoaded:(HolaCDN *)cdn {
-    [cdn attach:[self playerTmp]];
+    [cdn attach:player];
 }
 
 -(void)cdnDidAttached:(HolaCDN *)cdn {
