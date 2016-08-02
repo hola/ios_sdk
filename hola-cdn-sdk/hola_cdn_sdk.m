@@ -69,7 +69,9 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log info:@"load"];
     if (ready) {
         if (_delegate != nil) {
-            [_delegate cdnDidLoaded:self];
+            if ([_delegate respondsToSelector:@selector(cdnDidLoaded:)]) {
+                [_delegate cdnDidLoaded:self];
+            }
         }
         return YES;
     }
@@ -119,7 +121,9 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     ready = YES;
     if (_delegate != nil) {
-        [_delegate cdnDidLoaded:self];
+        if ([_delegate respondsToSelector:@selector(cdnDidLoaded:)]) {
+            [_delegate cdnDidLoaded:self];
+        }
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -217,7 +221,9 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log err:[NSString stringWithFormat:@"JS Exception: %@", value]];
 
     if (_delegate != nil) {
-        [_delegate cdnExceptionOccured:self withError:value];
+        if ([_delegate respondsToSelector:@selector(cdnExceptionOccured:withError:)]) {
+            [_delegate cdnExceptionOccured:self withError:value];
+        }
     }
 }
 

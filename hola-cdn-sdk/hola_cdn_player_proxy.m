@@ -36,7 +36,9 @@ BOOL attached = false;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         if (_cdn.delegate != nil) {
-            [_cdn.delegate cdnStateChanged:_cdn toState:state];
+            if ([_cdn.delegate respondsToSelector:@selector(cdnStateChanged:toState:)]) {
+                [_cdn.delegate cdnStateChanged:_cdn toState:state];
+            }
         }
     });
 }
@@ -220,7 +222,9 @@ BOOL attached = false;
         [self addObservers];
 
         if (_cdn.delegate != nil) {
-            [_cdn.delegate cdnDidAttached:self.cdn];
+            if ([_cdn.delegate respondsToSelector:@selector(cdnDidAttached:)]) {
+                [_cdn.delegate cdnDidAttached:self.cdn];
+            }
         }
     });
 }
@@ -264,7 +268,9 @@ BOOL attached = false;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         if (_cdn.delegate != nil) {
-            [_cdn.delegate cdnDidDetached:self.cdn];
+            if ([_cdn.delegate respondsToSelector:@selector(cdnDidDetached:)]) {
+                [_cdn.delegate cdnDidDetached:self.cdn];
+            }
         }
     });
 }
