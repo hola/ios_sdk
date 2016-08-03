@@ -55,13 +55,14 @@
 -(BOOL)load:(NSError * _Nullable * _Nullable)error;
 -(void)attach:(nonnull AVPlayer*)player;
 
+-(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;
 
 -(void)uninit;
 -(void)unload;
 
--(nullable NSDictionary*) get_stats;
--(nullable NSDictionary*) get_timeline;
--(nonnull NSString*) get_mode;
+-(void)get_stats:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;
+-(void)get_timeline:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;
+-(void)get_mode:(nonnull void (^)(NSString* _Nonnull mode))completionBlock;
 
 @end

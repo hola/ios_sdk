@@ -208,12 +208,10 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
 
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
-            @"url": originUrl.absoluteString,
-            @"req_id": currentId
-        } inContext:_cdn.ctx]];
-    });
+    [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
+        @"url": originUrl.absoluteString,
+        @"req_id": currentId
+    } inContext:_cdn.ctx]];
 
     req_id += 1;
 
@@ -387,9 +385,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
         return;
     }
 
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [_cdn.playerProxy execute:message withValue:[JSValue valueWithObject:data inContext:_cdn.ctx]];
-    });
+    [_cdn.playerProxy execute:message withValue:data];
 }
 
 -(NSDictionary*)getSegmentInfo:(NSString*)url {

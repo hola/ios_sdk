@@ -77,7 +77,7 @@ BOOL attached = false;
         _videoUrl = asset.URL;
 
         [_player addObserver:self forKeyPath:@"currentItem" options:NSKeyValueObservingOptionNew context:nil];
-        [_cdn.ctx setObject:self forKeyedSubscript:@"hola_ios_proxy"];
+        [[_cdn getContext] setObject:self forKeyedSubscript:@"hola_ios_proxy"];
     }
     return self;
 }
@@ -209,24 +209,26 @@ BOOL attached = false;
     [_LOG debug:@"wrapper_attached: attaching..."];
     attached = YES;
 
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if ([[_cdn get_mode] isEqual:@"cdn"]) {
-            // XXX alexeym: hack to count data correctly; need to fix cache for ios
-            [_cdn.ctx evaluateScript:@"hola_cdn._get_bws().disable_cache()"];
+    [_cdn get_mode:^(NSString* mode) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if ([mode isEqual:@"cdn"]) {
+                // XXX alexeym: hack to count data correctly; need to fix cache for ios
+                [[_cdn getContext] evaluateScript:@"hola_cdn._get_bws().disable_cache()"];
 
-            AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:_videoUrl andCDN:_cdn];
-            _cdnItem = [AVPlayerItem playerItemWithAsset:asset];
-            [self replacePlayerItem:_cdnItem];
-        }
-
-        [self addObservers];
-
-        if (_cdn.delegate != nil) {
-            if ([_cdn.delegate respondsToSelector:@selector(cdnDidAttached:)]) {
-                [_cdn.delegate cdnDidAttached:self.cdn];
+                AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:_videoUrl andCDN:_cdn];
+                _cdnItem = [AVPlayerItem playerItemWithAsset:asset];
+                [self replacePlayerItem:_cdnItem];
             }
-        }
-    });
+
+            [self addObservers];
+
+            if (_cdn.delegate != nil) {
+                if ([_cdn.delegate respondsToSelector:@selector(cdnDidAttached:)]) {
+                    [_cdn.delegate cdnDidAttached:self.cdn];
+                }
+            }
+        });
+    }];
 }
 
 -(void)log:(NSString*)msg {
@@ -254,7 +256,7 @@ BOOL attached = false;
     [self setState:@"IDLE"];
 
     [self execute:@"on_ended"];
-    [_cdn.ctx setObject:nil forKeyedSubscript:@"hola_ios_proxy"];
+    [[_cdn getContext] setObject:nil forKeyedSubscript:@"hola_ios_proxy"];
 
     if (_cdnItem != nil) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -417,14 +419,14 @@ BOOL attached = false;
 }
 
 -(JSValue*)getDelegate {
-    JSValue* proxy = [_cdn.ctx objectForKeyedSubscript:@"hola_ios_proxy"];
+    JSValue* proxy = [_cdn getContext][@"hola_ios_proxy"];
 
     if ([proxy isUndefined]) {
         [_LOG warn:@"getDelegate: proxy is undefined"];
         return nil;
     }
 
-    JSValue* delegate = [proxy objectForKeyedSubscript:@"delegate"];
+    JSValue* delegate = proxy[@"delegate"];
     if ([delegate isUndefined]) {
         [_LOG warn:@"getDelegate: delegate is undefined"];
         return nil;
@@ -438,26 +440,28 @@ BOOL attached = false;
 }
 
 -(void)execute:(NSString*)method withValue:(id)value {
+    JSValue* delegate = [self getDelegate];
+
+    if (delegate == nil) {
+        [_LOG err:[NSString stringWithFormat:@"Trying to execute js: '%@'; no delegate found!", method]];
+        return;
+    }
+
+    JSValue* callback = delegate[method];
+    if ([callback isUndefined]) {
+        [_LOG warn:[NSString stringWithFormat:@"Trying to execute js: '%@'; no callback found!", method]];
+        return;
+    }
+
+    NSArray* args;
+    if (value == nil) {
+        args = @[callback, @0];
+    } else {
+        args = @[callback, @0, value];
+    }
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        JSValue* delegate = [self getDelegate];
-
-        if (delegate == nil) {
-            [_LOG err:[NSString stringWithFormat:@"Trying to execute js: '%@'; no delegate found!", method]];
-            return;
-        }
-
-        JSValue* callback = [delegate objectForKeyedSubscript:method];
-        if ([callback isUndefined]) {
-            [_LOG warn:[NSString stringWithFormat:@"Trying to execute js: '%@'; no callback found!", method]];
-            return;
-        }
-
-        if (value != nil) {
-            JSValue* jsValue = [JSValue valueWithObject:value inContext:_cdn.ctx];
-            [callback callWithArguments:[NSArray arrayWithObject:jsValue]];
-        } else {
-            [callback callWithArguments:[NSArray new]];
-        }
+        [callback.context[@"setTimeout"] callWithArguments:args];
     });
 }
 

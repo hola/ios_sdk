@@ -97,13 +97,22 @@ NSString* hola_cdn = @"window.hola_cdn";
     return YES;
 }
 
+-(JSContext*)getContext {
+    JSContext* current = [JSContext currentContext];
+    if (current != nil) {
+        return current;
+    }
+
+    return _ctx;
+}
+
 -(void)set_cdn_enabled:(NSString*)name enabled:(BOOL)enabled {
     if (_playerProxy == nil) {
         return;
     }
 
     NSString* jsString = [NSString stringWithFormat:@"_get_bws().cdns.arr.forEach(function(cdn){ if (cdn.name=='%@') { cdn.enabled = %d; } })", name, enabled ? 1 : 0];
-    [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, jsString]];
+    [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, jsString]];
 }
 
 -(void)webViewDidStartLoad:(UIWebView *)webView {
@@ -166,7 +175,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     _playerProxy = [[HolaCDNPlayerProxy alloc] initWithPlayer:_player andCDN:self];
 
-    JSValue* ios_ready = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
+    JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
     if (ios_ready.isUndefined) {
         _playerProxy = nil;
         [_log err:@"No ios_ready: something is wrong with cdn js"];
@@ -192,56 +201,52 @@ NSString* hola_cdn = @"window.hola_cdn";
     ready = NO;
 }
 
--(NSDictionary*)get_stats {
+-(void)get_stats:(void (^)(NSDictionary*))completionBlock {
     if (_playerProxy == nil) {
-        return nil;
+        completionBlock(nil);
+        return;
     }
 
-    @try {
-        JSValue* stats = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_stats({silent: true})"]];
-        return [stats toDictionary];
-    } @catch (NSException *exception) {
-        [_log warn:[NSString stringWithFormat:@"get_stats err: %@", exception]];
-        return nil;
-    }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        JSValue* stats = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_stats({silent: true})"]];
+
+        completionBlock([stats toDictionary]);
+    });
 }
 
--(NSString*)get_mode {
+-(void)get_mode:(void (^)(NSString*))completionBlock {
     if (_playerProxy == nil) {
-        return ready ? @"detached" : @"loading";
+        completionBlock(ready ? @"detached" : @"loading");
     }
 
-    @try {
-        JSValue* mode = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
-        return [mode toString];
-    } @catch (NSException *exception) {
-        [_log warn:[NSString stringWithFormat:@"get_mode err: %@", exception]];
-        return nil;
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        JSValue* mode = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
+        completionBlock([mode toString]);
+    });
 }
 
--(NSDictionary*)get_timeline {
-    if (_playerProxy == nil || !_graphEnabled) {
-        return nil;
+-(void)get_timeline:(void (^)(NSDictionary*))completionBlock  {
+    if (_playerProxy == nil) {
+        completionBlock(nil);
+        return;
     }
 
     NSString* timelineString = @"window.cdn_graph.timeline";
 
-    @try {
-        JSValue* timeline = [_ctx evaluateScript:[NSString stringWithFormat:@"window.cdn_graph && %1$@ ? {cdns: %1$@.cdns, requests: %1$@.requests} : undefined", timelineString]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        JSValue* timeline = [[self getContext] evaluateScript:[NSString stringWithFormat:@"window.cdn_graph && %1$@ ? {cdns: %1$@.cdns, requests: %1$@.requests} : undefined", timelineString]];
 
         if (timeline.isUndefined) {
-            return nil;
+            completionBlock(nil);
+            return;
         }
 
         NSMutableDictionary* result = [[timeline toDictionary] mutableCopy];
         [result setObject:[_playerProxy get_duration] forKey:@"duration"];
 
-        return result;
-    } @catch (NSException *exception) {
-        [_log warn:[NSString stringWithFormat:@"get_timeline err: %@", exception]];
-        return nil;
-    }
+        completionBlock(result);
+    });
 }
 
 -(void)onException:(JSContext*)context value:(JSValue*)value {
