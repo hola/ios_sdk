@@ -88,15 +88,11 @@ when something goes wrong while executing HolaCDN code
     - `"cdn"` – CDN is attached and working in cdn mode
 
   - via Safari inspector:
-
     - Enable Safari developer mode in the preferences
     - Run your app in a Simulator or connected device
-
       - To enable this option in your device, look into Settings -> Safari -> Advanced -> Web-inspector
-
     - Find the app in Safari -> Develop -> Simulator (or the device name) menu
     - in the dev tools console, run `hola_cdn.get_stats()`
-
       - you should see detailed cdn stats at the moment
       - if you see `undefined` – it means cdn is not working properly
 
