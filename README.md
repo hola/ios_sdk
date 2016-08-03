@@ -79,13 +79,26 @@ when something goes wrong while executing HolaCDN code
 
 - How to check `HolaCDN` state:
 
-  - `cdn.get_mode()`: String – returns current cdn mode:
+  - `cdn.get_mode(completionBlock: (String?) -> Void)`: Async method, returns current cdn mode into completionBlock:
 
     - `"loading"` – CDN js code is loading
     - `"detached"` – CDN is loaded, not attached to a player
     - `"disabled"` – CDN is in automatic mode and disabled for current config
     - `"stats"` – CDN is attached and working in stats-only mode
     - `"cdn"` – CDN is attached and working in cdn mode
+
+  - via Safari inspector:
+
+    - Enable Safari developer mode in the preferences
+    - Run your app in a Simulator or connected device
+
+      - To enable this option in your device, look into Settings -> Safari -> Advanced -> Web-inspector
+
+    - Find the app in Safari -> Develop -> Simulator (or the device name) menu
+    - in the dev tools console, run `hola_cdn.get_stats()`
+
+      - you should see detailed cdn stats at the moment
+      - if you see `undefined` – it means cdn is not working properly
 
 ## Attach
 
