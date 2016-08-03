@@ -161,11 +161,20 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     return self;
 }
 
+-(void)dealloc {
+    [self uninit];
+}
+
 -(void)uninit {
-    [_session invalidateAndCancel];
-    _session = nil;
-    [_server stop];
-    _server = nil;
+    if (_session != nil) {
+        [_session invalidateAndCancel];
+        _session = nil;
+    }
+
+    if (_server != nil) {
+        [_server stop];
+        _server = nil;
+    }
 }
 
 // requests handling

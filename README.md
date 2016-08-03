@@ -58,7 +58,7 @@ protocol HolaCDNDelegate: NSObjectProtocol {
     optional func cdnDidAttached(cdn: HolaCDN) -> Void
     optional func cdnDidDetached(cdn: HolaCDN) -> Void
     optional func cdnStateChanged(cdn: HolaCDN, toState state: String) -> Void
-    optional func cdnExceptionOccured(cdn: HolaCDN, withError: JSValue) -> Void
+    optional func cdnExceptionOccured(cdn: HolaCDN, withError: NSError) -> Void
 }
 ```
 
@@ -74,7 +74,7 @@ try! cdn.load() // could throw an error in case if no "customerId" provided with
 methods could be called:
 
   - `cdnDidLoaded(cdn: HolaCDN) -> Void`: when HolaCDN code is loaded & inited
-  - `cdnExceptionOccured(cdn: HolaCDN, withError: JSValue) -> Void`:
+  - `cdnExceptionOccured(cdn: HolaCDN, withError: NSError) -> Void`:
 when something goes wrong while executing HolaCDN code
 
 - How to check `HolaCDN` state:
@@ -135,7 +135,7 @@ class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
 ### Objective-C
 
 ```objc
-@import HolaCDN;
+#import "hola_cdn_sdk.h"
 
 @implementation PlayerViewController
 

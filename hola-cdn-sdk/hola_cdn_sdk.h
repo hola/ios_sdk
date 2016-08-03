@@ -31,7 +31,7 @@
 -(void)cdnStateChanged:(nonnull HolaCDN*)cdn toState:(nonnull NSString*)state;
 
 @optional
--(void)cdnExceptionOccured:(nonnull HolaCDN*)cdn withError:(nullable JSValue*)error;
+-(void)cdnExceptionOccured:(nonnull HolaCDN*)cdn withError:(nullable NSError*)error;
 
 @end
 

@@ -111,12 +111,24 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    if (error != nil) {
+    if (error != nil && [error code] != NSURLErrorCancelled) {
         [_log err:[NSString stringWithFormat:@"webview: %@", error]];
+
+        if (_delegate != nil) {
+            if ([_delegate respondsToSelector:@selector(cdnExceptionOccured:withError:)]) {
+                [_delegate cdnExceptionOccured:self withError:[NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:2 userInfo:nil]];
+            }
+        }
+
+        [self unload];
     }
 }
 
 -(void)webViewDidFinishLoad:(UIWebView *)webView {
+    if (_ctx == nil) {
+        return;
+    }
+
     [_log debug:@"page loaded!"];
 
     ready = YES;
@@ -175,6 +187,8 @@ NSString* hola_cdn = @"window.hola_cdn";
 -(void)unload {
     [self uninit];
 
+    _ctx = nil;
+
     ready = NO;
 }
 
@@ -183,9 +197,13 @@ NSString* hola_cdn = @"window.hola_cdn";
         return nil;
     }
 
-    JSValue* stats = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_stats({silent: true})"]];
-
-    return [stats toDictionary];
+    @try {
+        JSValue* stats = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_stats({silent: true})"]];
+        return [stats toDictionary];
+    } @catch (NSException *exception) {
+        [_log warn:[NSString stringWithFormat:@"get_stats err: ", exception]];
+        return nil;
+    }
 }
 
 -(NSString*)get_mode {
@@ -193,9 +211,13 @@ NSString* hola_cdn = @"window.hola_cdn";
         return ready ? @"detached" : @"loading";
     }
 
-    JSValue* mode = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
-
-    return [mode toString];
+    @try {
+        JSValue* mode = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
+        return [mode toString];
+    } @catch (NSException *exception) {
+        [_log warn:[NSString stringWithFormat:@"get_mode err: ", exception]];
+        return nil;
+    }
 }
 
 -(NSDictionary*)get_timeline {
@@ -205,16 +227,21 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     NSString* timelineString = @"window.cdn_graph.timeline";
 
-    JSValue* timeline = [_ctx evaluateScript:[NSString stringWithFormat:@"window.cdn_graph && %1$@ ? {cdns: %1$@.cdns, requests: %1$@.requests} : undefined", timelineString]];
+    @try {
+        JSValue* timeline = [_ctx evaluateScript:[NSString stringWithFormat:@"window.cdn_graph && %1$@ ? {cdns: %1$@.cdns, requests: %1$@.requests} : undefined", timelineString]];
 
-    if (timeline.isUndefined) {
+        if (timeline.isUndefined) {
+            return nil;
+        }
+
+        NSMutableDictionary* result = [[timeline toDictionary] mutableCopy];
+        [result setObject:[_playerProxy get_duration] forKey:@"duration"];
+
+        return result;
+    } @catch (NSException *exception) {
+        [_log warn:[NSString stringWithFormat:@"get_timeline err: ", exception]];
         return nil;
     }
-
-    NSMutableDictionary* result = [[timeline toDictionary] mutableCopy];
-    [result setObject:[_playerProxy get_duration] forKey:@"duration"];
-
-    return result;
 }
 
 -(void)onException:(JSContext*)context value:(JSValue*)value {
@@ -222,7 +249,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     if (_delegate != nil) {
         if ([_delegate respondsToSelector:@selector(cdnExceptionOccured:withError:)]) {
-            [_delegate cdnExceptionOccured:self withError:value];
+            [_delegate cdnExceptionOccured:self withError:[NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:3 userInfo:value]];
         }
     }
 }

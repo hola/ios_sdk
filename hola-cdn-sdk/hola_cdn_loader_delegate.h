@@ -36,6 +36,7 @@ typedef NS_ENUM(int, HolaCDNErrorCode) {
 @property(readonly) dispatch_queue_t queue;
 
 -(instancetype)initWithCDN:(HolaCDN*)cdn;
+-(void)uninit;
 
 -(void)processRequest:(NSString*)url forFrag:(int)frag_id withReq:(int)arg_req_id isRate:(BOOL)rate;
 -(void)remove:(int)arg_req_id;

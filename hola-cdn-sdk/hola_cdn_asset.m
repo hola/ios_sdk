@@ -12,7 +12,7 @@
 
 -(instancetype)initWithURL:(NSURL*)url andCDN:(HolaCDN*)cdn {
     NSURL* cdnURL = [HolaCDNLoaderDelegate applyCDNScheme:url andType:HolaCDNSchemeFetch];
-    
+
     _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:cdn];
 
     self = [super initWithURL:cdnURL options:nil];
@@ -21,6 +21,11 @@
     }
 
     return self;
+}
+
+-(void)dealloc {
+    [_loader uninit];
+    _loader = nil;
 }
 
 @end
