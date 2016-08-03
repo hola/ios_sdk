@@ -201,7 +201,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         JSValue* stats = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_stats({silent: true})"]];
         return [stats toDictionary];
     } @catch (NSException *exception) {
-        [_log warn:[NSString stringWithFormat:@"get_stats err: ", exception]];
+        [_log warn:[NSString stringWithFormat:@"get_stats err: %@", exception]];
         return nil;
     }
 }
@@ -215,7 +215,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         JSValue* mode = [_ctx evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
         return [mode toString];
     } @catch (NSException *exception) {
-        [_log warn:[NSString stringWithFormat:@"get_mode err: ", exception]];
+        [_log warn:[NSString stringWithFormat:@"get_mode err: %@", exception]];
         return nil;
     }
 }
@@ -239,7 +239,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
         return result;
     } @catch (NSException *exception) {
-        [_log warn:[NSString stringWithFormat:@"get_timeline err: ", exception]];
+        [_log warn:[NSString stringWithFormat:@"get_timeline err: %@", exception]];
         return nil;
     }
 }
@@ -249,7 +249,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     if (_delegate != nil) {
         if ([_delegate respondsToSelector:@selector(cdnExceptionOccured:withError:)]) {
-            [_delegate cdnExceptionOccured:self withError:[NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:3 userInfo:value]];
+            [_delegate cdnExceptionOccured:self withError:[NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:3 userInfo:@{@"js": value}]];
         }
     }
 }
