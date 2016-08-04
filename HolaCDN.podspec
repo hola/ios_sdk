@@ -15,6 +15,10 @@ Pod::Spec.new do |s|
 
   s.public_header_files = "hola-cdn-sdk/*.h"
 
+  s.resource_bundles = {
+    'HolaCDNAssets' => ['hola-cdn-sdk/*.{js}']
+  }
+
   s.frameworks = "UIKit", "AVFoundation", "JavaScriptCore"
 
   s.dependency "GCDWebServer", "~> 3.0"

@@ -22,13 +22,15 @@
 		97A0D3881D4A360400EF7C1A /* hola_cdn_player_proxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A0D3861D4A360400EF7C1A /* hola_cdn_player_proxy.m */; };
 		97A0D38B1D4A366D00EF7C1A /* hola_hls_parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 97A0D3891D4A366D00EF7C1A /* hola_hls_parser.h */; };
 		97A0D38C1D4A366D00EF7C1A /* hola_hls_parser.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A0D38A1D4A366D00EF7C1A /* hola_hls_parser.m */; };
-		97A21CFA1D488E09008066A4 /* hola_cdn_sdk.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 97A21CF91D488E09008066A4 /* hola_cdn_sdk.h */; };
 		97A21CFC1D488E09008066A4 /* hola_cdn_sdk.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A21CFB1D488E09008066A4 /* hola_cdn_sdk.m */; };
 		97A21D091D488EAD008066A4 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A21D081D488EAD008066A4 /* JavaScriptCore.framework */; };
 		97A21D0B1D488EB3008066A4 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A21D0A1D488EB3008066A4 /* AVFoundation.framework */; };
 		97A21D0F1D488EBF008066A4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A21D0E1D488EBF008066A4 /* UIKit.framework */; };
 		97A21D121D489E09008066A4 /* hola_log.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A21D111D489E09008066A4 /* hola_log.m */; };
-		97DFA14D1D48B0FF00021AB1 /* hola_log.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 97A21D101D489E09008066A4 /* hola_log.h */; };
+		97C136D91D536E3F000724D2 /* xmlhttprequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 97C136D71D536E3F000724D2 /* xmlhttprequest.h */; };
+		97C136DA1D536E3F000724D2 /* xmlhttprequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C136D81D536E3F000724D2 /* xmlhttprequest.m */; };
+		97C136DD1D5378C9000724D2 /* window_timers.h in Headers */ = {isa = PBXBuildFile; fileRef = 97C136DB1D5378C9000724D2 /* window_timers.h */; };
+		97C136DE1D5378C9000724D2 /* window_timers.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C136DC1D5378C9000724D2 /* window_timers.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,8 +40,6 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				97DFA14D1D48B0FF00021AB1 /* hola_log.h in CopyFiles */,
-				97A21CFA1D488E09008066A4 /* hola_cdn_sdk.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,6 +68,13 @@
 		97A21D0E1D488EBF008066A4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		97A21D101D489E09008066A4 /* hola_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_log.h; sourceTree = "<group>"; };
 		97A21D111D489E09008066A4 /* hola_log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_log.m; sourceTree = "<group>"; };
+		97C136D31D533C7F000724D2 /* dom.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = dom.js; sourceTree = "<group>"; };
+		97C136D51D535447000724D2 /* proxy.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = proxy.js; sourceTree = "<group>"; };
+		97C136D61D535A46000724D2 /* localStorage.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = localStorage.js; sourceTree = "<group>"; };
+		97C136D71D536E3F000724D2 /* xmlhttprequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xmlhttprequest.h; sourceTree = "<group>"; };
+		97C136D81D536E3F000724D2 /* xmlhttprequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = xmlhttprequest.m; sourceTree = "<group>"; };
+		97C136DB1D5378C9000724D2 /* window_timers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = window_timers.h; sourceTree = "<group>"; };
+		97C136DC1D5378C9000724D2 /* window_timers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = window_timers.m; sourceTree = "<group>"; };
 		CF0FF535889901CC766122B2 /* libPods-HolaCDN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HolaCDN.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -119,6 +126,7 @@
 		97A21CF81D488E09008066A4 /* hola-cdn-sdk */ = {
 			isa = PBXGroup;
 			children = (
+				97C136D31D533C7F000724D2 /* dom.js */,
 				97A21CF91D488E09008066A4 /* hola_cdn_sdk.h */,
 				97A21CFB1D488E09008066A4 /* hola_cdn_sdk.m */,
 				97A21D101D489E09008066A4 /* hola_log.h */,
@@ -135,6 +143,12 @@
 				975745D01D4B7E3000CD1E70 /* hola_hls_level_info.m */,
 				975745D31D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.h */,
 				975745D41D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m */,
+				97C136D51D535447000724D2 /* proxy.js */,
+				97C136D61D535A46000724D2 /* localStorage.js */,
+				97C136D71D536E3F000724D2 /* xmlhttprequest.h */,
+				97C136D81D536E3F000724D2 /* xmlhttprequest.m */,
+				97C136DB1D5378C9000724D2 /* window_timers.h */,
+				97C136DC1D5378C9000724D2 /* window_timers.m */,
 			);
 			path = "hola-cdn-sdk";
 			sourceTree = "<group>";
@@ -158,9 +172,11 @@
 				97A0D3481D4A0CB000EF7C1A /* hola_cdn_sdk.h in Headers */,
 				975745C91D4B7B1B00CD1E70 /* hola_cdn_asset.h in Headers */,
 				97A0D38B1D4A366D00EF7C1A /* hola_hls_parser.h in Headers */,
+				97C136DD1D5378C9000724D2 /* window_timers.h in Headers */,
 				97A0D3491D4A0CB000EF7C1A /* hola_log.h in Headers */,
 				975745D11D4B7E3000CD1E70 /* hola_hls_level_info.h in Headers */,
 				975745CD1D4B7D3B00CD1E70 /* hola_hls_segment_info.h in Headers */,
+				97C136D91D536E3F000724D2 /* xmlhttprequest.h in Headers */,
 				97A0D3871D4A360400EF7C1A /* hola_cdn_player_proxy.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -259,12 +275,14 @@
 			files = (
 				975745D21D4B7E3000CD1E70 /* hola_hls_level_info.m in Sources */,
 				97A0D3881D4A360400EF7C1A /* hola_cdn_player_proxy.m in Sources */,
+				97C136DA1D536E3F000724D2 /* xmlhttprequest.m in Sources */,
 				975745CE1D4B7D3B00CD1E70 /* hola_hls_segment_info.m in Sources */,
 				975745CA1D4B7B1B00CD1E70 /* hola_cdn_asset.m in Sources */,
 				97A21D121D489E09008066A4 /* hola_log.m in Sources */,
 				975745D61D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m in Sources */,
 				97A0D38C1D4A366D00EF7C1A /* hola_hls_parser.m in Sources */,
 				97A21CFC1D488E09008066A4 /* hola_cdn_sdk.m in Sources */,
+				97C136DE1D5378C9000724D2 /* window_timers.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

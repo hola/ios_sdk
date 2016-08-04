@@ -8,13 +8,13 @@
 
 #import "hola_cdn_sdk.h"
 #import "hola_log.h"
+#import "XMLHttpRequest.h"
+#import "window_timers.h"
 
 @interface HolaCDN()
 {
 NSString* _zone;
 NSString* _mode;
-
-UIWebView* webview;
 
 AVPlayer* _player;
 
@@ -28,7 +28,8 @@ BOOL ready = NO;
 
 NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
-NSString* webviewHTML = @"<script>window.hola_cdn_sdk = {version:'%@'}</script><script src=\"%@/loader_%@.js\"></script>";
+NSString* basicJS = @"location = '%@'; window.hola_cdn_sdk = {version:'%@'};";
+NSString* loaderUrl = @"%@/loader_%@.js";
 
 NSString* hola_cdn = @"window.hola_cdn";
 
@@ -40,8 +41,6 @@ NSString* hola_cdn = @"window.hola_cdn";
     self = [super init];
     if (self) {
         _serverPort = 8199;
-        webview = [UIWebView new];
-        webview.delegate = self;
         _playerProxy = nil;
 
         _log = [HolaCDNLog new];
@@ -76,23 +75,71 @@ NSString* hola_cdn = @"window.hola_cdn";
         return YES;
     }
 
-    JSContext* ctx = [webview valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
-    if (ctx == nil) {
-        [_log err:@"No context on initContext"];
-        return NO;
-    }
+    
+    _ctx = [JSContext new];
+    XMLHttpRequest* xmlHttpRequest = [XMLHttpRequest new];
+    [xmlHttpRequest extend:_ctx];
 
-    ctx.exceptionHandler = ^(JSContext* context, JSValue* exception) {
-        [self onException:context value:exception];
+    WTWindowTimers *timers = [WTWindowTimers new];
+    [timers extend:_ctx];
+
+    __weak typeof(self) weakSelf = self;
+    _ctx.exceptionHandler = ^(JSContext* context, JSValue* exception) {
+        [weakSelf onException:context value:exception];
     };
 
-    _ctx = ctx;
-
     NSBundle* bundle = [NSBundle bundleForClass:NSClassFromString(@"HolaCDN")];
-    NSString* version = bundle.infoDictionary[@"CFBundleShortVersionString"];
-    NSString* htmlString = [NSString stringWithFormat:webviewHTML, version, domain, _customer];
+    NSString* bundlePath = [bundle pathForResource:@"HolaCDNAssets" ofType:@"bundle"];
 
-    [webview loadHTMLString:htmlString baseURL:[self makeWebviewUrl]];
+    NSBundle* assets;
+    if (bundlePath == nil) {
+        assets = bundle;
+    } else {
+        assets = [NSBundle bundleWithPath:bundlePath];
+    }
+
+    // assets order evaluating is important
+    NSArray<NSString*>* assetList = @[@"proxy", @"dom", @"localStorage"];
+    for (NSString* name in assetList) {
+        NSString* jsPath = [assets pathForResource:name ofType:@"js"];
+        if (jsPath == nil) {
+            *error = [NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:4 userInfo:@{
+                @"description": @"asset_not_found",
+                @"asset": name
+            }];
+            return NO;
+        }
+
+        NSError* err = nil;
+        NSString* jsCode = [NSString stringWithContentsOfFile:jsPath encoding:NSUTF8StringEncoding error:&err];
+
+        if (err != nil) {
+            *error = err;
+            return NO;
+        }
+
+        [_ctx evaluateScript:jsCode withSourceURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@.js", name]]];
+    }
+
+    NSString* version = bundle.infoDictionary[@"CFBundleShortVersionString"];
+    NSString* basic = [NSString stringWithFormat:basicJS, [self makeWebviewUrl], version];
+    [_ctx evaluateScript:basic withSourceURL:[NSURL URLWithString:@"basic.js"]];
+
+    NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:loaderUrl, domain, _customer]];
+
+    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    dispatch_async(backgroundQueue, ^{
+        NSError* err = nil;
+        NSString* loaderJS = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&err];
+
+        if (err != nil) {
+            [self didFailWithError:err];
+            return;
+        }
+
+        [_ctx evaluateScript:loaderJS withSourceURL:url];
+        [self didFinishLoading];
+    });
 
     return YES;
 }
@@ -115,13 +162,9 @@ NSString* hola_cdn = @"window.hola_cdn";
     [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, jsString]];
 }
 
--(void)webViewDidStartLoad:(UIWebView *)webView {
-    [_log debug:@"page loading..."];
-}
-
--(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+-(void)didFailWithError:(NSError*)error {
     if (error != nil && [error code] != NSURLErrorCancelled) {
-        [_log err:[NSString stringWithFormat:@"webview: %@", error]];
+        [_log err:[NSString stringWithFormat:@"loading fail: %@", error]];
 
         if (_delegate != nil) {
             if ([_delegate respondsToSelector:@selector(cdnExceptionOccured:withError:)]) {
@@ -133,7 +176,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 }
 
--(void)webViewDidFinishLoad:(UIWebView *)webView {
+-(void)didFinishLoading {
     if (_ctx == nil) {
         return;
     }

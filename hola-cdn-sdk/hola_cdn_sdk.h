@@ -35,7 +35,7 @@
 
 @end
 
-@interface HolaCDN : NSObject <UIWebViewDelegate>
+@interface HolaCDN : NSObject
 
 +(void)setLogLevel:(HolaCDNLogLevel)level;
 @property(readonly) int serverPort;
