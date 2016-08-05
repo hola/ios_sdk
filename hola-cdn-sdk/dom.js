@@ -125,7 +125,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             RegExp = global.RegExp,
             String = global.String,
             TypeError = global.TypeError,
-            WeakMap = global.WeakMap;
+            WeakMap = global.WeakMap,
+            Proxy = global.Proxy;
 
         // callbind parameterizes the binding of `this`
         // [].map(callback) -> map([], callback)
@@ -169,7 +170,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         // notation for these frequently-accessed sets of methods.
         JSON = shallow_frozen_copy(global.JSON),
             Math = shallow_frozen_copy(global.Math),
-            Proxy = shallow_frozen_copy(global.Proxy),
+            //Proxy = shallow_frozen_copy(global.Proxy),
             O = shallow_frozen_copy(Object),
             A = shallow_frozen_copy(Array),
             S = shallow_frozen_copy(String),
@@ -7861,7 +7862,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             var handler = O.create(AttrArrayProxy.handler);
             handler.element = attributes.element;
             handler.localprops = O.create(null);
-            return Proxy.create(handler, Array.prototype);
+            return new Proxy(Array.prototype, handler);
         }
 
         // This is the prototype object for the proxy handler object
@@ -7980,7 +7981,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             var handler = O.create(NodeListProxy.handler);
             handler.list = list;
             handler.localprops = O.create(null);
-            var p = Proxy.create(handler, idl.NodeList.prototype);
+            var p = new Proxy(idl.NodeList.prototype, handler);
 
             return p;
         }
@@ -8105,7 +8106,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             var handler = O.create(HTMLCollectionProxy.handler);
             handler.collection = collection;
             handler.localprops = O.create(null);
-            return Proxy.create(handler, idl.HTMLCollection.prototype);
+            return new Proxy(idl.HTMLCollection.prototype, handler);
         }
 
         // This is the prototype object for the proxy handler object

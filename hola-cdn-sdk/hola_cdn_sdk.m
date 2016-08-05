@@ -312,9 +312,9 @@ NSString* hola_cdn = @"window.hola_cdn";
         [url appendFormat:@"&hola_mode=%@", _mode];
     }
 
-    if (_graphEnabled) {
-        [url appendString:@"&hola_graph=1"];
-    }
+    //if (_graphEnabled) {
+    //    [url appendString:@"&hola_graph=1"];
+    //}
 
     return [NSURL URLWithString:url];
 }
