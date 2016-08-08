@@ -56,6 +56,7 @@
 		975745D01D4B7E3000CD1E70 /* hola_hls_level_info.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_hls_level_info.m; sourceTree = "<group>"; };
 		975745D31D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_cdn_loader_delegate.h; sourceTree = "<group>"; };
 		975745D41D4B9A1A00CD1E70 /* hola_cdn_loader_delegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_cdn_loader_delegate.m; sourceTree = "<group>"; };
+		9772703F1D589C1200DF4156 /* post_message.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = post_message.js; sourceTree = "<group>"; };
 		97A0D3851D4A360400EF7C1A /* hola_cdn_player_proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_cdn_player_proxy.h; sourceTree = "<group>"; };
 		97A0D3861D4A360400EF7C1A /* hola_cdn_player_proxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = hola_cdn_player_proxy.m; sourceTree = "<group>"; };
 		97A0D3891D4A366D00EF7C1A /* hola_hls_parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hola_hls_parser.h; sourceTree = "<group>"; };
@@ -149,6 +150,7 @@
 				97C136D81D536E3F000724D2 /* xmlhttprequest.m */,
 				97C136DB1D5378C9000724D2 /* window_timers.h */,
 				97C136DC1D5378C9000724D2 /* window_timers.m */,
+				9772703F1D589C1200DF4156 /* post_message.js */,
 			);
 			path = "hola-cdn-sdk";
 			sourceTree = "<group>";

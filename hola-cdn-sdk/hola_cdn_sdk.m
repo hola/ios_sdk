@@ -28,7 +28,7 @@ BOOL ready = NO;
 
 NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
-NSString* basicJS = @"location = '%@'; window.hola_cdn_sdk = {version:'%@'};";
+NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};";
 NSString* loaderUrl = @"%@/loader_%@.js";
 
 NSString* hola_cdn = @"window.hola_cdn";
@@ -98,6 +98,9 @@ NSString* hola_cdn = @"window.hola_cdn";
         assets = [NSBundle bundleWithPath:bundlePath];
     }
 
+    NSString* locationJS = [NSString stringWithFormat:@"_hola_location = '%@'", [self makeWebviewUrl]];
+    [_ctx evaluateScript:locationJS withSourceURL:[NSURL URLWithString:@"location.js"]];
+
     // assets order evaluating is important
     NSArray<NSString*>* assetList = @[@"proxy", @"dom", @"localStorage"];
     for (NSString* name in assetList) {
@@ -122,7 +125,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 
     NSString* version = bundle.infoDictionary[@"CFBundleShortVersionString"];
-    NSString* basic = [NSString stringWithFormat:basicJS, [self makeWebviewUrl], version];
+    NSString* basic = [NSString stringWithFormat:basicJS, version];
     [_ctx evaluateScript:basic withSourceURL:[NSURL URLWithString:@"basic.js"]];
 
     NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:loaderUrl, domain, _customer]];

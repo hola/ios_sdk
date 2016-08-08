@@ -965,6 +965,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         unwrap(this).addEventListener(String(type), toCallbackOrNull(listener), OptionalBoolean(capture));
                     },
 
+                    postMessage: function postMessage(data) {
+                        unwrap(this).postMessage(data);
+                    },
+
                     removeEventListener: function removeEventListener(type, listener, capture) {
                         unwrap(this).removeEventListener(String(type), toCallbackOrNull(listener), OptionalBoolean(capture));
                     },
@@ -8479,6 +8483,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 dispatchEvent: function dispatchEvent(event) {
                     // Dispatch an untrusted event
                     return this._dispatchEvent(event, false);
+                },
+
+                postMessage: function postMessage(data) {
+                    var constructor = impl.Event;
+
+                    var message = new constructor('message');
+                    message.data = data;
+                    message._idl = message;
+
+                    return this._dispatchEvent(message, false);
                 },
 
                 //
@@ -26848,7 +26862,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             this.document = new impl.DOMImplementation().createHTMLDocument("");
             this.document._scripting_enabled = true;
             this.document.defaultView = this;
-            this.location = new Location(this, "about:blank");
+            this.location = new Location(this, global._hola_location||"about:blank");
         }
 
         Window.prototype = O.create(impl.EventTarget.prototype, {
@@ -26965,6 +26979,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
         global.addEventListener = function addEventListener(type, listener, capture) {
             unwrap(this).addEventListener(String(type), toCallbackOrNull(listener), OptionalBoolean(capture));
+        };
+
+        global.postMessage = function postMessage(data) {
+            unwrap(this).postMessage(data);
         };
 
         global.removeEventListener = function addEventListener(type, listener, capture) {

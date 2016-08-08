@@ -13,6 +13,7 @@
     NSURLSession *_urlSession;
     NSString *_httpMethod;
     NSURL *_url;
+    __weak JSContext* _context;
     bool _async;
     NSMutableDictionary *_requestHeaders;
     NSDictionary *_responseHeaders;
@@ -26,6 +27,7 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
     XMLHttpReadyStateDONE
 };
 
+@synthesize response;
 @synthesize responseText;
 @synthesize onreadystatechange;
 @synthesize readyState;
@@ -58,12 +60,24 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
     jsContext[@"XMLHttpRequest"][@"HEADERS"] = @(XMLHttpReadyStateHEADERS);
     jsContext[@"XMLHttpRequest"][@"DONE"] = @(XMLHttpReadyStateDONE);
 
+    _context = jsContext;
 }
 
 - (void)open:(NSString *)httpMethod :(NSString *)url :(bool)async {
     // XXX alexeym: should throw an error if called with wrong arguments
     _httpMethod = httpMethod;
     _url = [NSURL URLWithString:url];
+    if ([_url scheme] == nil) {
+        NSString* location = _context[@"location"][@"href"].toString;
+        NSString* scheme = nil;
+        if (location != nil) {
+            NSURL* href = [NSURL URLWithString:location];
+            scheme = href.scheme;
+        }
+        NSURLComponents* components = [NSURLComponents componentsWithURL:_url resolvingAgainstBaseURL:NO];
+        components.scheme = scheme == nil ? @"http" : scheme;
+        _url = [components URL];
+    }
     _async = async;
     readyState = @(XMLHttpReadyStateOPENED);
 }
@@ -90,11 +104,24 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
         weakSelf.readyState = @(XMLHttpReadyStateDONE);
         weakSelf.status = @(httpResponse.statusCode);
-        weakSelf.responseText = [[NSString alloc] initWithData:receivedData
-                                                  encoding:NSUTF8StringEncoding];
+        weakSelf.responseText = [[NSString alloc] initWithData:receivedData encoding:NSUTF8StringEncoding];
+        weakSelf.response = weakSelf.responseText;
+
         [weakSelf setAllResponseHeaders:[httpResponse allHeaderFields]];
         if (weakSelf.onreadystatechange != nil) {
             [weakSelf.onreadystatechange callWithArguments:@[]];
+        }
+
+        if (weakSelf.onload != nil) {
+            NSDictionary* event = @{
+                @"target": @{
+                    @"response": weakSelf.response == nil ? [JSValue valueWithUndefinedInContext:[weakSelf.onload context]] : weakSelf.response,
+                    @"responseText": weakSelf.responseText == nil ? @"" : weakSelf.responseText,
+                },
+                @"total": [NSNumber numberWithInteger:[receivedData length]]
+            };
+
+            [weakSelf.onload callWithArguments:@[event]];
         }
     };
     NSURLSessionDataTask *task = [_urlSession dataTaskWithRequest:request completionHandler:completionHandler];

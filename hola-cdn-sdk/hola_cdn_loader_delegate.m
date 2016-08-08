@@ -200,6 +200,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     }
 
     if (req.request.URL == nil) {
+        [_log err:@"Trying to make request, but no request url found!"];
         return NO;
     }
 
@@ -333,8 +334,10 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
     [proxyRequests setObject:proxyRec forKey:proxyRec[@"uuid"]];
 
+    NSString* redirectUrl = [NSString stringWithFormat:@"http://127.0.0.1:%d/%@", [_cdn serverPort], proxyRec[@"uuid"]];
+
     dispatch_async(_queue, ^{
-        NSURLRequest* redirect = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%d/%@", [_cdn serverPort], proxyRec[@"uuid"]]]];
+        NSURLRequest* redirect = [NSURLRequest requestWithURL:[NSURL URLWithString:redirectUrl]];
         [req setRedirect:redirect];
 
         NSHTTPURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:url statusCode:302 HTTPVersion:nil headerFields:nil];

@@ -14,6 +14,7 @@
 @protocol XMLHttpRequestExport <JSExport>
 
 @property (nonatomic) NSString* responseText;
+@property (nonatomic) NSString* response;
 @property (nonatomic) JSValue* onreadystatechange;
 @property (nonatomic) NSNumber* readyState;
 @property (nonatomic) JSValue* onload;
