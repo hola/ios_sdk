@@ -141,7 +141,9 @@ NSString* hola_cdn = @"window.hola_cdn";
         }
 
         [_ctx evaluateScript:loaderJS withSourceURL:url];
-        [self didFinishLoading];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self didFinishLoading];
+        });
     });
 
     return YES;

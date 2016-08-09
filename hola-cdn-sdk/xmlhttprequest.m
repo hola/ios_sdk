@@ -108,11 +108,18 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
         weakSelf.response = weakSelf.responseText;
 
         [weakSelf setAllResponseHeaders:[httpResponse allHeaderFields]];
-        if (weakSelf.onreadystatechange != nil) {
-            [weakSelf.onreadystatechange callWithArguments:@[]];
-        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (weakSelf.onreadystatechange == nil || ![weakSelf.onreadystatechange toBool]) {
+                return;
+            }
+            [weakSelf.onreadystatechange.context[@"setTimeout"] callWithArguments:@[weakSelf.onreadystatechange, [JSValue valueWithInt32:0 inContext:[weakSelf.onload context]]]];
+        });
 
-        if (weakSelf.onload != nil) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (weakSelf.onload == nil || ![weakSelf.onload toBool]) {
+                return;
+            }
+
             NSDictionary* event = @{
                 @"target": @{
                     @"response": weakSelf.response == nil ? [JSValue valueWithUndefinedInContext:[weakSelf.onload context]] : weakSelf.response,
@@ -121,8 +128,11 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
                 @"total": [NSNumber numberWithInteger:[receivedData length]]
             };
 
-            [weakSelf.onload callWithArguments:@[event]];
-        }
+            JSValue* jsEvent = [JSValue valueWithObject:event inContext:[weakSelf.onload context]];
+
+            NSArray* args = @[weakSelf.onload, [JSValue valueWithInt32:0 inContext:[weakSelf.onload context]], jsEvent];
+            [weakSelf.onload.context[@"setTimeout"] callWithArguments:args];
+        });
     };
     NSURLSessionDataTask *task = [_urlSession dataTaskWithRequest:request completionHandler:completionHandler];
     [task resume];
