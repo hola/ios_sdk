@@ -18,6 +18,7 @@
 @property (nonatomic) JSValue* onreadystatechange;
 @property (nonatomic) NSNumber* readyState;
 @property (nonatomic) JSValue* onload;
+@property (nonatomic) JSValue* onprogress;
 @property (nonatomic) JSValue* onerror;
 @property (nonatomic) NSNumber* status;
 

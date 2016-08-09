@@ -31,6 +31,7 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
 @synthesize responseText;
 @synthesize onreadystatechange;
 @synthesize readyState;
+@synthesize onprogress;
 @synthesize onload;
 @synthesize onerror;
 @synthesize status;
@@ -52,7 +53,7 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
 
     // simulate the constructor.
     jsContext[@"XMLHttpRequest"] = ^{
-        return self;
+        return [[XMLHttpRequest alloc] initWithURLSession:_urlSession];
     };
     jsContext[@"XMLHttpRequest"][@"UNSENT"] = @(XMLHttpReadyStateUNSENT);
     jsContext[@"XMLHttpRequest"][@"OPENED"] = @(XMLHttpReadyStateOPENED);
@@ -102,20 +103,44 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
 
     id completionHandler = ^(NSData *receivedData, NSURLResponse *response, NSError *error) {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
+        NSDictionary* headers = [httpResponse allHeaderFields];
         weakSelf.readyState = @(XMLHttpReadyStateDONE);
         weakSelf.status = @(httpResponse.statusCode);
         weakSelf.responseText = [[NSString alloc] initWithData:receivedData encoding:NSUTF8StringEncoding];
-        weakSelf.response = weakSelf.responseText;
+        weakSelf.response = [@"" stringByPaddingToLength:[receivedData length] withString:@"binary data is not supported" startingAtIndex:0];
 
         [weakSelf setAllResponseHeaders:[httpResponse allHeaderFields]];
+
+        NSNumber* loaded = [NSNumber numberWithInteger:[receivedData length]];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (weakSelf.onprogress == nil || ![weakSelf.onprogress toBool]) {
+                return;
+            }
+            [weakSelf.onprogress.context[@"setTimeout"] callWithArguments:@[weakSelf.onprogress, @0, @{
+                @"srcElement": weakSelf,
+                @"loaded": loaded,
+                @"total": loaded
+            }]];
+        });
+
         dispatch_async(dispatch_get_main_queue(), ^{
             if (weakSelf.onreadystatechange == nil || ![weakSelf.onreadystatechange toBool]) {
                 return;
             }
-            [weakSelf.onreadystatechange.context[@"setTimeout"] callWithArguments:@[weakSelf.onreadystatechange, [JSValue valueWithInt32:0 inContext:[weakSelf.onload context]]]];
+            [weakSelf.onreadystatechange.context[@"setTimeout"] callWithArguments:@[weakSelf.onreadystatechange, @0]];
         });
 
         dispatch_async(dispatch_get_main_queue(), ^{
+            if (error != nil) {
+                if (weakSelf.onerror == nil || ![weakSelf.onerror toBool]) {
+                    return;
+                }
+
+                [weakSelf.onerror.context[@"setTimeout"] callWithArguments:@[weakSelf.onerror, @0, error]];
+                return;
+            }
+
             if (weakSelf.onload == nil || ![weakSelf.onload toBool]) {
                 return;
             }
@@ -125,12 +150,12 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
                     @"response": weakSelf.response == nil ? [JSValue valueWithUndefinedInContext:[weakSelf.onload context]] : weakSelf.response,
                     @"responseText": weakSelf.responseText == nil ? @"" : weakSelf.responseText,
                 },
-                @"total": [NSNumber numberWithInteger:[receivedData length]]
+                @"total": loaded
             };
 
             JSValue* jsEvent = [JSValue valueWithObject:event inContext:[weakSelf.onload context]];
 
-            NSArray* args = @[weakSelf.onload, [JSValue valueWithInt32:0 inContext:[weakSelf.onload context]], jsEvent];
+            NSArray* args = @[weakSelf.onload, @0, jsEvent];
             [weakSelf.onload.context[@"setTimeout"] callWithArguments:args];
         });
     };
