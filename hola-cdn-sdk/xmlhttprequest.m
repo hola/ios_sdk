@@ -107,7 +107,11 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
         weakSelf.readyState = @(XMLHttpReadyStateDONE);
         weakSelf.status = @(httpResponse.statusCode);
         weakSelf.responseText = [[NSString alloc] initWithData:receivedData encoding:NSUTF8StringEncoding];
-        weakSelf.response = [@"" stringByPaddingToLength:[receivedData length] withString:@"binary data is not supported" startingAtIndex:0];
+        if (weakSelf.responseText == nil) {
+            weakSelf.response = [@"" stringByPaddingToLength:[receivedData length] withString:@"binary data is not supported" startingAtIndex:0];
+        } else {
+            weakSelf.response = weakSelf.responseText;
+        }
 
         [weakSelf setAllResponseHeaders:[httpResponse allHeaderFields]];
 
