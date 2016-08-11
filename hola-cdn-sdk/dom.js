@@ -13316,7 +13316,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     // any, consist only of comment nodes and empty text nodes, then
                     // the user agent must abort these steps at this point. The script
                     // is not executed.
-                    if (!this.hasAttribute("src") && this.text === "") return;
+                    var srcAttribute = this.src;
+                    if (!srcAttribute && !this.hasAttribute("src") && this.text === "") return;
 
                     // If the element is not in a Document, then the user agent must
                     // abort these steps at this point. The script is not executed.
@@ -13344,10 +13345,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     //
                     // The language attribute is never conforming, and is always
                     // ignored if there is a type attribute present.
-                    var hastype = this.hasAttribute("type");
-                    var typeattr = hastype ? this.getAttribute("type") : undefined;
-                    var haslang = this.hasAttribute("language");
-                    var langattr = haslang ? this.getAttribute("language") : undefined;
+                    var hastype = this.hasAttribute("type") || !!this.type;
+                    var typeattr = hastype ? this.getAttribute("type") || this.type : undefined;
+                    var haslang = this.hasAttribute("language") || !!this.language;
+                    var langattr = haslang ? this.getAttribute("language") || this.language : undefined;
                     var scripttype;
 
                     if (typeattr === "" || !hastype && langattr === "" || !hastype && !haslang) {
@@ -13426,8 +13427,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                     //     agent must abort these steps at this point. The script is
                     //     not executed.
 
-                    var forattr = this.getAttribute("for") || "";
-                    var eventattr = this.getAttribute("event") || "";
+                    var forattr = this.getAttribute("for") || this.for || "";
+                    var eventattr = this.getAttribute("event") || this.event || "";
                     if (forattr || eventattr) {
                         forattr = toLowerCase(htmlTrim(forattr));
                         eventattr = toLowerCase(htmlTrim(eventattr));
@@ -13474,12 +13475,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         // is dynamically changed, then the user agent will not execute the
                         // script, and the fetching process will have been effectively
                         // wasted.
-                    if (this.hasAttribute("src")) {
+                    if (this.hasAttribute("src") || srcAttribute) {
                         // XXX
                         // The spec for handling this is really, really complicated.
                         // For now, I'm just going to try to get something basic working
 
-                        var url = this.getAttribute("src");
+                        var url = this.getAttribute("src") || srcAttribute;
 
                         if (this.ownerDocument._parser) {
                             this.ownerDocument._parser.pause();
@@ -13684,6 +13685,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
                     // Otherwise, the script is internal; queue a task to fire a simple
                     // event named load at the script element.
+                    var onload = this.getAttribute("onload") || this.onload;
+                    if (typeof(onload) === 'function') {
+                        onload();
+                    }
                 })
             });
 

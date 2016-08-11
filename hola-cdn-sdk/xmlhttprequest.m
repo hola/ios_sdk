@@ -66,6 +66,7 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
 
 - (void)open:(NSString *)httpMethod :(NSString *)url :(bool)async {
     // XXX alexeym: should throw an error if called with wrong arguments
+    NSLog(@"open xhr %@", url);
     _httpMethod = httpMethod;
     _url = [NSURL URLWithString:url];
     if ([_url scheme] == nil) {
@@ -101,9 +102,8 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
 
     __block __weak XMLHttpRequest *weakSelf = self;
 
-    id completionHandler = ^(NSData *receivedData, NSURLResponse *response, NSError *error) {
-        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
-        NSDictionary* headers = [httpResponse allHeaderFields];
+    id completionHandler = ^(NSData *receivedData, NSURLResponse *resp, NSError *error) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) resp;
         weakSelf.readyState = @(XMLHttpReadyStateDONE);
         weakSelf.status = @(httpResponse.statusCode);
         weakSelf.responseText = [[NSString alloc] initWithData:receivedData encoding:NSUTF8StringEncoding];
