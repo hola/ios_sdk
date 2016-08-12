@@ -12,6 +12,7 @@
 @import AVFoundation;
 #import "hola_log.h"
 #import "hola_cdn_player_proxy.h"
+#import "GCDWebServer/GCDWebServer.h"
 
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
@@ -43,6 +44,7 @@
 @property(nonnull, nonatomic, assign) id<HolaCDNDelegate> delegate;
 @property(nonnull, readonly) NSString* customer;
 @property(nullable, readonly) JSContext* ctx;
+@property(nullable, readonly) GCDWebServer* server;
 @property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
 @property BOOL graphEnabled;
 

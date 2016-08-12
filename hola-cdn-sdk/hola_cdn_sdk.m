@@ -75,7 +75,6 @@ NSString* hola_cdn = @"window.hola_cdn";
         return YES;
     }
 
-    
     _ctx = [JSContext new];
     XMLHttpRequest* xmlHttpRequest = [XMLHttpRequest new];
     [xmlHttpRequest extend:_ctx];
@@ -221,6 +220,9 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     [_log info:@"attach"];
 
+    [GCDWebServer setLogLevel:5];
+    _server = [GCDWebServer new];
+    
     _playerProxy = [[HolaCDNPlayerProxy alloc] initWithPlayer:_player andCDN:self];
 
     JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];

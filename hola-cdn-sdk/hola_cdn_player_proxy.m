@@ -116,6 +116,7 @@ BOOL attached = false;
 }
 
 -(int)fetch:(NSString*)url :(int)arg_req_id :(BOOL)rate {
+    [_LOG debug:[NSString stringWithFormat:@"js ask fetch url: %@", url]];
     HolaCDNLoaderDelegate* loader = [self getLoader];
 
     if (loader == nil) {
@@ -210,22 +211,28 @@ BOOL attached = false;
     attached = YES;
 
     [_cdn get_mode:^(NSString* mode) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
             if ([mode isEqual:@"cdn"]) {
                 // XXX alexeym: hack to count data correctly; need to fix cache for ios
                 [[_cdn getContext] evaluateScript:@"hola_cdn._get_bws().disable_cache()"];
 
                 AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:_videoUrl andCDN:_cdn];
                 _cdnItem = [AVPlayerItem playerItemWithAsset:asset];
-                [self replacePlayerItem:_cdnItem];
-            }
+                [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [_LOG debug:@"asset playable, main thread"];
+                        [self replacePlayerItem:_cdnItem];
 
-            [self addObservers];
+                        [self addObservers];
 
-            if (_cdn.delegate != nil) {
-                if ([_cdn.delegate respondsToSelector:@selector(cdnDidAttached:)]) {
-                    [_cdn.delegate cdnDidAttached:self.cdn];
-                }
+                        if (_cdn.delegate != nil) {
+                            if ([_cdn.delegate respondsToSelector:@selector(cdnDidAttached:)]) {
+                                [_LOG debug:@"call cdnDidAttached"];
+                                [_cdn.delegate cdnDidAttached:self.cdn];
+                            }
+                        }
+                    });
+                }];
             }
         });
     }];

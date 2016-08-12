@@ -57,11 +57,11 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     case HolaSchemeHTTPS:
         switch (type) {
         case HolaCDNSchemeFetch:
-            return @"hcdnrf";
+            return @"hcdnfs";
         case HolaCDNSchemeRedirect:
             return @"hcdnrs";
         case HolaCDNSchemeKey:
-            return @"hcdnsk";
+            return @"hcdnks";
         }
     }
 }
@@ -82,7 +82,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 }
 
 +(HolaCDNScheme)mapCDNScheme:(NSURL*)url {
-    NSArray<NSString*>* fetch = [NSArray arrayWithObjects:@"http", @"https", @"hcdnf", nil];
+    NSArray<NSString*>* fetch = [NSArray arrayWithObjects:@"http", @"https", @"hcdnf", @"hcdnfs", nil];
     NSArray<NSString*>* redirect = [NSArray arrayWithObjects:@"hcdnr", @"hcdnrs", nil];
     NSArray<NSString*>* key = [NSArray arrayWithObjects:@"hcdnk", @"hcdnks", nil];
 
@@ -140,10 +140,9 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
         _queue = dispatch_queue_create(LOADER_QUEUE, nil);
         _parser = [HolaHLSParser new];
 
-        [GCDWebServer setLogLevel:5];
-        _server = [GCDWebServer new];
-
         _session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
+
+        _server = cdn.server;
 
         __weak typeof(self) weakSelf = self;
         [_server addDefaultHandlerForMethod:@"GET" requestClass:[GCDWebServerRequest self] asyncProcessBlock:^(__kindof GCDWebServerRequest *request, GCDWebServerCompletionBlock completionBlock) {
@@ -180,6 +179,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 // requests handling
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
+    [_log debug:@"shouldWaitForLoadingOfRequestedResource"];
     return [self makeRequest:loadingRequest];
 }
 
@@ -208,6 +208,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     [pending setObject:req forKey:currentId];
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
+    [_log debug:[NSString stringWithFormat:@"makeRequest: %@", originUrl.absoluteString]];
 
     [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
         @"url": originUrl.absoluteString,
