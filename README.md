@@ -4,7 +4,7 @@ This document describes integration of a native iOS app to HolaCDN
 
 ## Requirements
 
-iOS version 7+ required.
+iOS 7+ or tvOS 9+ required.
 
 At the moment, HolaCDN works only with `AVPlayer`+`AVURLAsset`+HLS videos.
 
@@ -25,7 +25,9 @@ Custom `AVAssetResourceLoaderDelegate` is not yet supported.
 - Add the pod into your Podfile:
 
 ```
-pod "HolaCDN", "~> 1.0"
+pod "HolaCDN", "~> 1.2.0" # JSContext version (for iOS and tvOS)
+# or you can try old version in case of any issues with the new one
+# pod "HolaCDN", "~> 1.1.0" # UIWebView version (only for iOS)
 ```
 
 - Run `$ pod install`
