@@ -10,6 +10,8 @@ At the moment, HolaCDN works only with `AVPlayer`+`AVURLAsset`+HLS videos.
 
 Custom `AVAssetResourceLoaderDelegate` is not yet supported.
 
+If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
+
 ## Install
 
 ### Manually
