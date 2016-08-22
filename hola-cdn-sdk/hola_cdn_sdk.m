@@ -172,7 +172,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
         if (_delegate != nil) {
             if ([_delegate respondsToSelector:@selector(cdnExceptionOccured:withError:)]) {
-                [_delegate cdnExceptionOccured:self withError:[NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:2 userInfo:nil]];
+                [_delegate cdnExceptionOccured:self withError:error];
             }
         }
 
@@ -227,8 +227,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
     if (ios_ready.isUndefined) {
-        _playerProxy = nil;
-        [_log err:@"No ios_ready: something is wrong with cdn js"];
+        [self didFailWithError:[NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:5 userInfo:@{@"description": @"No ios_ready: something is wrong with cdn js"}]];
         return;
     }
 
@@ -266,8 +265,8 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)get_mode:(void (^)(NSString*))completionBlock {
-    if (_playerProxy == nil) {
-        completionBlock(ready ? @"detached" : @"loading");
+    if (_playerProxy == nil || _ctx == nil) {
+        completionBlock(ready || _ctx == nil ? @"detached" : @"loading");
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{

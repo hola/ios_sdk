@@ -66,7 +66,6 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
 
 - (void)open:(NSString *)httpMethod :(NSString *)url :(bool)async {
     // XXX alexeym: should throw an error if called with wrong arguments
-    NSLog(@"open xhr %@", url);
     _httpMethod = httpMethod;
     _url = [NSURL URLWithString:url];
     if ([_url scheme] == nil) {

@@ -202,6 +202,15 @@ BOOL attached = false;
     return [loader getSegmentInfo:url];
 }
 
+-(void)didAttached {
+    if (_cdn.delegate != nil) {
+        if ([_cdn.delegate respondsToSelector:@selector(cdnDidAttached:)]) {
+            [_LOG debug:@"call cdnDidAttached"];
+            [_cdn.delegate cdnDidAttached:self.cdn];
+        }
+    }
+}
+
 -(void)wrapper_attached {
     if (attached) {
         return;
@@ -224,15 +233,13 @@ BOOL attached = false;
                         [self replacePlayerItem:_cdnItem];
 
                         [self addObservers];
-
-                        if (_cdn.delegate != nil) {
-                            if ([_cdn.delegate respondsToSelector:@selector(cdnDidAttached:)]) {
-                                [_LOG debug:@"call cdnDidAttached"];
-                                [_cdn.delegate cdnDidAttached:self.cdn];
-                            }
-                        }
+                        [self didAttached];
                     });
                 }];
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self didAttached];
+                });
             }
         });
     }];
