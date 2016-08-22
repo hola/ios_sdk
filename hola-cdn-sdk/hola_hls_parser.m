@@ -65,13 +65,14 @@ static HolaCDNLog* _log;
 
     switch (state) {
     case HolaLevelStateTop:
-        master = [NSURL URLWithString:url];
         level = [HolaHLSLevelInfo new];
         break;
     case HolaLevelStateInner:
         level = [self getUrlLevel:url];
         break;
     }
+
+    master = [NSURL URLWithString:url];
 
     if (![data hasPrefix:@"#EXTM3U"]) {
         *error = [NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:HolaHLSErrorHeader userInfo:nil];
