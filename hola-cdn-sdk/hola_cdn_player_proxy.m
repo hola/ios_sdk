@@ -52,7 +52,7 @@ BOOL attached = false;
         _LOG = [HolaCDNLog new];
         [_LOG setModule:@"player"];
 
-        _ready = false;
+        _ready = NO;
         _duration = 0;
         _req_id = 1;
         _state = @"IDLE";
@@ -325,6 +325,10 @@ BOOL attached = false;
 }
 
 -(void)removeObservers {
+    if (_timeObserver == nil) {
+        return;
+    }
+
     [_player removeTimeObserver:_timeObserver];
 
     [_player removeObserver:self forKeyPath:@"status"];
@@ -337,6 +341,8 @@ BOOL attached = false;
     [_player removeObserver:self forKeyPath:@"currentItem.error"];
 
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:_player.currentItem];
+
+    _timeObserver = nil;
 }
 
 -(void)onTimeupdate:(CMTime)time {

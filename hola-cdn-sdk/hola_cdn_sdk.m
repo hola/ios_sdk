@@ -267,6 +267,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 -(void)get_mode:(void (^)(NSString*))completionBlock {
     if (_playerProxy == nil || _ctx == nil) {
         completionBlock(ready || _ctx == nil ? @"detached" : @"loading");
+        return;
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{
