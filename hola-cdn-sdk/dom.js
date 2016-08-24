@@ -8475,7 +8475,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                     break;
                                 }
                             }
-                            if (list.length === 1)
+                            if (list.length === 0)
                                 delete this._listeners[type];
                         }
                     }
