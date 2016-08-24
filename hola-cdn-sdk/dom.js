@@ -8471,9 +8471,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             for (var i = 0, n = list.length; i < n; i++) {
                                 var l = list[i];
                                 if (l.listener === listener && l.capture === capture) {
-                                    if (list.length === 1) delete this._listeners[type];else splice(list, i, 1);
+                                    splice(list, i, 1);
+                                    break;
                                 }
                             }
+                            if (list.length === 1)
+                                delete this._listeners[type];
                         }
                     }
                 },
@@ -8548,7 +8551,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         var list = target._listeners && target._listeners[type];
                         if (!list) return;
 
-                        for (var i = 0, n = list.length; i < n; i++) {
+                        for (var i = 0; i < list.length; i++) {
                             if (event._stopImmediatePropagation) return;
                             var l = list[i];
                             if (phase === CAPTURING_PHASE && !l.capture || phase === BUBBLING_PHASE && l.capture) continue;
