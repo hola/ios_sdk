@@ -10,6 +10,7 @@
 #import "hola_hls_parser.h"
 #import "GCDWebServer/GCDWebServerRequest.h"
 #import "GCDWebServer/GCDWebServerDataResponse.h"
+#import "GCDWebServer/GCDWebServerStreamedResponse.h"
 
 @interface HolaCDNLoaderDelegate()
 {
@@ -17,6 +18,8 @@ HolaCDN* _cdn;
 HolaHLSParser* _parser;
 GCDWebServer* _server;
 NSURLSession* _session;
+
+int _totalBytes;
 
 NSMutableDictionary<NSNumber*, AVAssetResourceLoadingRequest*>* pending;
 NSMutableDictionary<NSString*, NSMutableDictionary*>* proxyRequests;
@@ -53,6 +56,8 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
             return @"hcdnr";
         case HolaCDNSchemeKey:
             return @"hcdnk";
+        case HolaCDNSchemeProgressive:
+            return @"hcdnp";
         }
     case HolaSchemeHTTPS:
         switch (type) {
@@ -62,13 +67,15 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
             return @"hcdnrs";
         case HolaCDNSchemeKey:
             return @"hcdnks";
+        case HolaCDNSchemeProgressive:
+            return @"hcdnps";
         }
     }
 }
 
 +(HolaScheme)mapScheme:(NSString*)scheme {
-    NSArray<NSString*>* http = [NSArray arrayWithObjects:@"http", @"hcdnf", @"hcdnr", @"hcdnk", nil];
-    NSArray<NSString*>* https = [NSArray arrayWithObjects:@"https", @"hcdnfs", @"hcdnrs", @"hcdnks", nil];
+    NSArray<NSString*>* http = [NSArray arrayWithObjects:@"http", @"hcdnf", @"hcdnr", @"hcdnk", @"hcdnp", nil];
+    NSArray<NSString*>* https = [NSArray arrayWithObjects:@"https", @"hcdnfs", @"hcdnrs", @"hcdnks", @"hcdnps", nil];
 
     if ([http containsObject:scheme]) {
         return HolaSchemeHTTP;
@@ -85,9 +92,17 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     NSArray<NSString*>* fetch = [NSArray arrayWithObjects:@"http", @"https", @"hcdnf", @"hcdnfs", nil];
     NSArray<NSString*>* redirect = [NSArray arrayWithObjects:@"hcdnr", @"hcdnrs", nil];
     NSArray<NSString*>* key = [NSArray arrayWithObjects:@"hcdnk", @"hcdnks", nil];
+    NSArray<NSString*>* progressive = [NSArray arrayWithObjects:@"hcdnp", @"hcdnps", nil];
 
     NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:YES];
     NSString* scheme = components.scheme;
+
+    NSString* extension = url.pathExtension;
+
+    if ([extension isEqualToString:@"mp4"]) {
+        // XXX alexeym TODO
+        return HolaCDNSchemeProgressive;
+    }
 
     if ([fetch containsObject:scheme]) {
         return HolaCDNSchemeFetch;
@@ -136,11 +151,15 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
         taskTimers = [NSMutableDictionary new];
         taskClients = [NSMutableDictionary new];
 
+        _totalBytes = 0;
+
         _cdn = cdn;
         _queue = dispatch_queue_create(LOADER_QUEUE, nil);
         _parser = [HolaHLSParser new];
 
-        _session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
+        NSURLSessionConfiguration* configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        configuration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+        _session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
 
         _server = cdn.server;
 
@@ -179,17 +198,14 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 // requests handling
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
-    [_log debug:@"shouldWaitForLoadingOfRequestedResource"];
     return [self makeRequest:loadingRequest];
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForRenewalOfRequestedResource:(AVAssetResourceRenewalRequest *)renewalRequest {
-    [_log debug:@"shouldWaitForRenewalOfRequestedResource"];
     return YES;
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForResponseToAuthenticationChallenge:(NSURLAuthenticationChallenge *)authenticationChallenge {
-    [_log debug:@"shouldWaitForResponseToAuthenticationChallenge"];
     return YES;
 }
 
@@ -204,18 +220,28 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
         return NO;
     }
 
-    NSNumber* currentId = [NSNumber numberWithInt:req_id];
-    [pending setObject:req forKey:currentId];
+    // TODO:
+    if (NO/*non-HLS*/) {
+        /*
+        serve it via some ProgressiveProxyHandler
+        ProgressiveProxyHandler
+            send cdns "req", creates internal req_id and so on
+            responses with chunks to the single mp4 request
+        */
+    } else {
+        NSNumber* currentId = [NSNumber numberWithInt:req_id];
+        [pending setObject:req forKey:currentId];
 
-    NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
-    [_log debug:[NSString stringWithFormat:@"makeRequest: %@", originUrl.absoluteString]];
+        NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
+        [_log debug:[NSString stringWithFormat:@"makeRequest: %@", originUrl.absoluteString]];
 
-    [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
-        @"url": originUrl.absoluteString,
-        @"req_id": currentId
-    } inContext:_cdn.ctx]];
+        [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
+            @"url": originUrl.absoluteString,
+            @"req_id": currentId
+        } inContext:_cdn.ctx]];
 
-    req_id += 1;
+        req_id += 1;
+    }
 
     return YES;
 }
@@ -234,6 +260,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     }
 
     AVAssetResourceLoadingRequest* req = [self getRequest:frag_id];
+    [_log debug:[NSString stringWithFormat:@"get request %d", frag_id]];
     if (req == nil) {
         [self processExternalRequest:url :arg_req_id];
         return;
@@ -273,6 +300,9 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
         break;
     case HolaCDNSchemeKey:
         [self fetch:req :arg_req_id :YES];
+        break;
+    case HolaCDNSchemeProgressive:
+        [self redirect:url forRequest:req withId:arg_req_id];
         break;
     }
 }
@@ -332,6 +362,11 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     proxyRec[@"timer"] = [NSDate new];
     proxyRec[@"data"] = [NSMutableData new];
     proxyRec[@"size"] = [NSNumber numberWithInt:0];
+
+    AVAssetResourceLoadingDataRequest* dataReq = req.dataRequest;
+    if (dataReq.requestedOffset != 0 || !dataReq.requestsAllDataToEndOfResource) {
+        proxyRec[@"range"] = [NSString stringWithFormat:@"bytes=%lli-%lli", dataReq.requestedOffset, dataReq.requestedOffset + dataReq.requestedLength-1];
+    }
 
     [proxyRequests setObject:proxyRec forKey:proxyRec[@"uuid"]];
 
@@ -463,18 +498,31 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     }
 
     NSURL* url = [HolaCDNLoaderDelegate applyOriginScheme:proxyRec[@"target"]];
-    NSURLRequest* request = [NSURLRequest requestWithURL:url];
+    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
+
+    NSString* range = proxyRec[@"range"];
+    if (range != nil) {
+        [_log debug:[NSString stringWithFormat:@"request specific range: %@", proxyRec[@"range"]]];
+        [request setValue:proxyRec[@"range"] forHTTPHeaderField:@"Range"];
+    }
 
     NSURLSessionDataTask* task = [_session dataTaskWithRequest:request];
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
+
+    [_log debug:[NSString stringWithFormat:@"start request: %d", taskId.integerValue]];
+
     [taskClients setObject:completion forKey:taskId];
     [taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];
 
     return task;
 }
 
--(void)handleResponse:(NSDictionary*)req withResponse:(NSHTTPURLResponse*)resp {
+-(void)handleResponse:(NSDictionary*)req withResponse:(NSHTTPURLResponse*)resp andId:(NSNumber*)taskId {
     int ms;
+
+    [_log debug:[NSString stringWithFormat:@"handle response: %d", taskId.integerValue]];
+
+    NSDictionary* headers = [resp allHeaderFields];
 
     NSDate* timer = req[@"timer"];
     if (timer == nil) {
@@ -485,7 +533,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     }
 
     int size;
-    NSString* length = [resp allHeaderFields][@"Content-Length"];
+    NSString* length = headers[@"Content-Length"];
     if (length == nil) {
         size = 0;
     } else {
@@ -495,9 +543,14 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     NSString* uuid = req[@"uuid"];
     [[proxyRequests objectForKey:uuid] setObject:[NSNumber numberWithInt:size] forKey:@"size"];
     [[proxyRequests objectForKey:uuid] setObject:[NSNumber numberWithInteger:[resp statusCode]] forKey:@"statusCode"];
-    [[proxyRequests objectForKey:uuid] setObject:[resp MIMEType] forKey:@"contentType"];
+
+    NSString* type = [resp MIMEType];
+    [[proxyRequests objectForKey:uuid] setObject:type forKey:@"contentType"];
+    [[proxyRequests objectForKey:uuid] setObject:headers forKey:@"headers"];
 
     [self sendResponse:((NSNumber*)req[@"id"]).intValue :ms :(int)[resp statusCode]];
+
+    [_log debug:[NSString stringWithFormat:@"handle response full done: %d", taskId.integerValue]];
 }
 
 -(void)redirectProgress:(NSDictionary*)req {
@@ -513,11 +566,12 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     [self sendError:((NSNumber*)req[@"id"]).intValue];
 }
 
-
 -(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLSessionResponseDisposition))completionHandler {
 
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:dataTask.taskIdentifier];
     GCDWebServerCompletionBlock client = [taskClients objectForKey:taskId];
+
+    [_log debug:[NSString stringWithFormat:@"receive response: %d", taskId.integerValue]];
 
     if (client == nil) {
         completionHandler(NSURLSessionResponseCancel);
@@ -538,37 +592,43 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
         return;
     }
 
-    [self handleResponse:proxyRec withResponse:(NSHTTPURLResponse*)response];
+    [self handleResponse:proxyRec withResponse:(NSHTTPURLResponse*)response andId:taskId];
     completionHandler(NSURLSessionResponseAllow);
 }
 
 -(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:dataTask.taskIdentifier];
-
     NSString* uuid = [taskTimers objectForKey:taskId];
+
     if (uuid == nil) {
+        [_log err:@"no uuid found"];
         return;
     }
 
     NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
     if (proxyRec == nil) {
+        [_log err:@"no proxyRec found"];
         return;
     }
 
     NSMutableData* requestData = [[proxyRequests objectForKey:proxyRec[@"uuid"]] objectForKey:@"data"];
-
     [requestData appendData:data];
-
     [[proxyRequests objectForKey:proxyRec[@"uuid"]] setObject:requestData forKey:@"data"];
+
+    [_log debug:[NSString stringWithFormat:@"receive data: %d", requestData.length]];
+    _totalBytes += data.length;
 }
 
 -(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
+
     GCDWebServerCompletionBlock client = [taskClients objectForKey:taskId];
 
     if (client == nil) {
         return;
     }
+
+    [_log debug:[NSString stringWithFormat:@"request complete: %d", taskId.integerValue]];
 
     [taskClients removeObjectForKey:taskId];
 
@@ -579,6 +639,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
     NSString* uuid = [taskTimers objectForKey:taskId];
     if (uuid == nil) {
+        [_log err:@"no uuid on completion found"];
         return;
     }
 
@@ -586,16 +647,30 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
     NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
     if (proxyRec == nil) {
+        [_log err:@"no proxyRec on completion found"];
         return;
     }
+
+    NSDictionary* headers = proxyRec[@"headers"];
 
     [proxyRequests removeObjectForKey:uuid];
     [self redirectProgress:proxyRec];
 
     if (error != nil) {
+        [_log err:@"error on completion found"];
         [self redirectError:proxyRec withError:error];
     } else {
-        client([GCDWebServerDataResponse responseWithData:proxyRec[@"data"] contentType:proxyRec[@"contentType"]]);
+        NSData* data = proxyRec[@"data"];
+        [_log debug:[NSString stringWithFormat:@"request done %@\n, total: %d, %d, %@", proxyRec[@"target"], _totalBytes, data.length, proxyRec[@"contentType"]]];
+        GCDWebServerDataResponse* response = [GCDWebServerDataResponse responseWithData:data contentType:proxyRec[@"contentType"]];
+
+        for (NSString* header in headers) {
+            NSString* value = headers[header];
+            [response setValue:value forAdditionalHeader:header];
+            NSLog(@"%@: %@", header, value);
+        }
+
+        client(response);
         [self redirectComplete:proxyRec];
     }
 }

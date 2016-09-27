@@ -14,7 +14,8 @@
 typedef NS_ENUM(int, HolaCDNScheme) {
    HolaCDNSchemeRedirect = 0,
    HolaCDNSchemeFetch,
-   HolaCDNSchemeKey
+   HolaCDNSchemeKey,
+   HolaCDNSchemeProgressive
 };
 
 typedef NS_ENUM(int, HolaScheme) {
