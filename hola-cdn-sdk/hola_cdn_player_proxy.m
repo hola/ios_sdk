@@ -174,7 +174,16 @@ BOOL attached = false;
         return [NSArray new];
     }
 
-    return timeRanges;
+    NSMutableArray<NSDictionary*>* ranges = [NSMutableArray new];
+    [timeRanges enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL* stop) {
+        CMTimeRange range = [obj CMTimeRangeValue];
+        [ranges addObject:@{
+            @"start": [NSNumber numberWithFloat:CMTimeGetSeconds(range.start)],
+            @"end": [NSNumber numberWithFloat:CMTimeGetSeconds(range.start) + CMTimeGetSeconds(range.duration)]
+        }];
+    }];
+
+    return ranges.copy;
 }
 
 -(NSDictionary*)get_levels {
