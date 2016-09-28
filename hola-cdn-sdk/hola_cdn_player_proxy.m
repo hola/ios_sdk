@@ -439,6 +439,9 @@ BOOL attached = false;
         CMTime duration = [[_player currentItem] duration];
 
         _duration = CMTimeGetSeconds(duration);
+        if (isnan(_duration)) {
+            _duration = -1;
+        }
     }
 }
 
