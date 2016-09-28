@@ -79,7 +79,9 @@ static HolaCDNLog* _log;
         return nil;
     }
 
-    NSMutableArray<NSString*>* lines = [[data componentsSeparatedByString:@"\n"] mutableCopy];
+    NSCharacterSet *separator = [NSCharacterSet newlineCharacterSet];
+    NSMutableArray<NSString*>* lines = [[data componentsSeparatedByCharactersInSet:separator] mutableCopy];
+    lines = [lines filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]].mutableCopy;
     for (int i = 0; i < lines.count; i+=1) {
         NSString* line = lines[i];
 
