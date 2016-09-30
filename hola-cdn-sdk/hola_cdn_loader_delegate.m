@@ -443,17 +443,10 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     }
 
     NSString* uuid = path[1];
-    NSURLSessionDataTask* task = [self processRequestWithUUID:uuid completionBlock:completion];
-
-    if (task == nil) {
-        completion([GCDWebServerDataResponse responseWithStatusCode:400]);
-        return;
-    }
-
-    [task resume];
+    [self processRequestWithUUID:uuid completionBlock:completion];
 }
 
--(NSURLSessionDataTask*)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
+/*-(NSURLSessionDataTask*)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
     NSDictionary* proxyRec = proxyRequests[uuid];
 
     if (proxyRec == nil) {
@@ -471,6 +464,34 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     [taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];
 
     return task;
+}*/
+
+-(void)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
+    NSDictionary* proxyRec = proxyRequests[uuid];
+
+    if (proxyRec == nil) {
+        [_log warn:@"process request: no proxy request found!"];
+        completion([GCDWebServerDataResponse responseWithStatusCode:400]);
+        return;
+    }
+
+    NSURL* url = [HolaCDNLoaderDelegate applyOriginScheme:proxyRec[@"target"]];
+    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
+
+    NSString* range = proxyRec[@"range"];
+    if (range != nil) {
+        [_log debug:[NSString stringWithFormat:@"request specific range: %@", proxyRec[@"range"]]];
+        [request setValue:proxyRec[@"range"] forHTTPHeaderField:@"Range"];
+    }
+    NSURLSessionDataTask* task = [_session dataTaskWithRequest:request];
+    NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
+
+    [_log debug:[NSString stringWithFormat:@"start request: %d", taskId.integerValue]];
+
+    [taskClients setObject:completion forKey:taskId];
+    [taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];
+
+    [task resume];
 }
 
 -(void)handleResponse:(NSDictionary*)req withResponse:(NSHTTPURLResponse*)resp {
