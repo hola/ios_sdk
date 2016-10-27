@@ -121,12 +121,13 @@ static HolaCDNLog* _log;
 
             NSRange toEnd = NSMakeRange(8, line.length-8);
             NSRange durEnd = [line rangeOfString:@"," options:NSCaseInsensitiveSearch range:toEnd];
+            NSRange toDurEnd;
             if (durEnd.location == NSNotFound) {
-                *error = [NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:HolaHLSErrorDuration userInfo:nil];
-                return nil;
+                toDurEnd = toEnd;
+            } else {
+                toDurEnd = NSMakeRange(8, durEnd.location-8);
             }
 
-            NSRange toDurEnd = NSMakeRange(8, durEnd.location-8);
             segment.duration = [NSNumber numberWithDouble:[line substringWithRange:toDurEnd].doubleValue];
             break;
         }
