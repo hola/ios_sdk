@@ -43,6 +43,8 @@ NSString* hola_cdn = @"window.hola_cdn";
         _serverPort = 8199;
         _playerProxy = nil;
 
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
+
         _log = [HolaCDNLog new];
     }
 
@@ -237,6 +239,8 @@ NSString* hola_cdn = @"window.hola_cdn";
 -(void)uninit {
     [_log info:@"cdn uninit"];
 
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
+
     [_playerProxy uninit];
     _playerProxy = nil;
     _player = nil;
@@ -248,6 +252,10 @@ NSString* hola_cdn = @"window.hola_cdn";
     _ctx = nil;
 
     ready = NO;
+}
+
+-(void)appWillTerminate {
+    [self unload];
 }
 
 -(void)get_stats:(void (^)(NSDictionary*))completionBlock {
