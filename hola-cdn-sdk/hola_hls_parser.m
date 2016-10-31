@@ -14,6 +14,7 @@
 {
 
 NSMutableArray<HolaHLSLevelInfo*>* levels;
+NSMutableArray<NSString*>* media_urls;
 NSURL* master;
 
 }
@@ -52,6 +53,7 @@ static HolaCDNLog* _log;
         [_log setModule:@"parser"];
 
         levels = [NSMutableArray new];
+        media_urls = [NSMutableArray new];
     }
 
     return self;
@@ -134,17 +136,19 @@ static HolaCDNLog* _log;
         case HolaHLSEntryUrl:
         {
             NSURL* levelUrl = [NSURL URLWithString:line relativeToURL:master];
+            NSString* levelUrlString = levelUrl.absoluteString;
 
             NSURL* cdnLevelUrl;
             if (state == HolaLevelStateTop) {
-                level.url = levelUrl.absoluteString;
+                level.url = levelUrlString;
                 [levels addObject:level];
                 level = [HolaHLSLevelInfo new];
                 cdnLevelUrl = [HolaCDNLoaderDelegate applyCDNScheme:levelUrl andType:HolaCDNSchemeFetch];
             } else {
-                segment.url = levelUrl.absoluteString;
+                segment.url = levelUrlString;
                 segment.level = level;
                 [level.segments addObject:segment];
+                [media_urls addObject:levelUrlString];
                 segment = [HolaHLSSegmentInfo new];
                 cdnLevelUrl = [HolaCDNLoaderDelegate applyCDNScheme:levelUrl andType:HolaCDNSchemeRedirect];
             }
@@ -191,6 +195,10 @@ static HolaCDNLog* _log;
     }
 
     return [NSDictionary new];
+}
+
+-(BOOL)isMedia:(NSString*)url {
+    return [media_urls containsObject:url];
 }
 
 -(NSDictionary*)getLevels {

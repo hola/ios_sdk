@@ -16,4 +16,6 @@
 
 -(NSDictionary*)getSegmentInfo:(NSString*)url;
 
+-(BOOL)isMedia:(NSString*)url;
+
 @end

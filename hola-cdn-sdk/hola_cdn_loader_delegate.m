@@ -212,7 +212,8 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
     [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
         @"url": originUrl.absoluteString,
-        @"req_id": currentId
+        @"req_id": currentId,
+        @"force": [NSNumber numberWithBool:[_parser isMedia:originUrl.absoluteString]]
     } inContext:_cdn.ctx]];
 
     req_id += 1;
