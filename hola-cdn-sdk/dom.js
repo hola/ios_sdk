@@ -26886,8 +26886,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             navigator: constant({
                 appName: "dom.js",
                 appVersion: "0.1",
-                platform: "JavaScript!",
-                userAgent: "Servo",
+                platform: "ios",
+                userAgent: "HolaCDN iOS",
                 _idlName: "Navigator"
             }),
 
