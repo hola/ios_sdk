@@ -13,7 +13,6 @@
     NSURLSession *_urlSession;
     NSString *_httpMethod;
     NSURL *_url;
-    __weak JSContext* _context;
     bool _async;
     NSMutableDictionary *_requestHeaders;
     NSDictionary *_responseHeaders;
@@ -60,16 +59,15 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
     jsContext[@"XMLHttpRequest"][@"LOADING"] = @(XMLHttpReadyStateLOADING);
     jsContext[@"XMLHttpRequest"][@"HEADERS"] = @(XMLHttpReadyStateHEADERS);
     jsContext[@"XMLHttpRequest"][@"DONE"] = @(XMLHttpReadyStateDONE);
-
-    _context = jsContext;
 }
 
 - (void)open:(NSString *)httpMethod :(NSString *)url :(bool)async {
     // XXX alexeym: should throw an error if called with wrong arguments
     _httpMethod = httpMethod;
     _url = [NSURL URLWithString:url];
+
     if ([_url scheme] == nil) {
-        NSString* location = _context[@"location"][@"href"].toString;
+        NSString* location = [JSContext currentContext][@"location"][@"href"].toString;
         NSString* scheme = nil;
         if (location != nil) {
             NSURL* href = [NSURL URLWithString:location];
