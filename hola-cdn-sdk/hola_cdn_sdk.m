@@ -18,6 +18,8 @@ NSString* _mode;
 
 AVPlayer* _player;
 
+AVPlayer* next_attach;
+
 }
 @end
 
@@ -207,13 +209,28 @@ NSString* hola_cdn = @"window.hola_cdn";
     });
 }
 
+-(void)didDetached {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (ready && next_attach != nil && _playerProxy == nil) {
+            dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            dispatch_async(backgroundQueue, ^{
+                [_log info:@"player autoinit after detach"];
+                [self attach:next_attach];
+            });
+        }
+    });
+}
+
 -(void)attach:(AVPlayer*)player {
     if (_playerProxy != nil) {
         [_log warn:@"CDN is already attached!"];
+
+        next_attach = player;
         return;
     }
 
     _player = player;
+    next_attach = nil;
 
     if (!ready) {
         [_log info:@"not ready on attach: wait for player autoinit"];
@@ -244,6 +261,8 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_playerProxy uninit];
     _playerProxy = nil;
     _player = nil;
+
+    [self didDetached];
 }
 
 -(void)unload {
