@@ -241,6 +241,7 @@ BOOL cache_disabled = NO;
                 [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [_LOG debug:@"asset playable, main thread"];
+                        [self removeObservers];
                         [self replacePlayerItem:_cdnItem];
 
                         [self addObservers];
@@ -292,11 +293,10 @@ BOOL cache_disabled = NO;
             if ([_player currentItem] == _cdnItem) {
                 [self replacePlayerItem:_originalItem];
             }
+            _cdnItem = nil;
             _originalItem = nil;
             _player = nil;
         });
-
-        _cdnItem = nil;
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{

@@ -144,6 +144,10 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
         _server = cdn.server;
 
+        if ([_server isRunning]) {
+            [_server stop];
+        }
+
         __weak typeof(self) weakSelf = self;
         [_server addDefaultHandlerForMethod:@"GET" requestClass:[GCDWebServerRequest self] asyncProcessBlock:^(__kindof GCDWebServerRequest *request, GCDWebServerCompletionBlock completionBlock) {
             [weakSelf processRequest:request completionBlock:completionBlock];
@@ -171,7 +175,10 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     }
 
     if (_server != nil) {
-        [_server stop];
+        if ([_server isRunning]) {
+            [_server stop];
+        }
+        
         _server = nil;
     }
 }
@@ -448,7 +455,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 }
 
 /*-(NSURLSessionDataTask*)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
-    NSDictionary* proxyRec = proxyRequests[uuid];
+    NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
 
     if (proxyRec == nil) {
         [_log warn:@"process request: no proxy request found!"];
@@ -468,7 +475,7 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 }*/
 
 -(void)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
-    NSDictionary* proxyRec = proxyRequests[uuid];
+    NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
 
     if (proxyRec == nil) {
         [_log warn:@"process request: no proxy request found!"];
