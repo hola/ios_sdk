@@ -17,6 +17,22 @@
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
 
+typedef NS_ENUM(int, HolaCDNBusy) {
+    HolaCDNBusyNone = 0,
+    HolaCDNBusyLoading,
+    HolaCDNBusyAttaching,
+    HolaCDNBusyDetaching,
+    HolaCDNBusyUnloading
+};
+
+typedef NS_ENUM(int, HolaCDNAction) {
+    HolaCDNActionNone = 0,
+    HolaCDNActionLoad,
+    HolaCDNActionAttach,
+    HolaCDNActionUninit,
+    HolaCDNActionUnload
+};
+
 @protocol HolaCDNDelegate <NSObject>
 
 @optional
@@ -62,6 +78,9 @@
 
 -(void)uninit;
 -(void)unload;
+
+-(void)onAttached;
+-(void)onDetached;
 
 -(void)get_stats:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;
 -(void)get_timeline:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;

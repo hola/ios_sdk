@@ -124,13 +124,14 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
 // delegate init
 
+int req_id = 1;
+
 -(instancetype)initWithCDN:(HolaCDN*)cdn {
     self = [super init];
     if (self) {
         _log = [HolaCDNLog new];
         [_log setModule:@"Loader"];
 
-        req_id = 1;
         pending = [NSMutableDictionary new];
         proxyRequests = [NSMutableDictionary new];
         taskTimers = [NSMutableDictionary new];

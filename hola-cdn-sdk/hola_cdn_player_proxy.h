@@ -17,6 +17,7 @@
 @protocol HolaPlayerExports <JSExport>
 
 @property(readonly) BOOL ready;
+@property(readonly) NSString* proxy_id;
 
 -(NSString*)get_state;
 
