@@ -28,8 +28,6 @@ If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
 
 ```
 pod "HolaCDN", "~> 1.2.0" # JSContext version (for iOS and tvOS)
-# or you can try old version in case of any issues with the new one
-# pod "HolaCDN", "~> 1.1.0" # UIWebView version (only for iOS)
 ```
 
 - Run `$ pod install`
