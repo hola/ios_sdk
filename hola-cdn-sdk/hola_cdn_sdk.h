@@ -64,20 +64,21 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
 @property BOOL graphEnabled;
 
-/*-(void)configWithCustomer:(NSString*)customer;
--(void)configWithCustomer:(NSString*)customer usingZone:(NSString*)zone;*/
--(void)configWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;
+-(nonnull instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
+-(nonnull instancetype)initWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;
+
+-(void)configWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode __deprecated_msg("Use `initWithCustomer:` method");
 
 // public func config(customer: String, zone: String? = nil, mode: String? = nil) {
 
--(BOOL)load:(NSError * _Nullable * _Nullable)error;
+-(BOOL)load:(NSError * _Nullable * _Nullable)error __deprecated_msg("No need to use this method anymore");
 -(void)attach:(nonnull AVPlayer*)player;
 
 -(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;
 
 -(void)uninit;
--(void)unload;
+-(void)unload __deprecated_msg("Use `uninit` method");
 
 -(void)onAttached;
 -(void)onDetached;

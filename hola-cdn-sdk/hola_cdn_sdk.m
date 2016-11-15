@@ -35,6 +35,8 @@ NSString* webviewUrl = @"%@/webview?customer=%@";
 NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};";
 NSString* loaderUrl = @"%@/loader_%@.js";
 
+NSString* loaderFilename = @"hola_cdn_library.js";
+
 NSString* hola_cdn = @"window.hola_cdn";
 
 +(void)setLogLevel:(HolaCDNLogLevel)level {
@@ -54,6 +56,16 @@ NSString* hola_cdn = @"window.hola_cdn";
 
         _log = [HolaCDNLog new];
         [GCDWebServer setLogLevel:5];
+    }
+
+    return self;
+}
+
+-(instancetype)initWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode {
+    self = [self init];
+
+    if (self) {
+        [self configWithCustomer:customer usingZone:zone andMode:mode];
     }
 
     return self;
@@ -93,13 +105,29 @@ NSString* hola_cdn = @"window.hola_cdn";
     if (ready) {
         [self unload];
     }
+
+    [self load];
+}
+
+-(NSString*)getLoaderPath {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    return [documentsDirectory stringByAppendingPathComponent:loaderFilename];
 }
 
 -(BOOL)load:(NSError**)error {
+    if (ready || [self isBusy]) {
+        return NO;
+    }
+    [self load];
+    return YES;
+}
+
+-(void)load {
     if ([self isBusy]) {
         [_log warn:@"Can't perform load, CDN is busy"];
         nextAction = HolaCDNActionLoad;
-        return NO;
+        return;
     }
 
     if (nextAttach == nil) {
@@ -109,14 +137,14 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 
     if (_customer == nil) {
-        *error = [NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:1 userInfo:nil];
-        return NO;
+        [_log err:@"Need to call `configWithCustomer:` method first!"];
+        return;
     }
 
     if (ready) {
         [_log info:@"already loaded"];
         [self didFinishLoading];
-        return YES;
+        return;
     }
 
     [_log info:@"load"];
@@ -153,20 +181,11 @@ NSString* hola_cdn = @"window.hola_cdn";
     for (NSString* name in assetList) {
         NSString* jsPath = [assets pathForResource:name ofType:@"js"];
         if (jsPath == nil) {
-            *error = [NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:4 userInfo:@{
-                @"description": @"asset_not_found",
-                @"asset": name
-            }];
-            return NO;
+            [_log err:[NSString stringWithFormat:@"Can't find library asset: %@.js! Please re-integrate HolaCDN library into your project", name]];
+            return;
         }
 
-        NSError* err = nil;
-        NSString* jsCode = [NSString stringWithContentsOfFile:jsPath encoding:NSUTF8StringEncoding error:&err];
-
-        if (err != nil) {
-            *error = err;
-            return NO;
-        }
+        NSString* jsCode = [NSString stringWithContentsOfFile:jsPath encoding:NSUTF8StringEncoding error:NULL];
 
         [_ctx evaluateScript:jsCode withSourceURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@.js", name]]];
     }
@@ -177,22 +196,59 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:loaderUrl, domain, _customer]];
 
+    NSString* loaderPath = [self getLoaderPath];
+    __block BOOL contextReady = NO;
+    __block BOOL loaderFetched = NO;
+
     dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
     dispatch_async(backgroundQueue, ^{
         NSError* err = nil;
         NSString* loaderJS = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&err];
+        loaderFetched = YES;
         if (err != nil) {
-            [self didFailWithError:err];
+            [_log warn:@"Can't fetch fresh HolaCDN library"];
+            if (!contextReady) {
+                [self didFailWithError:err];
+            }
             return;
         }
 
-        [_ctx evaluateScript:loaderJS withSourceURL:url];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self didFinishLoading];
-        });
+        if (!contextReady) {
+            [_log info:@"Use fresh-loaded HolaCDN library"];
+            [_ctx evaluateScript:loaderJS withSourceURL:url];
+            contextReady = YES;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self didFinishLoading];
+            });
+        }
+
+        [loaderJS writeToFile:loaderPath atomically:YES encoding:NSUTF8StringEncoding error:&err];
+        if (err == nil) {
+            [_log info:@"HolaCDN library updated"];
+        } else {
+            [_log warn:[NSString stringWithFormat:@"Can't save HolaCDN library! Error: %@", err]];
+        }
     });
 
-    return YES;
+    dispatch_async(backgroundQueue, ^{
+        NSError* err = nil;
+        NSString* loaderJSSaved = [NSString stringWithContentsOfFile:loaderPath encoding:NSUTF8StringEncoding error:&err];
+        if (err == nil) {
+            if (!contextReady) {
+                [_log info:@"Use saved HolaCDN library"];
+                [_ctx evaluateScript:loaderJSSaved withSourceURL:url];
+                contextReady = YES;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self didFinishLoading];
+                });
+            }
+        } else {
+            [_log debug:[NSString stringWithFormat:@"Can't read HolaCDN library from file: %@", err]];
+            if (loaderFetched) {
+                [self didFailWithError:err];
+            }
+        }
+    });
 }
 
 -(JSContext*)getContext {
