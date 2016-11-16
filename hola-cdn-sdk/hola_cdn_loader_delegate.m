@@ -187,17 +187,16 @@ int req_id = 1;
 // requests handling
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
-    [_log debug:@"shouldWaitForLoadingOfRequestedResource"];
     return [self makeRequest:loadingRequest];
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForRenewalOfRequestedResource:(AVAssetResourceRenewalRequest *)renewalRequest {
-    [_log debug:@"shouldWaitForRenewalOfRequestedResource"];
+    [_log warn:@"shouldWaitForRenewalOfRequestedResource"];
     return YES;
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForResponseToAuthenticationChallenge:(NSURLAuthenticationChallenge *)authenticationChallenge {
-    [_log debug:@"shouldWaitForResponseToAuthenticationChallenge"];
+    [_log warn:@"shouldWaitForResponseToAuthenticationChallenge"];
     return YES;
 }
 
@@ -216,7 +215,7 @@ int req_id = 1;
     [pending setObject:req forKey:currentId];
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
-    [_log debug:[NSString stringWithFormat:@"makeRequest: %@", originUrl.absoluteString]];
+    [_log debug:[NSString stringWithFormat:@"process request: %@", originUrl.absoluteString]];
 
     [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
         @"url": originUrl.absoluteString,
@@ -494,8 +493,6 @@ int req_id = 1;
     }
     NSURLSessionDataTask* task = [_session dataTaskWithRequest:request];
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
-
-    [_log debug:[NSString stringWithFormat:@"start request: %d", taskId.integerValue]];
 
     [taskClients setObject:completion forKey:taskId];
     [taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];

@@ -61,7 +61,7 @@ static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
         return;
     }
 
-    NSLog(@"%@%@", [self prefixForLevel:level], msg);
+    NSLog(@"%@ %@", [self prefixForLevel:level], msg);
 }
 
 -(void) debug:(NSString*) msg {

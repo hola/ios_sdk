@@ -444,7 +444,6 @@ BOOL cache_disabled;
         }
     } else if ([keyPath isEqualToString:@"status"]) {
         if (_player.status == AVPlayerStatusReadyToPlay) {
-            [self execute:@"on_ready"];
         } else if (_player.status == AVPlayerStatusFailed) {
             [self execute:@"on_error" withValue:@"player.status == .Failed"];
         } else if (_player.status == AVPlayerStatusUnknown) {

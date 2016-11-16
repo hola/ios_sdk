@@ -42,6 +42,9 @@ typedef NS_ENUM(int, HolaCDNAction) {
 -(void)cdnDidAttached:(nonnull HolaCDN*)cdn;
 
 @optional
+-(void)cdnDidAttached:(nonnull HolaCDN*)cdn toPlayer:(nonnull AVPlayer*)player;
+
+@optional
 -(void)cdnDidDetached:(nonnull HolaCDN*)cdn;
 
 @optional
@@ -74,11 +77,18 @@ typedef NS_ENUM(int, HolaCDNAction) {
 -(BOOL)load:(NSError * _Nullable * _Nullable)error __deprecated_msg("No need to use this method anymore");
 -(void)attach:(nonnull AVPlayer*)player;
 
+// methods to create players
+-(nonnull AVPlayer*)makeAVPlayerWithURL:(nonnull NSURL*)url;
+-(nonnull AVPlayer*)makeAVPlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVQueuePlayer*)makeAVQueuePlayerWithURL:(nonnull NSURL*)url;
+-(nonnull AVQueuePlayer*)makeAVQueuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVQueuePlayer*)makeAVQueuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;
+
 -(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;
 
 -(void)uninit;
--(void)unload __deprecated_msg("Use `uninit` method");
+-(void)unload;
 
 -(void)onAttached;
 -(void)onDetached;
