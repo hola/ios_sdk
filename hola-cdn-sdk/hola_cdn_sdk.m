@@ -117,7 +117,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(BOOL)load:(NSError**)error {
     if (ready || [self isBusy]) {
-        return NO;
+        return YES;
     }
     [self load];
     return YES;
