@@ -430,12 +430,16 @@ NSString* hola_cdn = @"window.hola_cdn";
                 return;
             }
 
+            [_log info:@"Wait for HolaCDN Library"];
             [ios_ready callWithArguments:[NSArray new]];
         });
     });
 }
 
 -(void)onAttached {
+    if (_playerProxy == nil) {
+        return;
+    }
     inProgress = HolaCDNBusyNone;
 
     [_log info:@"Attached"];
@@ -456,6 +460,14 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)onDetached {
+    if (_playerProxy == nil) {
+        return;
+    }
+
+    if (inProgress == HolaCDNBusyDetaching) {
+        _playerProxy = nil;
+        _player = nil;
+    }
     inProgress = HolaCDNBusyNone;
 
     [_log info:@"Detached"];
@@ -473,12 +485,17 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)uninit {
-    if ([self isBusy] || _playerProxy == nil) {
+    if ([self isBusy]) {
         if (nextAction != HolaCDNActionAttach) {
             nextAttach = nil;
         }
         [_log warn:@"Will perform uninit when ready"];
         nextAction = HolaCDNActionUninit;
+        return;
+    }
+
+    if (_playerProxy == nil) {
+        [_log err:@"HolaCDN not attached!"];
         return;
     }
 
@@ -490,8 +507,6 @@ NSString* hola_cdn = @"window.hola_cdn";
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
 
     [_playerProxy uninit];
-    _playerProxy = nil;
-    _player = nil;
 }
 
 -(void)unload {

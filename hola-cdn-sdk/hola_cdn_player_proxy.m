@@ -288,7 +288,13 @@ BOOL cache_disabled;
 }
 
 -(void)didDetached {
+    _cdnItem = nil;
+    _originalItem = nil;
+    _player = nil;
+
     [_cdn onDetached];
+    
+    _cdn = nil;
 }
 
 -(void)uninit {
@@ -305,7 +311,7 @@ BOOL cache_disabled;
         return;
     }
 
-    [_LOG info:@"proxy uninit"];
+    [_LOG info:[NSString stringWithFormat:@"Proxy uninit, id: %@", _proxy_id]];
     attached = NO;
 
     [self removeObservers];
@@ -325,15 +331,14 @@ BOOL cache_disabled;
             if (_player.currentItem == _cdnItem && _originalItem != nil) {
                 [self replacePlayerItem:_originalItem];
             }
-            _cdnItem = nil;
-            _originalItem = nil;
-            _player = nil;
+
+            [self didDetached];
+        });
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self didDetached];
         });
     }
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self didDetached];
-    });
 }
 
 -(void)replacePlayerItem:(AVPlayerItem*)newItem {

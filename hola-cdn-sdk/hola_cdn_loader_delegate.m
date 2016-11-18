@@ -22,8 +22,6 @@ NSMutableDictionary<NSNumber*, AVAssetResourceLoadingRequest*>* pending;
 NSMutableDictionary<NSString*, NSMutableDictionary*>* proxyRequests;
 NSMutableDictionary<NSNumber*, GCDWebServerCompletionBlock>* taskClients;
 NSMutableDictionary<NSNumber*, NSString*>* taskTimers;
-
-int req_id;
 }
 @end
 
@@ -215,7 +213,8 @@ int req_id = 1;
     [pending setObject:req forKey:currentId];
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
-    [_log debug:[NSString stringWithFormat:@"process request: %@", originUrl.absoluteString]];
+    [_log debug:[NSString stringWithFormat:@"Start request %d", [currentId intValue]]];
+    [_log debug:[NSString stringWithFormat:@"URL: %@", originUrl.absoluteString]];
 
     [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
         @"url": originUrl.absoluteString,
@@ -237,9 +236,12 @@ int req_id = 1;
     [self sendOpen:arg_req_id];
 
     if (rate) {
+        [_log debug:[NSString stringWithFormat:@"Fetch rate request: %d", frag_id]];
         [self processExternalRequest:url :arg_req_id];
         return;
     }
+
+    [_log debug:[NSString stringWithFormat:@"Process request %d", frag_id]];
 
     AVAssetResourceLoadingRequest* req = [self getRequest:frag_id];
     if (req == nil) {
