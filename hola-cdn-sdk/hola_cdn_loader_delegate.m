@@ -22,8 +22,6 @@ NSMutableDictionary<NSNumber*, AVAssetResourceLoadingRequest*>* pending;
 NSMutableDictionary<NSString*, NSMutableDictionary*>* proxyRequests;
 NSMutableDictionary<NSNumber*, GCDWebServerCompletionBlock>* taskClients;
 NSMutableDictionary<NSNumber*, NSString*>* taskTimers;
-
-int req_id;
 }
 @end
 
@@ -124,13 +122,14 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
 // delegate init
 
+int req_id = 1;
+
 -(instancetype)initWithCDN:(HolaCDN*)cdn {
     self = [super init];
     if (self) {
         _log = [HolaCDNLog new];
         [_log setModule:@"Loader"];
 
-        req_id = 1;
         pending = [NSMutableDictionary new];
         proxyRequests = [NSMutableDictionary new];
         taskTimers = [NSMutableDictionary new];
@@ -186,17 +185,16 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 // requests handling
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
-    [_log debug:@"shouldWaitForLoadingOfRequestedResource"];
     return [self makeRequest:loadingRequest];
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForRenewalOfRequestedResource:(AVAssetResourceRenewalRequest *)renewalRequest {
-    [_log debug:@"shouldWaitForRenewalOfRequestedResource"];
+    [_log warn:@"shouldWaitForRenewalOfRequestedResource"];
     return YES;
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForResponseToAuthenticationChallenge:(NSURLAuthenticationChallenge *)authenticationChallenge {
-    [_log debug:@"shouldWaitForResponseToAuthenticationChallenge"];
+    [_log warn:@"shouldWaitForResponseToAuthenticationChallenge"];
     return YES;
 }
 
@@ -215,7 +213,8 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     [pending setObject:req forKey:currentId];
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
-    [_log debug:[NSString stringWithFormat:@"makeRequest: %@", originUrl.absoluteString]];
+    [_log debug:[NSString stringWithFormat:@"Start request %d", [currentId intValue]]];
+    [_log debug:[NSString stringWithFormat:@"URL: %@", originUrl.absoluteString]];
 
     [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
         @"url": originUrl.absoluteString,
@@ -237,9 +236,12 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     [self sendOpen:arg_req_id];
 
     if (rate) {
+        [_log debug:[NSString stringWithFormat:@"Fetch rate request: %d", frag_id]];
         [self processExternalRequest:url :arg_req_id];
         return;
     }
+
+    [_log debug:[NSString stringWithFormat:@"Process request %d", frag_id]];
 
     AVAssetResourceLoadingRequest* req = [self getRequest:frag_id];
     if (req == nil) {
@@ -493,8 +495,6 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     }
     NSURLSessionDataTask* task = [_session dataTaskWithRequest:request];
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
-
-    [_log debug:[NSString stringWithFormat:@"start request: %d", taskId.integerValue]];
 
     [taskClients setObject:completion forKey:taskId];
     [taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];

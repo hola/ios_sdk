@@ -17,6 +17,22 @@
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
 
+typedef NS_ENUM(int, HolaCDNBusy) {
+    HolaCDNBusyNone = 0,
+    HolaCDNBusyLoading,
+    HolaCDNBusyAttaching,
+    HolaCDNBusyDetaching,
+    HolaCDNBusyUnloading
+};
+
+typedef NS_ENUM(int, HolaCDNAction) {
+    HolaCDNActionNone = 0,
+    HolaCDNActionLoad,
+    HolaCDNActionAttach,
+    HolaCDNActionUninit,
+    HolaCDNActionUnload
+};
+
 @protocol HolaCDNDelegate <NSObject>
 
 @optional
@@ -24,6 +40,9 @@
 
 @optional
 -(void)cdnDidAttached:(nonnull HolaCDN*)cdn;
+
+@optional
+-(void)cdnDidAttached:(nonnull HolaCDN*)cdn toPlayer:(nonnull AVPlayer*)player;
 
 @optional
 -(void)cdnDidDetached:(nonnull HolaCDN*)cdn;
@@ -48,20 +67,31 @@
 @property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
 @property BOOL graphEnabled;
 
-/*-(void)configWithCustomer:(NSString*)customer;
--(void)configWithCustomer:(NSString*)customer usingZone:(NSString*)zone;*/
--(void)configWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;
+-(nonnull instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
+-(nonnull instancetype)initWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;
+
+-(void)configWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode __deprecated_msg("Use `initWithCustomer:` method");
 
 // public func config(customer: String, zone: String? = nil, mode: String? = nil) {
 
--(BOOL)load:(NSError * _Nullable * _Nullable)error;
+-(BOOL)load:(NSError * _Nullable * _Nullable)error __deprecated_msg("No need to use this method anymore");
 -(void)attach:(nonnull AVPlayer*)player;
+
+// methods to create players
+-(nonnull AVPlayer*)makeAVPlayerWithURL:(nonnull NSURL*)url;
+-(nonnull AVPlayer*)makeAVPlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVQueuePlayer*)makeAVQueuePlayerWithURL:(nonnull NSURL*)url;
+-(nonnull AVQueuePlayer*)makeAVQueuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVQueuePlayer*)makeAVQueuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;
 
 -(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;
 
 -(void)uninit;
 -(void)unload;
+
+-(void)onAttached;
+-(void)onDetached;
 
 -(void)get_stats:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;
 -(void)get_timeline:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;
