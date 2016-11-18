@@ -25,6 +25,7 @@
 @implementation HolaCDNPlayerProxy
 
 static HolaCDNLog* _LOG;
+static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
 
 @synthesize state = _state;
 @synthesize ready = _ready;
@@ -83,7 +84,7 @@ BOOL cache_disabled;
         _proxy_id = [[NSUUID new] UUIDString];
 
         registered = YES;
-        [_player addObserver:self forKeyPath:@"currentItem" options:NSKeyValueObservingOptionNew context:nil];
+        [_player addObserver:self forKeyPath:@"currentItem" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
         [[_cdn getContext] setObject:self forKeyedSubscript:@"hola_ios_proxy"];
     }
     return self;
@@ -299,7 +300,7 @@ BOOL cache_disabled;
 
 -(void)uninit {
     if (registered) {
-        [_player removeObserver:self forKeyPath:@"currentItem"];
+        [_player removeObserver:self forKeyPath:@"currentItem" context:kHolaCDNProxyContext];
         registered = NO;
     }
     
@@ -355,42 +356,43 @@ BOOL cache_disabled;
 }
 
 -(void)addObservers {
+    [_LOG debug:[NSString stringWithFormat:@"Add observers 1, id: %@", _proxy_id]];
     _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(0.5, 600) queue:nil usingBlock:^(CMTime time) {
         [self onTimeupdate:time];
     }];
 
-    [_player addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
-    [_player addObserver:self forKeyPath:@"rate" options:NSKeyValueObservingOptionNew context:nil];
-    [_player addObserver:self forKeyPath:@"currentItem.status" options:NSKeyValueObservingOptionNew context:nil];
-    [_player addObserver:self forKeyPath:@"currentItem.duration" options:NSKeyValueObservingOptionNew context:nil];
-    [_player addObserver:self forKeyPath:@"currentItem.loadedTimeRanges" options:NSKeyValueObservingOptionNew context:nil];
-    [_player addObserver:self forKeyPath:@"currentItem.playbackBufferFull" options:NSKeyValueObservingOptionNew context:nil];
-    [_player addObserver:self forKeyPath:@"currentItem.playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:nil];
-    [_player addObserver:self forKeyPath:@"currentItem.error" options:NSKeyValueObservingOptionNew context:nil];
+    [_player addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [_player addObserver:self forKeyPath:@"rate" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [_player addObserver:self forKeyPath:@"currentItem.status" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [_player addObserver:self forKeyPath:@"currentItem.duration" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [_player addObserver:self forKeyPath:@"currentItem.loadedTimeRanges" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [_player addObserver:self forKeyPath:@"currentItem.playbackBufferFull" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [_player addObserver:self forKeyPath:@"currentItem.playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [_player addObserver:self forKeyPath:@"currentItem.error" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidFinishPlaying) name:AVPlayerItemDidPlayToEndTimeNotification object:_player.currentItem];
-
-    [self observeValueForKeyPath:@"status" ofObject:self change:nil context:nil];
-    [self observeValueForKeyPath:@"rate" ofObject:self change:nil context:nil];
 
     _ready = YES;
 }
 
 -(void)removeObservers {
+    [_LOG debug:[NSString stringWithFormat:@"Remove observers 1, id: %@", _proxy_id]];
     if (_timeObserver == nil) {
+        [_LOG debug:@"Remove observers: not found"];
         return;
     }
 
+    [_LOG debug:@"Remove observers 2"];
     [_player removeTimeObserver:_timeObserver];
 
-    [_player removeObserver:self forKeyPath:@"status"];
-    [_player removeObserver:self forKeyPath:@"rate"];
-    [_player removeObserver:self forKeyPath:@"currentItem.status"];
-    [_player removeObserver:self forKeyPath:@"currentItem.duration"];
-    [_player removeObserver:self forKeyPath:@"currentItem.loadedTimeRanges"];
-    [_player removeObserver:self forKeyPath:@"currentItem.playbackBufferFull"];
-    [_player removeObserver:self forKeyPath:@"currentItem.playbackBufferEmpty"];
-    [_player removeObserver:self forKeyPath:@"currentItem.error"];
+    [_player removeObserver:self forKeyPath:@"status" context:kHolaCDNProxyContext];
+    [_player removeObserver:self forKeyPath:@"rate" context:kHolaCDNProxyContext];
+    [_player removeObserver:self forKeyPath:@"currentItem.status" context:kHolaCDNProxyContext];
+    [_player removeObserver:self forKeyPath:@"currentItem.duration" context:kHolaCDNProxyContext];
+    [_player removeObserver:self forKeyPath:@"currentItem.loadedTimeRanges" context:kHolaCDNProxyContext];
+    [_player removeObserver:self forKeyPath:@"currentItem.playbackBufferFull" context:kHolaCDNProxyContext];
+    [_player removeObserver:self forKeyPath:@"currentItem.playbackBufferEmpty" context:kHolaCDNProxyContext];
+    [_player removeObserver:self forKeyPath:@"currentItem.error" context:kHolaCDNProxyContext];
 
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:_player.currentItem];
 
@@ -414,6 +416,11 @@ BOOL cache_disabled;
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    if (context != kHolaCDNProxyContext) {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
+    }
+
     if (_player == nil) {
         [_LOG warn:@"no player found in observer!"];
         return;
