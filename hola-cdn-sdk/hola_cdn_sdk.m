@@ -377,9 +377,13 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 
     if ([self isBusy]) {
+        if (inProgress == HolaCDNBusyAttaching && nextAction != HolaCDNActionUninit) {
+            [_log err:@"Call `uninit` before new attach!"];
+            return;
+        }
         [_log warn:@"Will make attach automatically when ready"];
         nextAttach = player;
-        if (inProgress == HolaCDNActionAttach) {
+        if (inProgress == HolaCDNBusyAttaching) {
             nextAction = HolaCDNActionUninit;
             return;
         }
