@@ -34,6 +34,7 @@ NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
 NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};";
 NSString* loaderUrl = @"%@/loader_%@.js";
+double loaderTimeout = 1.0; // Timeout in sec before using saved HolaCDN library
 
 NSString* loaderFilename = @"hola_cdn_library.js";
 
@@ -229,7 +230,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         }
     });
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), backgroundQueue, ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(loaderTimeout * NSEC_PER_SEC)), backgroundQueue, ^{
         if (contextReady) {
             [_log debug:@"Fresh version was already loaded, stop looking for a saved library"];
             return;
