@@ -126,7 +126,6 @@ NSString* hola_cdn = @"window.hola_cdn";
 -(void)load {
     if ([self isBusy]) {
         [_log err:@"Can't perform load when busy!"];
-        //nextAction = HolaCDNActionLoad;
         return;
     }
 
@@ -224,13 +223,17 @@ NSString* hola_cdn = @"window.hola_cdn";
 
         [loaderJS writeToFile:loaderPath atomically:YES encoding:NSUTF8StringEncoding error:&err];
         if (err == nil) {
-            [_log info:@"HolaCDN library updated"];
+            [_log debug:@"HolaCDN library updated"];
         } else {
             [_log warn:[NSString stringWithFormat:@"Can't save HolaCDN library! Error: %@", err]];
         }
     });
 
-    dispatch_async(backgroundQueue, ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), backgroundQueue, ^{
+        if (contextReady) {
+            [_log debug:@"Fresh version was already loaded, stop looking for a saved library"];
+            return;
+        }
         NSError* err = nil;
         NSString* loaderJSSaved = [NSString stringWithContentsOfFile:loaderPath encoding:NSUTF8StringEncoding error:&err];
         if (err == nil) {
@@ -241,10 +244,13 @@ NSString* hola_cdn = @"window.hola_cdn";
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self didFinishLoading];
                 });
+            } else {
+                [_log debug:@"Saved library found, but fresh version was already loaded"];
             }
         } else {
             [_log debug:[NSString stringWithFormat:@"Can't read HolaCDN library from file: %@", err]];
             if (loaderFetched) {
+                [_log debug:@"Remote load also failed!"];
                 [self didFailWithError:err];
             }
         }
@@ -398,11 +404,6 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     if (!ready) {
         [_log err:@"HolaCDN is not ready on attach!"];
-        return;
-        [_log info:@"not ready on attach: perform load"];
-        nextAttach = player;
-        nextAction = HolaCDNActionLoad;
-        [self processNextAction];
         return;
     }
 
