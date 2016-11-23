@@ -44,6 +44,10 @@ NSString* hola_cdn = @"window.hola_cdn";
     [HolaCDNLog setVerboseLevel:level];
 }
 
++(void)setLogModules:(NSArray*)modules {
+    [HolaCDNLog setVerboseModules:modules];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -349,18 +353,28 @@ NSString* hola_cdn = @"window.hola_cdn";
     return YES;
 }
 
--(AVPlayer*)attachToNewPlayer:(AVPlayer*)player {
-    if ([self canMakePlayer]) {
-        [self attach:player];
-    }
+-(AVPlayerItem*)playerItemWithURL:(NSURL*)url {
+    AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:url andCDN:self];
+    //AVURLAsset* asset = [[AVURLAsset alloc] initWithURL:url options:nil];
+    return [AVPlayerItem playerItemWithAsset:asset];
+}
+
+-(AVPlayer*)playerWithURL:(NSURL*)url {
+    AVPlayerItem* item = [self playerItemWithURL:url];
+    AVPlayer* player = [AVPlayer playerWithPlayerItem:item];
+
+    player.automaticallyWaitsToMinimizeStalling = NO;
 
     return player;
 }
 
--(AVPlayer*)makeAVPlayerWithURL:(NSURL*)url {
-    return [self attachToNewPlayer:[[AVPlayer alloc] initWithURL:url]];
+-(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVURLAsset* asset = (AVURLAsset*)playerItem.asset;
+    AVPlayerItem* item = [self playerItemWithURL:asset.URL];
+    return [AVPlayer playerWithPlayerItem:item];
 }
 
+/*
 -(AVPlayer*)makeAVPlayerWithPlayerItem:(AVPlayerItem*)playerItem {
     return [self attachToNewPlayer:[[AVPlayer alloc] initWithPlayerItem:playerItem]];
 }
@@ -375,7 +389,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(AVQueuePlayer*)makeAVQueuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
     return [self attachToNewPlayer:[[AVQueuePlayer alloc] initWithItems:items]];
-}
+}*/
 
 -(void)attach:(AVPlayer*)player {
     if (player == nil) {

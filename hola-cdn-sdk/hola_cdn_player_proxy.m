@@ -51,7 +51,7 @@ BOOL cache_disabled;
     return _state;
 }
 
--(instancetype)initWithPlayer:(AVPlayer *)player andCDN:(HolaCDN *)cdn {
+-(instancetype)initWithPlayer:(AVPlayer*)player andCDN:(HolaCDN *)cdn {
     self = [super init];
     if (self) {
         _LOG = [HolaCDNLog new];
@@ -96,10 +96,22 @@ BOOL cache_disabled;
         _originalItem = nil;
     }
 
-    AVURLAsset* asset = (AVURLAsset*)_player.currentItem.asset;
+    if ([_player.currentItem.asset isKindOfClass:[HolaCDNAsset class]]) {
+        _cdnItem = _player.currentItem;
+    } else {
+        AVURLAsset* asset = (AVURLAsset*)_player.currentItem.asset;
 
-    _videoUrl = asset.URL;
-    _originalItem = _player.currentItem;
+        _videoUrl = asset.URL;
+        _originalItem = _player.currentItem;
+
+        if (_cdnItem != nil) {
+            [(HolaCDNAsset*)_cdnItem.asset onDetached];
+            _cdnItem = nil;
+        }
+
+        AVURLAsset* cdnAsset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:_videoUrl andCDN:_cdn];
+        _cdnItem = [AVPlayerItem playerItemWithAsset:cdnAsset];
+    }
 }
 
 -(void)dealloc {
@@ -251,8 +263,6 @@ BOOL cache_disabled;
                 [[_cdn getContext] evaluateScript:@"hola_cdn._get_bws().disable_cache()"];
                 cache_disabled = YES;
 
-                [self updateItem];
-
                 AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:_videoUrl andCDN:_cdn];
                 _cdnItem = [AVPlayerItem playerItemWithAsset:asset];
                 [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
@@ -269,6 +279,8 @@ BOOL cache_disabled;
                         [self didAttached];
                     });
                 }];
+
+                [(HolaCDNAsset*)asset onAttached];
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self didAttached];

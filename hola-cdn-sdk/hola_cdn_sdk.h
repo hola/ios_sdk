@@ -12,10 +12,12 @@
 @import AVFoundation;
 #import "hola_log.h"
 #import "hola_cdn_player_proxy.h"
+#import "hola_cdn_asset.h"
 #import "GCDWebServer/GCDWebServer.h"
 
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
+@class HolaCDNAsset;
 
 typedef NS_ENUM(int, HolaCDNBusy) {
     HolaCDNBusyNone = 0,
@@ -58,6 +60,7 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @interface HolaCDN : NSObject
 
 +(void)setLogLevel:(HolaCDNLogLevel)level;
++(void)setLogModules:(nullable NSArray*)modules;
 @property(readonly) int serverPort;
 
 @property(nonnull, nonatomic, assign) id<HolaCDNDelegate> delegate;
@@ -77,12 +80,17 @@ typedef NS_ENUM(int, HolaCDNAction) {
 -(BOOL)load:(NSError * _Nullable * _Nullable)error __deprecated_msg("No need to use this method anymore");
 -(void)attach:(nonnull AVPlayer*)player;
 
+-(nonnull AVPlayerItem*)playerItemWithURL:(nonnull NSURL*)url;
+-(nonnull AVPlayer*)playerWithURL:(nonnull NSURL*)url;
+-(nonnull AVPlayer*)playerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+
 // methods to create players
--(nonnull AVPlayer*)makeAVPlayerWithURL:(nonnull NSURL*)url;
+/*-(nonnull AVPlayer*)makeAVPlayerWithURL:(nonnull NSURL*)url;
 -(nonnull AVPlayer*)makeAVPlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
 -(nonnull AVQueuePlayer*)makeAVQueuePlayerWithURL:(nonnull NSURL*)url;
 -(nonnull AVQueuePlayer*)makeAVQueuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
--(nonnull AVQueuePlayer*)makeAVQueuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;
+-(nonnull AVQueuePlayer*)makeAVQueuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;*/
+
 
 -(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;

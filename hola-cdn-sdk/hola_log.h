@@ -28,5 +28,6 @@ typedef NS_ENUM(int, HolaCDNLogLevel) {
 -(void) crit:(NSString*) msg;
 
 +(void) setVerboseLevel:(HolaCDNLogLevel) level;
++(void) setVerboseModules:(NSArray*) modules;
 
 @end

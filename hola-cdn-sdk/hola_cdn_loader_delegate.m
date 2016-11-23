@@ -102,6 +102,19 @@ static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
     return HolaCDNSchemeFetch;
 }
 
++(HolaScheme)isCDNScheme:(NSURL*)url {
+    NSArray<NSString*>* cdn = [NSArray arrayWithObjects:@"hcdnf", @"hcdnr", @"hcdnk", @"hcdnfs", @"hcdnrs", @"hcdnks", nil];
+
+    NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:YES];
+    NSString* scheme = components.scheme;
+
+    if ([cdn containsObject:scheme]) {
+        return YES;
+    }
+
+    return NO;
+}
+
 +(NSURL*)applyCDNScheme:(NSURL*)url andType:(HolaCDNScheme)type {
     NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:YES];
     HolaScheme scheme = [HolaCDNLoaderDelegate mapScheme:components.scheme];
@@ -135,32 +148,42 @@ int req_id = 1;
         taskTimers = [NSMutableDictionary new];
         taskClients = [NSMutableDictionary new];
 
-        _cdn = cdn;
         _queue = dispatch_queue_create(LOADER_QUEUE, nil);
-        _parser = [HolaHLSParser new];
 
-        _session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
-
-        _server = cdn.server;
-
-        if ([_server isRunning]) {
-            [_server stop];
-        }
-
-        __weak typeof(self) weakSelf = self;
-        [_server addDefaultHandlerForMethod:@"GET" requestClass:[GCDWebServerRequest self] asyncProcessBlock:^(__kindof GCDWebServerRequest *request, GCDWebServerCompletionBlock completionBlock) {
-            [weakSelf processRequest:request completionBlock:completionBlock];
-        }];
-
-        NSError* err = nil;
-        [_server startWithOptions:@{
-            GCDWebServerOption_BindToLocalhost: @YES,
-            GCDWebServerOption_Port: [NSNumber numberWithInt:[cdn serverPort]],
-            GCDWebServerOption_BonjourName: @"HolaCDN"
-        } error:&err];
+        _cdn = cdn;
+        _isAttached = NO;
     }
 
     return self;
+}
+
+-(void)attach {
+    if (_isAttached) {
+        [_log warn:@"Already attached"];
+        return;
+    }
+    _isAttached = YES;
+    _parser = [HolaHLSParser new];
+
+    _session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
+
+    _server = _cdn.server;
+
+    if ([_server isRunning]) {
+        [_server stop];
+    }
+
+    __weak typeof(self) weakSelf = self;
+    [_server addDefaultHandlerForMethod:@"GET" requestClass:[GCDWebServerRequest self] asyncProcessBlock:^(__kindof GCDWebServerRequest *request, GCDWebServerCompletionBlock completionBlock) {
+        [weakSelf processRequest:request completionBlock:completionBlock];
+    }];
+
+    NSError* err = nil;
+    [_server startWithOptions:@{
+        GCDWebServerOption_BindToLocalhost: @YES,
+        GCDWebServerOption_Port: [NSNumber numberWithInt:[_cdn serverPort]],
+        GCDWebServerOption_BonjourName: @"HolaCDN"
+    } error:&err];
 }
 
 -(void)dealloc {
@@ -180,12 +203,60 @@ int req_id = 1;
         
         _server = nil;
     }
+
+    _isAttached = NO;
 }
 
 // requests handling
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
-    return [self makeRequest:loadingRequest];
+    if (_isAttached) {
+        [_log debug:@"Loader attached, make request"];
+        return [self makeRequest:loadingRequest];
+    }
+
+    NSURL* requestURL = loadingRequest.request.URL;
+
+/*    HolaCDNScheme scheme = [HolaCDNLoaderDelegate mapCDNScheme:requestURL];
+    switch (scheme) {
+    case HolaCDNSchemeRedirect:
+
+        break;
+    case HolaCDNSchemeFetch:
+        [self fetch:req :arg_req_id];
+        break;
+    case HolaCDNSchemeKey:
+        [self fetch:req :arg_req_id :YES];
+        break;
+    }*/
+
+
+    if ([HolaCDNLoaderDelegate isCDNScheme:requestURL]) {
+        NSURL* url = [HolaCDNLoaderDelegate applyOriginScheme:requestURL];
+        [_log debug:[NSString stringWithFormat:@"Not attached, redirect to origin url: %@", requestURL]];
+        NSLog([[loadingRequest.request allHTTPHeaderFields] description]);
+        dispatch_async(_queue, ^{
+            NSURLRequest* redirect = [NSURLRequest requestWithURL:url];
+            //NSMutableURLRequest* redirect = [loadingRequest.request mutableCopy];
+            //[redirect setURL:url];
+            NSLog([[redirect allHTTPHeaderFields] description]);
+            [loadingRequest setRedirect:[redirect copy]];
+            NSHTTPURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:[redirect URL] statusCode:302 HTTPVersion:nil headerFields:nil];
+            [loadingRequest setResponse:response];
+            //[loadingRequest.dataRequest respondWithData:[NSData data]];
+            //[loadingRequest finishLoading];
+            //[_log debug:[NSString stringWithFormat:@"redirected: %@", [redirect URL]]];
+
+            [_log debug:[NSString stringWithFormat:@"fetch: %@", url]];
+            NSData* nsData = [NSData dataWithContentsOfURL:url];
+            [loadingRequest.dataRequest respondWithData:nsData];
+            [loadingRequest finishLoading];
+        });
+        return YES;
+    }
+
+    [_log debug:@"Not attached, can't handle"];
+    return NO;
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForRenewalOfRequestedResource:(AVAssetResourceRenewalRequest *)renewalRequest {
