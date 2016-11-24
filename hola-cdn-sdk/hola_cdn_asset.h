@@ -15,12 +15,11 @@
 
 @interface HolaCDNAsset: AVURLAsset
 
-@property(nonatomic, retain) HolaCDN* cdn;
+@property(nonatomic, weak) HolaCDN* cdn;
 @property(nonatomic, retain) NSMutableArray* keysToLoad;
 @property(nonatomic, assign) BOOL isAttached;
 @property(nonatomic, assign) BOOL attachTimeoutSet;
 @property(nonatomic, assign) BOOL attachTimeoutTriggered;
-@property(readonly) HolaCDNLoaderDelegate* loader;
 
 -(instancetype)initWithURL:(NSURL*)url andCDN:(HolaCDN*)cdn;
 -(void)loadValuesAsynchronouslyForKeys:(NSArray<NSString *> *)keys completionHandler:(void (^)(void))handler;

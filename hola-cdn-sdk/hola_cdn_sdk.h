@@ -13,11 +13,13 @@
 #import "hola_log.h"
 #import "hola_cdn_player_proxy.h"
 #import "hola_cdn_asset.h"
+#import "hola_cdn_loader_delegate.h"
 #import "GCDWebServer/GCDWebServer.h"
 
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
 @class HolaCDNAsset;
+@class HolaCDNLoaderDelegate;
 
 typedef NS_ENUM(int, HolaCDNBusy) {
     HolaCDNBusyNone = 0,
@@ -68,7 +70,9 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @property(nullable, readonly) JSContext* ctx;
 @property(nullable, readonly) GCDWebServer* server;
 @property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
+@property(nonnull, retain) HolaCDNLoaderDelegate* loader;
 @property BOOL graphEnabled;
+@property(readonly) double loaderTimeout; // Timeout in sec before using saved HolaCDN library
 
 -(nonnull instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
 -(nonnull instancetype)initWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;

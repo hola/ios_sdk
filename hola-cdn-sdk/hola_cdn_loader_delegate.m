@@ -13,9 +13,9 @@
 
 @interface HolaCDNLoaderDelegate()
 {
-HolaCDN* _cdn;
+__weak HolaCDN* _cdn;
 HolaHLSParser* _parser;
-GCDWebServer* _server;
+__weak GCDWebServer* _server;
 NSURLSession* _session;
 
 NSMutableDictionary<NSNumber*, AVAssetResourceLoadingRequest*>* pending;
@@ -28,6 +28,7 @@ NSMutableDictionary<NSNumber*, NSString*>* taskTimers;
 @implementation HolaCDNLoaderDelegate
 
 static HolaCDNLog* _log;
+static HolaCDNLog* _logNetwork;
 static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
 // class static methods
@@ -143,12 +144,16 @@ int req_id = 1;
         _log = [HolaCDNLog new];
         [_log setModule:@"Loader"];
 
+        _logNetwork = [HolaCDNLog new];
+        [_logNetwork setModule:@"Network"];
+
         pending = [NSMutableDictionary new];
         proxyRequests = [NSMutableDictionary new];
         taskTimers = [NSMutableDictionary new];
         taskClients = [NSMutableDictionary new];
 
         _queue = dispatch_queue_create(LOADER_QUEUE, nil);
+        _parser = [HolaHLSParser new];
 
         _cdn = cdn;
         _isAttached = NO;
@@ -163,7 +168,6 @@ int req_id = 1;
         return;
     }
     _isAttached = YES;
-    _parser = [HolaHLSParser new];
 
     _session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
 
@@ -187,10 +191,12 @@ int req_id = 1;
 }
 
 -(void)dealloc {
+    [_log debug:@"dealloc"];
     [self uninit];
 }
 
 -(void)uninit {
+    [_log debug:@"uninit"];
     if (_session != nil) {
         [_session invalidateAndCancel];
         _session = nil;
@@ -200,7 +206,7 @@ int req_id = 1;
         if ([_server isRunning]) {
             [_server stop];
         }
-        
+        [_server removeAllHandlers];
         _server = nil;
     }
 
@@ -210,53 +216,8 @@ int req_id = 1;
 // requests handling
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
-    if (_isAttached) {
-        [_log debug:@"Loader attached, make request"];
-        return [self makeRequest:loadingRequest];
-    }
-
-    NSURL* requestURL = loadingRequest.request.URL;
-
-/*    HolaCDNScheme scheme = [HolaCDNLoaderDelegate mapCDNScheme:requestURL];
-    switch (scheme) {
-    case HolaCDNSchemeRedirect:
-
-        break;
-    case HolaCDNSchemeFetch:
-        [self fetch:req :arg_req_id];
-        break;
-    case HolaCDNSchemeKey:
-        [self fetch:req :arg_req_id :YES];
-        break;
-    }*/
-
-
-    if ([HolaCDNLoaderDelegate isCDNScheme:requestURL]) {
-        NSURL* url = [HolaCDNLoaderDelegate applyOriginScheme:requestURL];
-        [_log debug:[NSString stringWithFormat:@"Not attached, redirect to origin url: %@", requestURL]];
-        NSLog([[loadingRequest.request allHTTPHeaderFields] description]);
-        dispatch_async(_queue, ^{
-            NSURLRequest* redirect = [NSURLRequest requestWithURL:url];
-            //NSMutableURLRequest* redirect = [loadingRequest.request mutableCopy];
-            //[redirect setURL:url];
-            NSLog([[redirect allHTTPHeaderFields] description]);
-            [loadingRequest setRedirect:[redirect copy]];
-            NSHTTPURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:[redirect URL] statusCode:302 HTTPVersion:nil headerFields:nil];
-            [loadingRequest setResponse:response];
-            //[loadingRequest.dataRequest respondWithData:[NSData data]];
-            //[loadingRequest finishLoading];
-            //[_log debug:[NSString stringWithFormat:@"redirected: %@", [redirect URL]]];
-
-            [_log debug:[NSString stringWithFormat:@"fetch: %@", url]];
-            NSData* nsData = [NSData dataWithContentsOfURL:url];
-            [loadingRequest.dataRequest respondWithData:nsData];
-            [loadingRequest finishLoading];
-        });
-        return YES;
-    }
-
-    [_log debug:@"Not attached, can't handle"];
-    return NO;
+    [_log debug:@"Loader attached, make request"];
+    return [self makeRequest:loadingRequest];
 }
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForRenewalOfRequestedResource:(AVAssetResourceRenewalRequest *)renewalRequest {
@@ -270,11 +231,6 @@ int req_id = 1;
 }
 
 -(BOOL)makeRequest:(AVAssetResourceLoadingRequest*)req {
-    if (_cdn.playerProxy == nil) {
-        [_log err:@"Trying to make request, but no player attached!"];
-        return NO;
-    }
-
     if (req.request.URL == nil) {
         [_log err:@"Trying to make request, but no request url found!"];
         return NO;
@@ -284,14 +240,18 @@ int req_id = 1;
     [pending setObject:req forKey:currentId];
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
-    [_log debug:[NSString stringWithFormat:@"Start request %d", [currentId intValue]]];
-    [_log debug:[NSString stringWithFormat:@"URL: %@", originUrl.absoluteString]];
+    [_logNetwork debug:[NSString stringWithFormat:@"Start request %d", [currentId intValue]]];
+    [_logNetwork debug:[NSString stringWithFormat:@"URL: %@", originUrl.absoluteString]];
 
-    [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
-        @"url": originUrl.absoluteString,
-        @"req_id": currentId,
-        @"force": [NSNumber numberWithBool:[_parser isMedia:originUrl.absoluteString]]
-    } inContext:_cdn.ctx]];
+    if (_isAttached && _cdn.playerProxy != nil) {
+        [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
+            @"url": originUrl.absoluteString,
+            @"req_id": currentId,
+            @"force": [NSNumber numberWithBool:[_parser isMedia:originUrl.absoluteString]]
+        } inContext:_cdn.ctx]];
+    } else {
+        [self processRequest:originUrl.absoluteString forFrag:[currentId intValue] withReq:1 isRate:NO];
+    }
 
     req_id += 1;
 
@@ -307,19 +267,19 @@ int req_id = 1;
     [self sendOpen:arg_req_id];
 
     if (rate) {
-        [_log debug:[NSString stringWithFormat:@"Fetch rate request: %d", frag_id]];
+        [_logNetwork debug:[NSString stringWithFormat:@"Fetch rate request: %d", frag_id]];
         [self processExternalRequest:url :arg_req_id];
         return;
     }
-
-    [_log debug:[NSString stringWithFormat:@"Process request %d", frag_id]];
 
     AVAssetResourceLoadingRequest* req = [self getRequest:frag_id];
     if (req == nil) {
+        [_logNetwork debug:[NSString stringWithFormat:@"Process external request %d", frag_id]];
         [self processExternalRequest:url :arg_req_id];
         return;
     }
 
+    [_logNetwork debug:[NSString stringWithFormat:@"Process internal request %d", frag_id]];
     [self processInternalRequest:url :req :arg_req_id];
 }
 
@@ -347,12 +307,15 @@ int req_id = 1;
 
     switch (scheme) {
     case HolaCDNSchemeRedirect:
+        [_logNetwork debug:[NSString stringWithFormat:@"Redirect request"]];
         [self redirect:url forRequest:req withId:arg_req_id];
         break;
     case HolaCDNSchemeFetch:
+        [_logNetwork debug:[NSString stringWithFormat:@"Fetch request"]];
         [self fetch:req :arg_req_id];
         break;
     case HolaCDNSchemeKey:
+        [_logNetwork debug:[NSString stringWithFormat:@"Key request"]];
         [self fetch:req :arg_req_id :YES];
         break;
     }
@@ -369,9 +332,12 @@ int req_id = 1;
     NSError* err = nil;
     NSData* nsData;
     if (key) {
+        [_logNetwork debug:[NSString stringWithFormat:@"Fetch key"]];
         nsData = [NSData dataWithContentsOfURL:url];
     } else {
+        [_logNetwork debug:[NSString stringWithFormat:@"Fetch manifest: %@", url]];
         NSString* data = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&err];
+        [_logNetwork debug:[NSString stringWithFormat:@"Manifest length: %d", [data length]]];
 
         if (err != nil) {
             [_log err:[NSString stringWithFormat:@"Can't fetch data %@", err]];
@@ -381,6 +347,7 @@ int req_id = 1;
         }
 
         NSString* manifest = [_parser parse:url.absoluteString andData:data withError:&err];
+        [_logNetwork debug:[NSString stringWithFormat:@"Manifest parsed length: %d", [manifest length]]];
         if (err != nil) {
             [_log err:[NSString stringWithFormat:@"Can't parse data %@", err]];
             [self sendError:req msg:@"Can't parse data"];
@@ -394,6 +361,7 @@ int req_id = 1;
     NSTimeInterval interval = [[NSDate new] timeIntervalSinceDate:date];
 
     dispatch_async(_queue, ^{
+        [_logNetwork debug:[NSString stringWithFormat:@"Request finish loading, data: %d", [nsData length]]];
         [req.dataRequest respondWithData:nsData];
         [req finishLoading];
     });
@@ -405,6 +373,19 @@ int req_id = 1;
 
 -(void)redirect:(NSString*)urlString forRequest:(AVAssetResourceLoadingRequest*)req withId:(int)arg_req_id {
     NSURL* url = [NSURL URLWithString:urlString];
+
+    if (!_isAttached) {
+        dispatch_async(_queue, ^{
+            NSMutableURLRequest* redirect = [req.request mutableCopy];
+            [redirect setURL:url];
+            [req setRedirect:[redirect copy]];
+
+            NSHTTPURLResponse* response = [[NSHTTPURLResponse alloc] initWithURL:url statusCode:302 HTTPVersion:nil headerFields:nil];
+            [req setResponse:response];
+            [req finishLoading];
+        });
+        return;
+    }
 
     NSMutableDictionary* proxyRec = [NSMutableDictionary new];
     proxyRec[@"uuid"] = [[NSUUID new] UUIDString];
@@ -465,6 +446,9 @@ int req_id = 1;
 }
 
 -(void)sendMessage:(NSString*)message withData:(id)data {
+    if (!_isAttached) {
+        return;
+    }
     if (_cdn.playerProxy == nil) {
         [_log err:@"Trying to send message, but no player attached!"];
         return;
@@ -527,26 +511,6 @@ int req_id = 1;
     [self processRequestWithUUID:uuid completionBlock:completion];
 }
 
-/*-(NSURLSessionDataTask*)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
-    NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
-
-    if (proxyRec == nil) {
-        [_log warn:@"process request: no proxy request found!"];
-        completion([GCDWebServerDataResponse responseWithStatusCode:400]);
-        return nil;
-    }
-
-    NSURL* url = [HolaCDNLoaderDelegate applyOriginScheme:proxyRec[@"target"]];
-    NSURLRequest* request = [NSURLRequest requestWithURL:url];
-
-    NSURLSessionDataTask* task = [_session dataTaskWithRequest:request];
-    NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
-    [taskClients setObject:completion forKey:taskId];
-    [taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];
-
-    return task;
-}*/
-
 -(void)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
     NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
 
@@ -561,7 +525,7 @@ int req_id = 1;
 
     NSString* range = proxyRec[@"range"];
     if (range != nil) {
-        [_log debug:[NSString stringWithFormat:@"request specific range: %@", proxyRec[@"range"]]];
+        [_logNetwork debug:[NSString stringWithFormat:@"request specific range: %@", proxyRec[@"range"]]];
         [request setValue:proxyRec[@"range"] forHTTPHeaderField:@"Range"];
     }
     NSURLSessionDataTask* task = [_session dataTaskWithRequest:request];

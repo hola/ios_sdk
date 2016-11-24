@@ -34,7 +34,6 @@ NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
 NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};";
 NSString* loaderUrl = @"%@/loader_%@.js";
-double loaderTimeout = 1.0; // Timeout in sec before using saved HolaCDN library
 
 NSString* loaderFilename = @"hola_cdn_library.js";
 
@@ -56,11 +55,15 @@ NSString* hola_cdn = @"window.hola_cdn";
         ready = NO;
         nextAction = HolaCDNActionNone;
         inProgress = HolaCDNBusyNone;
+        _loaderTimeout = 1;
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
 
         _log = [HolaCDNLog new];
         [GCDWebServer setLogLevel:5];
+        _server = [GCDWebServer new];
+        _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:self];
+
         [_log info:@"New HolaCDN instance created"];
     }
 
@@ -234,7 +237,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         }
     });
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(loaderTimeout * NSEC_PER_SEC)), backgroundQueue, ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_loaderTimeout * NSEC_PER_SEC)), backgroundQueue, ^{
         if (contextReady) {
             [_log debug:@"Fresh version was already loaded, stop looking for a saved library"];
             return;
@@ -355,23 +358,22 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(AVPlayerItem*)playerItemWithURL:(NSURL*)url {
     AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:url andCDN:self];
-    //AVURLAsset* asset = [[AVURLAsset alloc] initWithURL:url options:nil];
     return [AVPlayerItem playerItemWithAsset:asset];
+}
+
+-(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVURLAsset* asset = (AVURLAsset*)playerItem.asset;
+
+    return [self playerWithURL:asset.URL];
 }
 
 -(AVPlayer*)playerWithURL:(NSURL*)url {
     AVPlayerItem* item = [self playerItemWithURL:url];
     AVPlayer* player = [AVPlayer playerWithPlayerItem:item];
 
-    player.automaticallyWaitsToMinimizeStalling = NO;
+    [self attach:player];
 
     return player;
-}
-
--(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
-    AVURLAsset* asset = (AVURLAsset*)playerItem.asset;
-    AVPlayerItem* item = [self playerItemWithURL:asset.URL];
-    return [AVPlayer playerWithPlayerItem:item];
 }
 
 /*
@@ -431,15 +433,6 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log info:@"Attach..."];
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_server != nil) {
-            if ([_server isRunning]) {
-                [_server stop];
-            }
-            [_server removeAllHandlers];
-            _server = nil;
-        }
-        _server = [GCDWebServer new];
-        
         dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
         dispatch_async(backgroundQueue, ^{
             _playerProxy = [[HolaCDNPlayerProxy alloc] initWithPlayer:_player andCDN:self];
@@ -513,6 +506,8 @@ NSString* hola_cdn = @"window.hola_cdn";
         nextAction = HolaCDNActionUninit;
         return;
     }
+
+    [_loader uninit];
 
     if (_playerProxy == nil) {
         [_log err:@"HolaCDN not attached!"];

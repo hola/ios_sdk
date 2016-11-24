@@ -15,9 +15,6 @@ static HolaCDNLog* _log;
 
 -(instancetype)initWithURL:(NSURL*)url andCDN:(HolaCDN*)cdn {
     NSURL* cdnURL = [HolaCDNLoaderDelegate applyCDNScheme:url andType:HolaCDNSchemeFetch];
-    //NSURL* cdnURL = url;
-
-    _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:cdn];
 
     self = [super initWithURL:cdnURL options:nil];
     if (self) {
@@ -30,13 +27,13 @@ static HolaCDNLog* _log;
         _attachTimeoutTriggered = NO;
         _keysToLoad = [NSMutableArray new];
 
-        [self.resourceLoader setDelegate:_loader queue:_loader.queue];
+        [self.resourceLoader setDelegate:_cdn.loader queue:_cdn.loader.queue];
     }
 
     return self;
 }
 
-/*-(void)loadValuesAsynchronouslyForKeys:(NSArray<NSString *> *)keys completionHandler:(void (^)(void))handler {
+-(void)loadValuesAsynchronouslyForKeys:(NSArray<NSString *> *)keys completionHandler:(void (^)(void))handler {
     if (_isAttached || _attachTimeoutTriggered) {
         //[_log debug:[NSString stringWithFormat:@"Load values async for %@", keys]];
         return [super loadValuesAsynchronouslyForKeys:keys completionHandler:handler];
@@ -53,20 +50,22 @@ static HolaCDNLog* _log;
         return;
     }
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
         if (_isAttached) {
-            [_log debug:@"Already attached on timeout"];
+            [_log debug:@"Timeout: already attached"];
             return;
         }
 
         [_log debug:@"Load asset without cdn"];
+
+        [self onDetached];
 
         _attachTimeoutTriggered = YES;
         [self loadPendingKeys];
     });
 
     _attachTimeoutSet = YES;
-}*/
+}
 
 -(void)loadPendingKeys {
     for (NSDictionary* item in _keysToLoad) {
@@ -82,22 +81,24 @@ static HolaCDNLog* _log;
     if (_attachTimeoutTriggered) {
         return;
     }
-    
-    [self loadPendingKeys];
+
+    [_log debug:@"Attached"];
 
     _isAttached = YES;
+    [_cdn.loader attach];
+    [self loadPendingKeys];
 }
 
 -(void)onDetached {
-    [_log info:@"on detached"];
+    [_log info:@"Detached"];
     if (_isAttached) {
-        [_loader uninit];
         _isAttached = NO;
+        [_cdn.loader uninit];
     }
 }
 
 -(void)dealloc {
-    [_log debug:@"dealloc"];
+    [_log debug:@"Dealloc"];
     [self onDetached];
 }
 
