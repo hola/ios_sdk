@@ -211,6 +211,21 @@ int req_id = 1;
     }
 
     _isAttached = NO;
+
+    if ([pending count] > 0) {
+        NSMutableArray<AVAssetResourceLoadingRequest*>* reqs = [NSMutableArray new];
+        for (NSNumber* key in pending) {
+            [reqs addObject:[pending objectForKey:key]];
+        }
+
+        [pending removeAllObjects];
+
+        for (AVAssetResourceLoadingRequest* req in reqs) {
+            [self makeRequest:req];
+        }
+
+        [reqs removeAllObjects];
+    }
 }
 
 // requests handling

@@ -232,8 +232,10 @@ BOOL cache_disabled;
     [_cdn get_mode:^(NSString* mode) {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
             if ([mode isEqual:@"cdn"]) {
+                [_LOG debug:@"mode: cdn, doing attach"];
                 // XXX alexeym: hack to count data correctly; need to fix cache for ios
                 [[_cdn getContext] evaluateScript:@"hola_cdn._get_bws().disable_cache()"];
+                [_LOG debug:@"cache disabled"];
                 cache_disabled = YES;
 
                 _cdnItem = _player.currentItem;
@@ -249,7 +251,13 @@ BOOL cache_disabled;
                     return;
                 }
 
+                [_LOG debug:@"wait for asset duration"];
+                __block BOOL assetTimeout = NO;
                 [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
+                    if (assetTimeout) {
+                        return;
+                    }
+                    assetTimeout = YES;
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [_LOG debug:@"asset playable, main thread"];
                         [self removeObservers];
@@ -262,6 +270,15 @@ BOOL cache_disabled;
                         [self didAttached];
                     });
                 }];
+
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+                    if (assetTimeout) {
+                        return;
+                    }
+                    assetTimeout = YES;
+                    [self didAttached];
+                    [_cdn uninit];
+                });
 
                 [asset onAttached];
             } else {

@@ -361,22 +361,95 @@ NSString* hola_cdn = @"window.hola_cdn";
     return [AVPlayerItem playerItemWithAsset:asset];
 }
 
--(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
-    AVURLAsset* asset = (AVURLAsset*)playerItem.asset;
-    return [self playerWithURL:asset.URL];
+-(AVPlayerItem*)playerItemFromItem:(AVPlayerItem*)item {
+    AVURLAsset* asset = (AVURLAsset*)item.asset;
+
+    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+        return item;
+    }
+
+    return [self playerItemWithURL:[asset URL]];
 }
 
--(AVPlayer*)playerWithURL:(NSURL*)url {
-    AVPlayer* player = [self makePlayerWithURL:url];
+// AVPlayer methods
+
+-(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVPlayer* player = [self makePlayerWithPlayerItem:playerItem];
     [self attach:player];
     return player;
 }
 
--(AVPlayer*)makePlayerWithURL:(NSURL*)url {
-    AVPlayerItem* item = [self playerItemWithURL:url];
+-(AVPlayer*)playerWithURL:(NSURL*)url {
+    AVPlayer* item = [self playerItemWithURL:url];
+    return [self playerWithPlayerItem:item];
+}
+
+-(AVPlayer*)makePlayerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVPlayerItem* item = [self playerItemFromItem:playerItem];
     return [AVPlayer playerWithPlayerItem:item];
 }
 
+// AVQueuePlayer methods
+
+-(AVQueuePlayer*)queuePlayerWithURL:(NSURL*)url {
+    AVPlayerItem* item = [self playerItemWithURL:url];
+    return [self queuePlayerWithItems:@[item]];
+}
+
+-(AVQueuePlayer*)queuePlayerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVURLAsset* asset = (AVURLAsset*)playerItem.asset;
+    return [self queuePlayerWithURL:asset.URL];
+}
+
+-(AVQueuePlayer*)queuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
+    AVQueuePlayer* player = [self makeQueuePlayerWithItems:items];
+    [self attach:player];
+    return player;
+}
+
+-(AVQueuePlayer*)makeQueuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
+    NSMutableArray<AVPlayerItem*>* cdnItems = [NSMutableArray new];
+
+    for (AVPlayerItem* item in items) {
+        [cdnItems addObject:[self playerItemFromItem:item]];
+    }
+
+    return [AVQueuePlayer queuePlayerWithItems:cdnItems];
+}
+
+// Wrap player
+-(AVPlayer*)wrapPlayer:(AVPlayer*)player {
+
+    AVAsset* asset = player.currentItem.asset;
+
+    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+        return player;
+    }
+
+    if (![asset isKindOfClass:[AVURLAsset class]]) {
+        [_log err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
+        return nil;
+    }
+
+    return [self makePlayerWithPlayerItem:player.currentItem];
+}
+
+-(AVQueuePlayer*)wrapQueuePlayer:(AVQueuePlayer*)player {
+    AVAsset* asset = player.currentItem.asset;
+
+    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+        return player;
+    }
+
+    if (![asset isKindOfClass:[AVURLAsset class]]) {
+        [_log err:@"AVQueuePlayer must be initialized with AVURLAsset or NSURL!"];
+        return nil;
+    }
+
+    return [self makeQueuePlayerWithItems:[player items]];
+}
+
+// HolaCDN methods
 -(AVPlayer*)attach:(AVPlayer*)player {
     if (player == nil) {
         [_log err:@"Player can't be nil on attach"];
@@ -388,14 +461,15 @@ NSString* hola_cdn = @"window.hola_cdn";
         return nil;
     }
 
-    AVAsset* asset = player.currentItem.asset;
+    if ([player isKindOfClass:[AVQueuePlayer class]]) {
+        player = [self wrapQueuePlayer:player];
+    } else {
+        player = [self wrapPlayer:player];
+    }
 
-    if (![asset isKindOfClass:[HolaCDNAsset class]]) {
-        if (![asset isKindOfClass:[AVURLAsset class]]) {
-            [_log err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
-            return nil;
-        }
-        player = [self makePlayerWithURL:[(AVURLAsset*)asset URL]];
+    if (player == nil) {
+        [_log err:@"Player can't be wrapped"];
+        return nil;
     }
 
     if ([self isBusy]) {
@@ -572,7 +646,9 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        [_log debug:@"get mode from JS"];
         JSValue* mode = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
+        [_log debug:[mode toString]];
         completionBlock([mode toString]);
     });
 }

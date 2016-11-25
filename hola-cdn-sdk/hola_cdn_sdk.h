@@ -83,8 +83,12 @@ typedef NS_ENUM(int, HolaCDNAction) {
 -(nullable AVPlayer*)attach:(nonnull AVPlayer*)player;
 
 -(nonnull AVPlayerItem*)playerItemWithURL:(nonnull NSURL*)url;
--(nonnull AVPlayer*)playerWithURL:(nonnull NSURL*)url;
+-(nonnull AVPlayerItem*)playerItemFromItem:(nonnull AVPlayerItem*)item;
 -(nonnull AVPlayer*)playerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVPlayer*)playerWithURL:(nonnull NSURL*)url;
+-(nonnull AVQueuePlayer*)queuePlayerWithURL:(nonnull NSURL*)url;
+-(nonnull AVQueuePlayer*)queuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVQueuePlayer*)queuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;
 
 -(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;
