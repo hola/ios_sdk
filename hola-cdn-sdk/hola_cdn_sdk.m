@@ -55,7 +55,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         ready = NO;
         nextAction = HolaCDNActionNone;
         inProgress = HolaCDNBusyNone;
-        _loaderTimeout = 1;
+        _loaderTimeout = 2; // seconds
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
 
@@ -363,65 +363,64 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
     AVURLAsset* asset = (AVURLAsset*)playerItem.asset;
-
     return [self playerWithURL:asset.URL];
 }
 
 -(AVPlayer*)playerWithURL:(NSURL*)url {
-    AVPlayerItem* item = [self playerItemWithURL:url];
-    AVPlayer* player = [AVPlayer playerWithPlayerItem:item];
-
+    AVPlayer* player = [self makePlayerWithURL:url];
     [self attach:player];
-
     return player;
 }
 
-/*
--(AVPlayer*)makeAVPlayerWithPlayerItem:(AVPlayerItem*)playerItem {
-    return [self attachToNewPlayer:[[AVPlayer alloc] initWithPlayerItem:playerItem]];
+-(AVPlayer*)makePlayerWithURL:(NSURL*)url {
+    AVPlayerItem* item = [self playerItemWithURL:url];
+    return [AVPlayer playerWithPlayerItem:item];
 }
 
--(AVQueuePlayer*)makeAVQueuePlayerWithURL:(NSURL*)url {
-    return [self attachToNewPlayer:[[AVQueuePlayer alloc] initWithURL:url]];
-}
-
--(AVQueuePlayer*)makeAVQueuePlayerWithPlayerItem:(AVPlayerItem*)playerItem {
-    return [self attachToNewPlayer:[[AVQueuePlayer alloc] initWithPlayerItem:playerItem]];
-}
-
--(AVQueuePlayer*)makeAVQueuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
-    return [self attachToNewPlayer:[[AVQueuePlayer alloc] initWithItems:items]];
-}*/
-
--(void)attach:(AVPlayer*)player {
+-(AVPlayer*)attach:(AVPlayer*)player {
     if (player == nil) {
         [_log err:@"Player can't be nil on attach"];
-        return;
+        return nil;
+    }
+
+    if (player.currentItem == nil) {
+        [_log err:@"Player.currentItem can't be nil on attach"];
+        return nil;
+    }
+
+    AVAsset* asset = player.currentItem.asset;
+
+    if (![asset isKindOfClass:[HolaCDNAsset class]]) {
+        if (![asset isKindOfClass:[AVURLAsset class]]) {
+            [_log err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
+            return nil;
+        }
+        player = [self makePlayerWithURL:[(AVURLAsset*)asset URL]];
     }
 
     if ([self isBusy]) {
         if (inProgress == HolaCDNBusyAttaching && nextAction != HolaCDNActionUninit) {
             [_log err:@"Call `uninit` before new attach!"];
-            return;
+            return player;
         }
         [_log warn:@"Will make attach automatically when ready"];
         nextAttach = player;
         if (inProgress == HolaCDNBusyAttaching) {
             nextAction = HolaCDNActionUninit;
-            return;
+            return player;
         }
         nextAction = HolaCDNActionAttach;
-        return;
+        return player;
     }
 
     if (_playerProxy != nil) {
         [_log err:@"HolaCDN is already attached!"];
-        return;
+        return player;
     }
 
     if (!ready) {
         [_log err:@"HolaCDN is not ready on attach!"];
-        return;
+        return player;
     }
 
     inProgress = HolaCDNBusyAttaching;
@@ -447,6 +446,8 @@ NSString* hola_cdn = @"window.hola_cdn";
             [ios_ready callWithArguments:[NSArray new]];
         });
     });
+
+    return player;
 }
 
 -(void)onAttached {

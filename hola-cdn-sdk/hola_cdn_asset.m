@@ -35,11 +35,8 @@ static HolaCDNLog* _log;
 
 -(void)loadValuesAsynchronouslyForKeys:(NSArray<NSString *> *)keys completionHandler:(void (^)(void))handler {
     if (_isAttached || _attachTimeoutTriggered) {
-        //[_log debug:[NSString stringWithFormat:@"Load values async for %@", keys]];
         return [super loadValuesAsynchronouslyForKeys:keys completionHandler:handler];
     }
-
-    //[_log debug:[NSString stringWithFormat:@"Save pending async keys: %@", keys]];
 
     [_keysToLoad addObject:@{
         @"keys": keys,
@@ -51,20 +48,29 @@ static HolaCDNLog* _log;
     }
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
-        if (_isAttached) {
-            [_log debug:@"Timeout: already attached"];
-            return;
-        }
-
-        [_log debug:@"Load asset without cdn"];
-
-        [self onDetached];
-
-        _attachTimeoutTriggered = YES;
-        [self loadPendingKeys];
+        [self skip];
     });
 
     _attachTimeoutSet = YES;
+}
+
+-(void)skip {
+    if (_attachTimeoutTriggered) {
+        [_log debug:@"Timeout: already triggered"];
+        return;
+    }
+
+    if (_isAttached) {
+        [_log debug:@"Timeout: already attached"];
+        return;
+    }
+
+    [_log debug:@"Load asset without cdn"];
+
+    _attachTimeoutTriggered = YES;
+    [self loadPendingKeys];
+
+    [self onDetached];
 }
 
 -(void)loadPendingKeys {
@@ -72,9 +78,10 @@ static HolaCDNLog* _log;
         NSArray* keys = item[@"keys"];
         id handler = item[@"handler"];
 
-        //[_log debug:[NSString stringWithFormat:@"Load pending keys %@", keys]];
         [super loadValuesAsynchronouslyForKeys:keys completionHandler:handler];
     }
+
+    [_keysToLoad removeAllObjects];
 }
 
 -(void)onAttached {
@@ -91,6 +98,9 @@ static HolaCDNLog* _log;
 
 -(void)onDetached {
     [_log info:@"Detached"];
+
+    [self skip];
+
     if (_isAttached) {
         _isAttached = NO;
         [_cdn.loader uninit];

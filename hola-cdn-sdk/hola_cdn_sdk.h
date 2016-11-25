@@ -72,29 +72,19 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
 @property(nonnull, retain) HolaCDNLoaderDelegate* loader;
 @property BOOL graphEnabled;
-@property(readonly) double loaderTimeout; // Timeout in sec before using saved HolaCDN library
+@property double loaderTimeout; // Timeout in sec before using saved HolaCDN library
 
 -(nonnull instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
 -(nonnull instancetype)initWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;
 
 -(void)configWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode __deprecated_msg("Use `initWithCustomer:` method");
 
-// public func config(customer: String, zone: String? = nil, mode: String? = nil) {
-
 -(BOOL)load:(NSError * _Nullable * _Nullable)error __deprecated_msg("No need to use this method anymore");
--(void)attach:(nonnull AVPlayer*)player;
+-(nullable AVPlayer*)attach:(nonnull AVPlayer*)player;
 
 -(nonnull AVPlayerItem*)playerItemWithURL:(nonnull NSURL*)url;
 -(nonnull AVPlayer*)playerWithURL:(nonnull NSURL*)url;
 -(nonnull AVPlayer*)playerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
-
-// methods to create players
-/*-(nonnull AVPlayer*)makeAVPlayerWithURL:(nonnull NSURL*)url;
--(nonnull AVPlayer*)makeAVPlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
--(nonnull AVQueuePlayer*)makeAVQueuePlayerWithURL:(nonnull NSURL*)url;
--(nonnull AVQueuePlayer*)makeAVQueuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
--(nonnull AVQueuePlayer*)makeAVQueuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;*/
-
 
 -(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;
