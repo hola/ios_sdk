@@ -12,10 +12,14 @@
 @import AVFoundation;
 #import "hola_log.h"
 #import "hola_cdn_player_proxy.h"
+#import "hola_cdn_asset.h"
+#import "hola_cdn_loader_delegate.h"
 #import "GCDWebServer/GCDWebServer.h"
 
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
+@class HolaCDNAsset;
+@class HolaCDNLoaderDelegate;
 
 typedef NS_ENUM(int, HolaCDNBusy) {
     HolaCDNBusyNone = 0,
@@ -58,6 +62,7 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @interface HolaCDN : NSObject
 
 +(void)setLogLevel:(HolaCDNLogLevel)level;
++(void)setLogModules:(nullable NSArray*)modules;
 @property(readonly) int serverPort;
 
 @property(nonnull, nonatomic, assign) id<HolaCDNDelegate> delegate;
@@ -65,24 +70,25 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @property(nullable, readonly) JSContext* ctx;
 @property(nullable, readonly) GCDWebServer* server;
 @property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
+@property(nonnull, retain) HolaCDNLoaderDelegate* loader;
 @property BOOL graphEnabled;
+@property double loaderTimeout; // Timeout in sec before using saved HolaCDN library
 
 -(nonnull instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
 -(nonnull instancetype)initWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;
 
 -(void)configWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode __deprecated_msg("Use `initWithCustomer:` method");
 
-// public func config(customer: String, zone: String? = nil, mode: String? = nil) {
-
 -(BOOL)load:(NSError * _Nullable * _Nullable)error __deprecated_msg("No need to use this method anymore");
--(void)attach:(nonnull AVPlayer*)player;
+-(nullable AVPlayer*)attach:(nonnull AVPlayer*)player;
 
-// methods to create players
--(nonnull AVPlayer*)makeAVPlayerWithURL:(nonnull NSURL*)url;
--(nonnull AVPlayer*)makeAVPlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
--(nonnull AVQueuePlayer*)makeAVQueuePlayerWithURL:(nonnull NSURL*)url;
--(nonnull AVQueuePlayer*)makeAVQueuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
--(nonnull AVQueuePlayer*)makeAVQueuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;
+-(nonnull AVPlayerItem*)playerItemWithURL:(nonnull NSURL*)url;
+-(nonnull AVPlayerItem*)playerItemFromItem:(nonnull AVPlayerItem*)item;
+-(nonnull AVPlayer*)playerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVPlayer*)playerWithURL:(nonnull NSURL*)url;
+-(nonnull AVQueuePlayer*)queuePlayerWithURL:(nonnull NSURL*)url;
+-(nonnull AVQueuePlayer*)queuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
+-(nonnull AVQueuePlayer*)queuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;
 
 -(nullable JSContext*)getContext;
 -(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;

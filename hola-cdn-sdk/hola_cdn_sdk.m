@@ -34,7 +34,6 @@ NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
 NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};";
 NSString* loaderUrl = @"%@/loader_%@.js";
-double loaderTimeout = 1.0; // Timeout in sec before using saved HolaCDN library
 
 NSString* loaderFilename = @"hola_cdn_library.js";
 
@@ -42,6 +41,10 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 +(void)setLogLevel:(HolaCDNLogLevel)level {
     [HolaCDNLog setVerboseLevel:level];
+}
+
++(void)setLogModules:(NSArray*)modules {
+    [HolaCDNLog setVerboseModules:modules];
 }
 
 - (instancetype)init {
@@ -52,11 +55,15 @@ NSString* hola_cdn = @"window.hola_cdn";
         ready = NO;
         nextAction = HolaCDNActionNone;
         inProgress = HolaCDNBusyNone;
+        _loaderTimeout = 2; // seconds
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
 
         _log = [HolaCDNLog new];
         [GCDWebServer setLogLevel:5];
+        _server = [GCDWebServer new];
+        _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:self];
+
         [_log info:@"New HolaCDN instance created"];
     }
 
@@ -230,7 +237,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         }
     });
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(loaderTimeout * NSEC_PER_SEC)), backgroundQueue, ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_loaderTimeout * NSEC_PER_SEC)), backgroundQueue, ^{
         if (contextReady) {
             [_log debug:@"Fresh version was already loaded, stop looking for a saved library"];
             return;
@@ -349,63 +356,145 @@ NSString* hola_cdn = @"window.hola_cdn";
     return YES;
 }
 
--(AVPlayer*)attachToNewPlayer:(AVPlayer*)player {
-    if ([self canMakePlayer]) {
-        [self attach:player];
+-(AVPlayerItem*)playerItemWithURL:(NSURL*)url {
+    AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:url andCDN:self];
+    return [AVPlayerItem playerItemWithAsset:asset];
+}
+
+-(AVPlayerItem*)playerItemFromItem:(AVPlayerItem*)item {
+    AVURLAsset* asset = (AVURLAsset*)item.asset;
+
+    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+        return item;
     }
 
+    return [self playerItemWithURL:[asset URL]];
+}
+
+// AVPlayer methods
+
+-(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVPlayer* player = [self makePlayerWithPlayerItem:playerItem];
+    [self attach:player];
     return player;
 }
 
--(AVPlayer*)makeAVPlayerWithURL:(NSURL*)url {
-    return [self attachToNewPlayer:[[AVPlayer alloc] initWithURL:url]];
+-(AVPlayer*)playerWithURL:(NSURL*)url {
+    AVPlayer* item = [self playerItemWithURL:url];
+    return [self playerWithPlayerItem:item];
 }
 
--(AVPlayer*)makeAVPlayerWithPlayerItem:(AVPlayerItem*)playerItem {
-    return [self attachToNewPlayer:[[AVPlayer alloc] initWithPlayerItem:playerItem]];
+-(AVPlayer*)makePlayerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVPlayerItem* item = [self playerItemFromItem:playerItem];
+    return [AVPlayer playerWithPlayerItem:item];
 }
 
--(AVQueuePlayer*)makeAVQueuePlayerWithURL:(NSURL*)url {
-    return [self attachToNewPlayer:[[AVQueuePlayer alloc] initWithURL:url]];
+// AVQueuePlayer methods
+
+-(AVQueuePlayer*)queuePlayerWithURL:(NSURL*)url {
+    AVPlayerItem* item = [self playerItemWithURL:url];
+    return [self queuePlayerWithItems:@[item]];
 }
 
--(AVQueuePlayer*)makeAVQueuePlayerWithPlayerItem:(AVPlayerItem*)playerItem {
-    return [self attachToNewPlayer:[[AVQueuePlayer alloc] initWithPlayerItem:playerItem]];
+-(AVQueuePlayer*)queuePlayerWithPlayerItem:(AVPlayerItem*)playerItem {
+    AVURLAsset* asset = (AVURLAsset*)playerItem.asset;
+    return [self queuePlayerWithURL:asset.URL];
 }
 
--(AVQueuePlayer*)makeAVQueuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
-    return [self attachToNewPlayer:[[AVQueuePlayer alloc] initWithItems:items]];
+-(AVQueuePlayer*)queuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
+    AVQueuePlayer* player = [self makeQueuePlayerWithItems:items];
+    [self attach:player];
+    return player;
 }
 
--(void)attach:(AVPlayer*)player {
+-(AVQueuePlayer*)makeQueuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
+    NSMutableArray<AVPlayerItem*>* cdnItems = [NSMutableArray new];
+
+    for (AVPlayerItem* item in items) {
+        [cdnItems addObject:[self playerItemFromItem:item]];
+    }
+
+    return [AVQueuePlayer queuePlayerWithItems:cdnItems];
+}
+
+// Wrap player
+-(AVPlayer*)wrapPlayer:(AVPlayer*)player {
+
+    AVAsset* asset = player.currentItem.asset;
+
+    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+        return player;
+    }
+
+    if (![asset isKindOfClass:[AVURLAsset class]]) {
+        [_log err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
+        return nil;
+    }
+
+    return [self makePlayerWithPlayerItem:player.currentItem];
+}
+
+-(AVQueuePlayer*)wrapQueuePlayer:(AVQueuePlayer*)player {
+    AVAsset* asset = player.currentItem.asset;
+
+    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+        return player;
+    }
+
+    if (![asset isKindOfClass:[AVURLAsset class]]) {
+        [_log err:@"AVQueuePlayer must be initialized with AVURLAsset or NSURL!"];
+        return nil;
+    }
+
+    return [self makeQueuePlayerWithItems:[player items]];
+}
+
+// HolaCDN methods
+-(AVPlayer*)attach:(AVPlayer*)player {
     if (player == nil) {
         [_log err:@"Player can't be nil on attach"];
-        return;
+        return nil;
+    }
+
+    if (player.currentItem == nil) {
+        [_log err:@"Player.currentItem can't be nil on attach"];
+        return nil;
+    }
+
+    if ([player isKindOfClass:[AVQueuePlayer class]]) {
+        player = [self wrapQueuePlayer:player];
+    } else {
+        player = [self wrapPlayer:player];
+    }
+
+    if (player == nil) {
+        [_log err:@"Player can't be wrapped"];
+        return nil;
     }
 
     if ([self isBusy]) {
         if (inProgress == HolaCDNBusyAttaching && nextAction != HolaCDNActionUninit) {
             [_log err:@"Call `uninit` before new attach!"];
-            return;
+            return player;
         }
         [_log warn:@"Will make attach automatically when ready"];
         nextAttach = player;
         if (inProgress == HolaCDNBusyAttaching) {
             nextAction = HolaCDNActionUninit;
-            return;
+            return player;
         }
         nextAction = HolaCDNActionAttach;
-        return;
+        return player;
     }
 
     if (_playerProxy != nil) {
         [_log err:@"HolaCDN is already attached!"];
-        return;
+        return player;
     }
 
     if (!ready) {
         [_log err:@"HolaCDN is not ready on attach!"];
-        return;
+        return player;
     }
 
     inProgress = HolaCDNBusyAttaching;
@@ -417,15 +506,6 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log info:@"Attach..."];
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_server != nil) {
-            if ([_server isRunning]) {
-                [_server stop];
-            }
-            [_server removeAllHandlers];
-            _server = nil;
-        }
-        _server = [GCDWebServer new];
-        
         dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
         dispatch_async(backgroundQueue, ^{
             _playerProxy = [[HolaCDNPlayerProxy alloc] initWithPlayer:_player andCDN:self];
@@ -440,6 +520,8 @@ NSString* hola_cdn = @"window.hola_cdn";
             [ios_ready callWithArguments:[NSArray new]];
         });
     });
+
+    return player;
 }
 
 -(void)onAttached {
@@ -499,6 +581,8 @@ NSString* hola_cdn = @"window.hola_cdn";
         nextAction = HolaCDNActionUninit;
         return;
     }
+
+    [_loader uninit];
 
     if (_playerProxy == nil) {
         [_log err:@"HolaCDN not attached!"];
@@ -562,7 +646,9 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        [_log debug:@"get mode from JS"];
         JSValue* mode = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
+        [_log debug:[mode toString]];
         completionBlock([mode toString]);
     });
 }

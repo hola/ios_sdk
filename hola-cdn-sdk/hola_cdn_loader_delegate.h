@@ -11,6 +11,8 @@
 #import "hola_cdn_sdk.h"
 #import "GCDWebServer/GCDWebServer.h"
 
+@class HolaCDN;
+
 typedef NS_ENUM(int, HolaCDNScheme) {
    HolaCDNSchemeRedirect = 0,
    HolaCDNSchemeFetch,
@@ -34,8 +36,10 @@ typedef NS_ENUM(int, HolaCDNErrorCode) {
 +(NSURL*)applyCDNScheme:(NSURL*)url andType:(HolaCDNScheme)type;
 
 @property(readonly) dispatch_queue_t queue;
+@property(nonatomic, assign) BOOL isAttached;
 
 -(instancetype)initWithCDN:(HolaCDN*)cdn;
+-(void)attach;
 -(void)uninit;
 
 -(void)processRequest:(NSString*)url forFrag:(int)frag_id withReq:(int)arg_req_id isRate:(BOOL)rate;

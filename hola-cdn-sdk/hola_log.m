@@ -11,18 +11,39 @@
 @implementation HolaCDNLog
 
 static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
+static NSArray* verboseModules;
+
+static dispatch_once_t onceToken;
+static NSString* const defaultModules[] = {@"cdn", @"player", @"parser"};
+static int const defaultModulesCount = 3;
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
         _module = @"cdn";
+
+        dispatch_once(&onceToken, ^{
+            if (verboseModules == nil) {
+                [HolaCDNLog setVerboseModules:nil];
+            }
+        });
     }
     return self;
 }
 
 +(void) setVerboseLevel:(HolaCDNLogLevel) level {
     verboseLevel = level;
+}
+
++(void) setVerboseModules:(NSArray*) modules {
+    if (modules == nil) {
+        NSArray* dm = [NSArray arrayWithObjects:defaultModules count:defaultModulesCount];
+        verboseModules = dm;
+        return;
+    }
+
+    verboseModules = modules;
 }
 
 -(NSString*) prefixForLevel:(HolaCDNLogLevel)level {
@@ -61,7 +82,9 @@ static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
         return;
     }
 
-    NSLog(@"%@ %@", [self prefixForLevel:level], msg);
+    if (verboseModules == nil || [verboseModules count] == 0 || [verboseModules containsObject:_module]) {
+        NSLog(@"%@ %@", [self prefixForLevel:level], msg);
+    }
 }
 
 -(void) debug:(NSString*) msg {

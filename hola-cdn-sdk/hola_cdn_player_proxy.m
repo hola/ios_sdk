@@ -15,7 +15,6 @@
 
 @property NSString* state;
 @property NSURL* videoUrl;
-@property AVPlayerItem* originalItem;
 @property AVPlayerItem* cdnItem;
 @property id timeObserver;
 @property int req_id;
@@ -51,7 +50,7 @@ BOOL cache_disabled;
     return _state;
 }
 
--(instancetype)initWithPlayer:(AVPlayer *)player andCDN:(HolaCDN *)cdn {
+-(instancetype)initWithPlayer:(AVPlayer*)player andCDN:(HolaCDN *)cdn {
     self = [super init];
     if (self) {
         _LOG = [HolaCDNLog new];
@@ -69,16 +68,6 @@ BOOL cache_disabled;
         _cdn = cdn;
         _player = player;
 
-        if (player.currentItem == nil) {
-            [_LOG err:@"AVPlayer must have a playerItem!"];
-            return self;
-        }
-
-        if (![player.currentItem.asset isKindOfClass:[AVURLAsset class]]) {
-            [_LOG err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
-            return self;
-        }
-
         [self updateItem];
 
         _proxy_id = [[NSUUID new] UUIDString];
@@ -93,13 +82,10 @@ BOOL cache_disabled;
 -(void)updateItem {
     if (_player == nil || _player.currentItem == nil) {
         _videoUrl = nil;
-        _originalItem = nil;
     }
 
     AVURLAsset* asset = (AVURLAsset*)_player.currentItem.asset;
-
     _videoUrl = asset.URL;
-    _originalItem = _player.currentItem;
 }
 
 -(void)dealloc {
@@ -112,16 +98,16 @@ BOOL cache_disabled;
 
 }
 
--(AVURLAsset*)getAsset {
+-(HolaCDNAsset*)getAsset {
     if (_cdnItem != nil) {
-        return (AVURLAsset*)_cdnItem.asset;
+        return (HolaCDNAsset*)_cdnItem.asset;
     }
 
     return nil;
 }
 
 -(HolaCDNLoaderDelegate*)getLoader {
-    AVURLAsset* asset = [self getAsset];
+    HolaCDNAsset* asset = [self getAsset];
     if (asset != nil) {
         return (HolaCDNLoaderDelegate*)asset.resourceLoader.delegate;
     }
@@ -136,7 +122,6 @@ BOOL cache_disabled;
 }
 
 -(int)fetch:(NSString*)url :(int)arg_req_id :(BOOL)rate {
-    [_LOG debug:[NSString stringWithFormat:@"js ask fetch url: %@", url]];
     HolaCDNLoaderDelegate* loader = [self getLoader];
 
     if (loader == nil) {
@@ -247,15 +232,32 @@ BOOL cache_disabled;
     [_cdn get_mode:^(NSString* mode) {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
             if ([mode isEqual:@"cdn"]) {
+                [_LOG debug:@"mode: cdn, doing attach"];
                 // XXX alexeym: hack to count data correctly; need to fix cache for ios
                 [[_cdn getContext] evaluateScript:@"hola_cdn._get_bws().disable_cache()"];
+                [_LOG debug:@"cache disabled"];
                 cache_disabled = YES;
 
-                [self updateItem];
+                _cdnItem = _player.currentItem;
+                HolaCDNAsset* asset = _cdnItem.asset;
 
-                AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:_videoUrl andCDN:_cdn];
-                _cdnItem = [AVPlayerItem playerItemWithAsset:asset];
+                if ([asset attachTimeoutTriggered]) {
+                    // XXX alexeym: TODO skip
+                    [_LOG debug:@"Skip on attach (by asset timeout)"];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self didAttached];
+                        [self uninit];
+                    });
+                    return;
+                }
+
+                [_LOG debug:@"wait for asset duration"];
+                __block BOOL assetTimeout = NO;
                 [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
+                    if (assetTimeout) {
+                        return;
+                    }
+                    assetTimeout = YES;
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [_LOG debug:@"asset playable, main thread"];
                         [self removeObservers];
@@ -263,13 +265,25 @@ BOOL cache_disabled;
                             [self didAttached];
                             return;
                         }
-                        [self replacePlayerItem:_cdnItem];
 
                         [self addObservers];
                         [self didAttached];
                     });
                 }];
+
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+                    if (assetTimeout) {
+                        return;
+                    }
+                    assetTimeout = YES;
+                    [self didAttached];
+                    [_cdn uninit];
+                });
+
+                [asset onAttached];
             } else {
+                HolaCDNAsset* asset = _player.currentItem.asset;
+                [asset onDetached];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self didAttached];
                 });
@@ -290,7 +304,6 @@ BOOL cache_disabled;
 
 -(void)didDetached {
     _cdnItem = nil;
-    _originalItem = nil;
     _player = nil;
 
     [_cdn onDetached];
@@ -326,32 +339,16 @@ BOOL cache_disabled;
         cache_disabled = NO;
     }
     [[_cdn getContext] setObject:nil forKeyedSubscript:@"hola_ios_proxy"];
+    [self detachAsset];
 
-    if (_cdnItem != nil && _player.currentItem == _cdnItem) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (_player.currentItem == _cdnItem && _originalItem != nil) {
-                [self replacePlayerItem:_originalItem];
-            }
-
-            [self didDetached];
-        });
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self didDetached];
-        });
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self didDetached];
+    });
 }
 
--(void)replacePlayerItem:(AVPlayerItem*)newItem {
-    float rate = _player.rate;
-    _player.rate = 0;
-    CMTime position = [_player.currentItem currentTime];
-
-    [_player replaceCurrentItemWithPlayerItem:newItem];
-
-    if (CMTIME_IS_VALID(position)) {
-        [_player.currentItem seekToTime:position toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
-        _player.rate = rate;
+-(void)detachAsset {
+    if (_cdnItem != nil) {
+        [(HolaCDNAsset*)_cdnItem.asset onDetached];
     }
 }
 
@@ -432,17 +429,12 @@ BOOL cache_disabled;
     }
 
     if ([keyPath isEqualToString:@"currentItem"]) {
-        if (![_player.currentItem.asset isKindOfClass:[HolaCDNAsset class]]) {
-            cancelled = YES;
-            [_LOG info:@"player.currentItem changed from outside, calling uninit"];
-            AVPlayer* currentPlayer = _player;
-            [_cdn uninit];
+        [_LOG info:@"player.currentItem changed, calling uninit"];
+        [_cdn uninit];
 
-            if ([change objectForKey:NSKeyValueChangeNewKey] != [NSNull null]) {
-                [_LOG info:@"Trying to attach cdn to the new item"];
-                [_cdn attach:_player];
-            }
-            return;
+        if ([change objectForKey:NSKeyValueChangeNewKey] != [NSNull null]) {
+            [_LOG info:@"Trying to attach cdn to the new item"];
+            [_cdn attach:_player];
         }
     } else if ([keyPath isEqualToString:@"rate"]) {
         if (_player.rate == 0) {
