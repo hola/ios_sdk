@@ -21,13 +21,14 @@ static HolaCDNLog* _log;
         _log = [HolaCDNLog new];
         [_log setModule:@"asset"];
 
-        _cdn = cdn;
         _isAttached = NO;
         _attachTimeoutSet = NO;
         _attachTimeoutTriggered = NO;
         _keysToLoad = [NSMutableArray new];
 
-        [self.resourceLoader setDelegate:_cdn.loader queue:_cdn.loader.queue];
+        _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:cdn];
+
+        [self.resourceLoader setDelegate:_loader queue:_loader.queue];
     }
 
     return self;
@@ -47,7 +48,7 @@ static HolaCDNLog* _log;
         return;
     }
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
         [self skip];
     });
 
@@ -92,7 +93,7 @@ static HolaCDNLog* _log;
     [_log debug:@"Attached"];
 
     _isAttached = YES;
-    [_cdn.loader attach];
+    [_loader attach];
     [self loadPendingKeys];
 }
 
@@ -103,12 +104,12 @@ static HolaCDNLog* _log;
 
     if (_isAttached) {
         _isAttached = NO;
-        [_cdn.loader uninit];
+        [_loader uninit];
     }
 }
 
 -(void)dealloc {
-    [_log debug:@"Dealloc"];
+    [_log info:@"Dealloc"];
     [self onDetached];
 }
 

@@ -89,7 +89,7 @@ BOOL cache_disabled;
 }
 
 -(void)dealloc {
-    [_LOG debug:@"proxy dealloc"];
+    [_LOG info:@"proxy dealloc"];
 
     [self proxyUninit];
 }

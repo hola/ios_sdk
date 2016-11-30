@@ -61,8 +61,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
         _log = [HolaCDNLog new];
         [GCDWebServer setLogLevel:5];
-        _server = [GCDWebServer new];
-        _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:self];
+        _server = [[HolaCDNServer alloc] initWithCDN:self];
 
         [_log info:@"New HolaCDN instance created"];
     }
@@ -157,6 +156,8 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log info:@"Loading..."];
 
     inProgress = HolaCDNBusyLoading;
+
+    [_server start];
 
     _ctx = [JSContext new];
     XMLHttpRequest* xmlHttpRequest = [XMLHttpRequest new];
@@ -582,8 +583,6 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    [_loader uninit];
-
     if (_playerProxy == nil) {
         [_log err:@"HolaCDN not attached!"];
         return;
@@ -612,14 +611,17 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log info:@"Unload..."];
 
     nextAction = HolaCDNActionNone;
-    
+
+    [_server stop];
     [self uninit];
     _ctx = nil;
+    _server = nil;
     ready = NO;
 }
 
 -(void)dealloc {
     [_log info:@"Dealloc"];
+    [self unload];
 }
 
 -(void)appWillTerminate {

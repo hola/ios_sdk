@@ -7,15 +7,11 @@
 //
 
 #import "hola_cdn_loader_delegate.h"
-#import "hola_hls_parser.h"
-#import "GCDWebServer/GCDWebServerRequest.h"
-#import "GCDWebServer/GCDWebServerDataResponse.h"
 
 @interface HolaCDNLoaderDelegate()
 {
 __weak HolaCDN* _cdn;
 HolaHLSParser* _parser;
-__weak GCDWebServer* _server;
 NSURLSession* _session;
 
 NSMutableDictionary<NSNumber*, AVAssetResourceLoadingRequest*>* pending;
@@ -147,6 +143,8 @@ int req_id = 1;
         _logNetwork = [HolaCDNLog new];
         [_logNetwork setModule:@"Network"];
 
+        _loaderUUID = [[NSUUID new] UUIDString];
+
         pending = [NSMutableDictionary new];
         proxyRequests = [NSMutableDictionary new];
         taskTimers = [NSMutableDictionary new];
@@ -171,27 +169,11 @@ int req_id = 1;
 
     _session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
 
-    _server = _cdn.server;
-
-    if ([_server isRunning]) {
-        [_server stop];
-    }
-
-    __weak typeof(self) weakSelf = self;
-    [_server addDefaultHandlerForMethod:@"GET" requestClass:[GCDWebServerRequest self] asyncProcessBlock:^(__kindof GCDWebServerRequest *request, GCDWebServerCompletionBlock completionBlock) {
-        [weakSelf processRequest:request completionBlock:completionBlock];
-    }];
-
-    NSError* err = nil;
-    [_server startWithOptions:@{
-        GCDWebServerOption_BindToLocalhost: @YES,
-        GCDWebServerOption_Port: [NSNumber numberWithInt:[_cdn serverPort]],
-        GCDWebServerOption_BonjourName: @"HolaCDN"
-    } error:&err];
+    [_cdn.server bindLoader:self];
 }
 
 -(void)dealloc {
-    [_log debug:@"dealloc"];
+    [_log info:@"Dealloc"];
     [self uninit];
 }
 
@@ -202,13 +184,7 @@ int req_id = 1;
         _session = nil;
     }
 
-    if (_server != nil) {
-        if ([_server isRunning]) {
-            [_server stop];
-        }
-        [_server removeAllHandlers];
-        _server = nil;
-    }
+    [_cdn.server unbindLoader:self];
 
     _isAttached = NO;
 
@@ -412,7 +388,7 @@ int req_id = 1;
 
     [proxyRequests setObject:proxyRec forKey:proxyRec[@"uuid"]];
 
-    NSString* redirectUrl = [NSString stringWithFormat:@"http://127.0.0.1:%d/%@", [_cdn serverPort], proxyRec[@"uuid"]];
+    NSString* redirectUrl = [NSString stringWithFormat:@"http://127.0.0.1:%d/%@/%@", [_cdn serverPort], _loaderUUID, proxyRec[@"uuid"]];
 
     dispatch_async(_queue, ^{
         NSURLRequest* redirect = [NSURLRequest requestWithURL:[NSURL URLWithString:redirectUrl]];
@@ -513,18 +489,6 @@ int req_id = 1;
 }
 
 // data fetching
-
--(void)processRequest:(GCDWebServerRequest*)request completionBlock:(GCDWebServerCompletionBlock)completion {
-    NSArray<NSString*>* path = [request.URL pathComponents];
-
-    if (path == nil) {
-        completion([GCDWebServerDataResponse responseWithStatusCode:400]);
-        return;
-    }
-
-    NSString* uuid = path[1];
-    [self processRequestWithUUID:uuid completionBlock:completion];
-}
 
 -(void)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
     NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];

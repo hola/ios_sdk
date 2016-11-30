@@ -59,6 +59,10 @@ static HolaCDNLog* _log;
     return self;
 }
 
+-(void)dealloc {
+    [_log info:@"Dealloc"];
+}
+
 -(NSString*)parse:(NSString*)url andData:(NSString*)data withError:(NSError**)error {
     HolaHLSLevelInfo* level = [HolaHLSLevelInfo new];
     HolaHLSSegmentInfo* segment = [HolaHLSSegmentInfo new];
