@@ -32,7 +32,7 @@ AVPlayer* nextAttach;
 
 NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
-NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};";
+NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};window.hola_ios_proxy = {};";
 NSString* loaderUrl = @"%@/loader_%@.js";
 
 NSString* loaderFilename = @"hola_cdn_library.js";

@@ -74,7 +74,7 @@ BOOL cache_disabled;
 
         registered = YES;
         [_player addObserver:self forKeyPath:@"currentItem" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
-        [[_cdn getContext] setObject:self forKeyedSubscript:@"hola_ios_proxy"];
+        [[_cdn getContext][@"hola_ios_proxy"] setObject:self forKeyedSubscript:_proxy_id];
     }
     return self;
 }
@@ -502,7 +502,14 @@ BOOL cache_disabled;
 }
 
 -(JSValue*)getDelegate {
-    JSValue* proxy = [_cdn getContext][@"hola_ios_proxy"];
+    JSValue* list = [_cdn getContext][@"hola_ios_proxy"];
+
+    if ([list isUndefined]) {
+        [_LOG warn:@"getDelegate: proxy list is undefined"];
+        return nil;
+    }
+
+    JSValue* proxy = list[_proxy_id];
 
     if ([proxy isUndefined]) {
         [_LOG warn:@"getDelegate: proxy is undefined"];
