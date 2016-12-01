@@ -23,13 +23,6 @@ AVPlayer* _player;
 
 @implementation HolaCDN
 
-static HolaCDNLog* _log;
-BOOL ready;
-HolaCDNBusy inProgress;
-HolaCDNAction nextAction;
-
-AVPlayer* nextAttach;
-
 NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
 NSString* basicJS = @"window.hola_cdn_sdk = {version:'%@'};window.hola_ios_proxy = {};";
@@ -52,14 +45,15 @@ NSString* hola_cdn = @"window.hola_cdn";
     if (self) {
         _serverPort = 8199;
         _playerProxy = nil;
-        ready = NO;
-        nextAction = HolaCDNActionNone;
-        inProgress = HolaCDNBusyNone;
+        _ready = NO;
+        _nextAction = HolaCDNActionNone;
+        _inProgress = HolaCDNBusyNone;
         _loaderTimeout = 2; // seconds
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
 
-        _log = [HolaCDNLog new];
+        _log = [HolaCDNLog logWithModule:nil];
+
         [GCDWebServer setLogLevel:5];
         _server = [[HolaCDNServer alloc] initWithCDN:self];
 
@@ -81,7 +75,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(BOOL)isBusy {
     NSString* msg;
-    switch (inProgress) {
+    switch (_inProgress) {
     case HolaCDNBusyNone:
         return NO;
     case HolaCDNBusyLoading:
@@ -136,10 +130,10 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    if (nextAttach == nil) {
-        nextAction = HolaCDNActionNone;
+    if (_nextAttach == nil) {
+        _nextAction = HolaCDNActionNone;
     } else {
-        nextAction = HolaCDNActionAttach;
+        _nextAction = HolaCDNActionAttach;
     }
 
     if (_customer == nil) {
@@ -147,7 +141,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    if (ready) {
+    if (_ready) {
         [_log info:@"already loaded"];
         [self didFinishLoading];
         return;
@@ -155,7 +149,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     [_log info:@"Loading..."];
 
-    inProgress = HolaCDNBusyLoading;
+    _inProgress = HolaCDNBusyLoading;
 
     [_server start];
 
@@ -285,7 +279,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)didFailWithError:(NSError*)error {
-    inProgress = HolaCDNBusyNone;
+    _inProgress = HolaCDNBusyNone;
 
     if (error != nil && [error code] != NSURLErrorCancelled) {
         [_log err:[NSString stringWithFormat:@"Loading fail: %@", error]];
@@ -306,10 +300,10 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    inProgress = HolaCDNBusyNone;
+    _inProgress = HolaCDNBusyNone;
     [_log info:@"Loaded"];
 
-    ready = YES;
+    _ready = YES;
     if (_delegate != nil) {
         if ([_delegate respondsToSelector:@selector(cdnDidLoaded:)]) {
             [_delegate cdnDidLoaded:self];
@@ -320,7 +314,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(BOOL)processNextAction {
-    switch (nextAction) {
+    switch (_nextAction) {
     case HolaCDNActionNone:
         return NO;
     case HolaCDNActionLoad:
@@ -328,9 +322,9 @@ NSString* hola_cdn = @"window.hola_cdn";
         [self load:nil];
         break;
     case HolaCDNActionAttach:
-        if (nextAttach) {
+        if (_nextAttach) {
             [_log debug:@"next action call: attach"];
-            [self attach:nextAttach];
+            [self attach:_nextAttach];
         } else {
             [_log debug:@"next action call: attach, no player found; do nothing"];
         }
@@ -474,17 +468,17 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 
     if ([self isBusy]) {
-        if (inProgress == HolaCDNBusyAttaching && nextAction != HolaCDNActionUninit) {
+        if (_inProgress == HolaCDNBusyAttaching && _nextAction != HolaCDNActionUninit) {
             [_log err:@"Call `uninit` before new attach!"];
             return player;
         }
         [_log warn:@"Will make attach automatically when ready"];
-        nextAttach = player;
-        if (inProgress == HolaCDNBusyAttaching) {
-            nextAction = HolaCDNActionUninit;
+        _nextAttach = player;
+        if (_inProgress == HolaCDNBusyAttaching) {
+            _nextAction = HolaCDNActionUninit;
             return player;
         }
-        nextAction = HolaCDNActionAttach;
+        _nextAction = HolaCDNActionAttach;
         return player;
     }
 
@@ -493,16 +487,16 @@ NSString* hola_cdn = @"window.hola_cdn";
         return player;
     }
 
-    if (!ready) {
+    if (!_ready) {
         [_log err:@"HolaCDN is not ready on attach!"];
         return player;
     }
 
-    inProgress = HolaCDNBusyAttaching;
+    _inProgress = HolaCDNBusyAttaching;
 
     _player = player;
-    nextAttach = nil;
-    nextAction = HolaCDNActionNone;
+    _nextAttach = nil;
+    _nextAction = HolaCDNActionNone;
 
     [_log info:@"Attach..."];
 
@@ -529,7 +523,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     if (_playerProxy == nil) {
         return;
     }
-    inProgress = HolaCDNBusyNone;
+    _inProgress = HolaCDNBusyNone;
 
     [_log info:@"Attached"];
 
@@ -553,11 +547,11 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    if (inProgress == HolaCDNBusyDetaching) {
+    if (_inProgress == HolaCDNBusyDetaching) {
         _playerProxy = nil;
         _player = nil;
     }
-    inProgress = HolaCDNBusyNone;
+    _inProgress = HolaCDNBusyNone;
 
     [_log info:@"Detached"];
 
@@ -567,19 +561,19 @@ NSString* hola_cdn = @"window.hola_cdn";
         }
     }
 
-    if (nextAttach != nil) {
-        nextAction = HolaCDNActionAttach;
+    if (_nextAttach != nil) {
+        _nextAction = HolaCDNActionAttach;
     }
     [self processNextAction];
 }
 
 -(void)uninit {
     if ([self isBusy]) {
-        if (nextAction != HolaCDNActionAttach) {
-            nextAttach = nil;
+        if (_nextAction != HolaCDNActionAttach) {
+            _nextAttach = nil;
         }
         [_log warn:@"Will perform uninit when ready"];
-        nextAction = HolaCDNActionUninit;
+        _nextAction = HolaCDNActionUninit;
         return;
     }
 
@@ -590,8 +584,8 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     [_log info:@"Uninit..."];
 
-    nextAction = HolaCDNActionNone;
-    inProgress = HolaCDNBusyDetaching;
+    _nextAction = HolaCDNActionNone;
+    _inProgress = HolaCDNBusyDetaching;
 
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
 
@@ -599,24 +593,24 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)unload {
-    if ([self isBusy] || !ready) {
-        if (nextAction != HolaCDNActionAttach) {
-            nextAttach = nil;
+    if ([self isBusy] || !_ready) {
+        if (_nextAction != HolaCDNActionAttach) {
+            _nextAttach = nil;
         }
         [_log warn:@"Will perform unload when ready"];
-        nextAction = HolaCDNActionUnload;
+        _nextAction = HolaCDNActionUnload;
         return;
     }
 
     [_log info:@"Unload..."];
 
-    nextAction = HolaCDNActionNone;
+    _nextAction = HolaCDNActionNone;
 
     [_server stop];
     [self uninit];
     _ctx = nil;
     _server = nil;
-    ready = NO;
+    _ready = NO;
 }
 
 -(void)dealloc {
@@ -643,7 +637,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(void)get_mode:(void (^)(NSString*))completionBlock {
     if (_playerProxy == nil || _ctx == nil) {
-        completionBlock(ready || _ctx == nil ? @"detached" : @"loading");
+        completionBlock(_ready || _ctx == nil ? @"detached" : @"loading");
         return;
     }
 

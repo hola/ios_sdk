@@ -15,8 +15,7 @@ static HolaCDNLog* _log;
 -(instancetype)initWithCDN:(HolaCDN*)cdn {
     self = [super init];
     if (self) {
-        _log = [HolaCDNLog new];
-        [_log setModule:@"Server"];
+        _log = [HolaCDNLog logWithModule:@"Server"];
 
         _loaders = [NSMutableDictionary new];
 

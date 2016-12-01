@@ -137,11 +137,8 @@ int req_id = 1;
 -(instancetype)initWithCDN:(HolaCDN*)cdn {
     self = [super init];
     if (self) {
-        _log = [HolaCDNLog new];
-        [_log setModule:@"Loader"];
-
-        _logNetwork = [HolaCDNLog new];
-        [_logNetwork setModule:@"Network"];
+        _log = [HolaCDNLog logWithModule:@"Loader"];
+        _logNetwork = [HolaCDNLog logWithModule:@"Network"];
 
         _loaderUUID = [[NSUUID new] UUIDString];
 

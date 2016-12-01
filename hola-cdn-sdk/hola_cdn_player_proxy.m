@@ -53,8 +53,7 @@ BOOL cache_disabled;
 -(instancetype)initWithPlayer:(AVPlayer*)player andCDN:(HolaCDN *)cdn {
     self = [super init];
     if (self) {
-        _LOG = [HolaCDNLog new];
-        [_LOG setModule:@"player"];
+        _LOG = [HolaCDNLog logWithModule:@"player"];
 
         _ready = NO;
         attached = NO;

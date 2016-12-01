@@ -18,8 +18,7 @@ static HolaCDNLog* _log;
 
     self = [super initWithURL:cdnURL options:nil];
     if (self) {
-        _log = [HolaCDNLog new];
-        [_log setModule:@"asset"];
+        _log = [HolaCDNLog logWithModule:@"asset"];
 
         _isAttached = NO;
         _attachTimeoutSet = NO;
@@ -48,7 +47,9 @@ static HolaCDNLog* _log;
         return;
     }
 
+    [_log debug:@"Timeout: set"];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        [_log debug:@"Timeout: skip"];
         [self skip];
     });
 
@@ -57,12 +58,12 @@ static HolaCDNLog* _log;
 
 -(void)skip {
     if (_attachTimeoutTriggered) {
-        [_log debug:@"Timeout: already triggered"];
+        [_log debug:@"Skip: already triggered"];
         return;
     }
 
     if (_isAttached) {
-        [_log debug:@"Timeout: already attached"];
+        [_log debug:@"Skip: already attached"];
         return;
     }
 

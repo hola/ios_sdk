@@ -49,8 +49,7 @@ static HolaCDNLog* _log;
     self = [super init];
 
     if (self) {
-        _log = [HolaCDNLog new];
-        [_log setModule:@"parser"];
+        _log = [HolaCDNLog logWithModule:@"Parser"];
 
         levels = [NSMutableArray new];
         media_urls = [NSMutableArray new];
