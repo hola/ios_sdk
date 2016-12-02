@@ -12,12 +12,14 @@
 @import AVFoundation;
 #import "hola_log.h"
 #import "hola_cdn_player_proxy.h"
+#import "hola_cdn_player_item.h"
 #import "hola_cdn_asset.h"
 #import "hola_cdn_loader_delegate.h"
 #import "hola_cdn_server.h"
 
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
+@class HolaCDNPlayerItem;
 @class HolaCDNAsset;
 @class HolaCDNLoaderDelegate;
 @class HolaCDNServer;
@@ -47,9 +49,6 @@ typedef NS_ENUM(int, HolaCDNAction) {
 -(void)cdnDidAttached:(HolaCDN*)cdn;
 
 @optional
--(void)cdnDidAttached:(HolaCDN*)cdn toPlayer:(AVPlayer*)player;
-
-@optional
 -(void)cdnDidDetached:(HolaCDN*)cdn;
 
 @optional
@@ -71,7 +70,8 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @property id<HolaCDNDelegate> delegate;
 @property(readonly) NSString* customer;
 @property(readonly) JSContext* ctx;
-@property(readonly) HolaCDNPlayerProxy* playerProxy;
+@property(readonly) AVPlayer* player;
+@property(readonly) id timeObserver;
 @property HolaCDNServer* server;
 @property BOOL graphEnabled;
 @property double loaderTimeout; // Timeout in sec before using saved HolaCDN library
@@ -106,6 +106,8 @@ typedef NS_ENUM(int, HolaCDNAction) {
 
 -(void)onAttached;
 -(void)onDetached;
+
+-(void)refreshJS;
 
 -(void)get_stats:(void (^)(NSDictionary* data))completionBlock;
 -(void)get_timeline:(void (^)(NSDictionary* data))completionBlock;

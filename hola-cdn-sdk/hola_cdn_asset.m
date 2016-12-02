@@ -11,14 +11,12 @@
 
 @implementation HolaCDNAsset
 
-static HolaCDNLog* _log;
-
 -(instancetype)initWithURL:(NSURL*)url andCDN:(HolaCDN*)cdn {
     NSURL* cdnURL = [HolaCDNLoaderDelegate applyCDNScheme:url andType:HolaCDNSchemeFetch];
 
     self = [super initWithURL:cdnURL options:nil];
     if (self) {
-        _log = [HolaCDNLog logWithModule:@"asset"];
+        _log = [HolaCDNLog logWithModule:@"Asset"];
 
         _isAttached = NO;
         _attachTimeoutSet = NO;

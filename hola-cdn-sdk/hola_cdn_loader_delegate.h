@@ -11,9 +11,11 @@
 #import "GCDWebServer/GCDWebServer.h"
 #import "GCDWebServer/GCDWebServerDataResponse.h"
 #import "hola_cdn_sdk.h"
+#import "hola_cdn_player_proxy.h"
 #import "hola_hls_parser.h"
 
 @class HolaCDN;
+@class HolaCDNPlayerProxy;
 
 typedef NS_ENUM(int, HolaCDNScheme) {
    HolaCDNSchemeRedirect = 0,
@@ -40,6 +42,18 @@ typedef NS_ENUM(int, HolaCDNErrorCode) {
 @property(readonly) NSString* loaderUUID;
 @property(readonly) dispatch_queue_t queue;
 @property(nonatomic, assign) BOOL isAttached;
+@property(weak) HolaCDNPlayerProxy* proxy;
+
+@property(weak, readonly) HolaCDN* cdn;
+@property(readonly) HolaHLSParser* parser;
+@property(readonly) NSURLSession* session;
+
+@property(readonly) NSMutableDictionary<NSNumber*, AVAssetResourceLoadingRequest*>* pending;
+@property(readonly) NSMutableDictionary<NSString*, NSMutableDictionary*>* proxyRequests;
+@property(readonly) NSMutableDictionary<NSNumber*, GCDWebServerCompletionBlock>* taskClients;
+@property(readonly) NSMutableDictionary<NSNumber*, NSString*>* taskTimers;
+@property(readonly) HolaCDNLog* log;
+@property(readonly) HolaCDNLog* logNetwork;
 
 -(instancetype)initWithCDN:(HolaCDN*)cdn;
 -(void)attach;

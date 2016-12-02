@@ -8,6 +8,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import "hola_cdn_sdk.h"
+#import "hola_cdn_player_proxy.h"
 #import "hola_cdn_loader_delegate.h"
 
 @class HolaCDN;
@@ -15,6 +16,7 @@
 
 @interface HolaCDNAsset: AVURLAsset
 
+@property(readonly) HolaCDNLog* log;
 @property(readonly) HolaCDNLoaderDelegate* loader;
 @property(readonly) NSMutableArray* keysToLoad;
 @property(readonly) BOOL isAttached;

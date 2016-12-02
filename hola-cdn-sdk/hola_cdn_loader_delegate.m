@@ -8,23 +8,8 @@
 
 #import "hola_cdn_loader_delegate.h"
 
-@interface HolaCDNLoaderDelegate()
-{
-__weak HolaCDN* _cdn;
-HolaHLSParser* _parser;
-NSURLSession* _session;
-
-NSMutableDictionary<NSNumber*, AVAssetResourceLoadingRequest*>* pending;
-NSMutableDictionary<NSString*, NSMutableDictionary*>* proxyRequests;
-NSMutableDictionary<NSNumber*, GCDWebServerCompletionBlock>* taskClients;
-NSMutableDictionary<NSNumber*, NSString*>* taskTimers;
-}
-@end
-
 @implementation HolaCDNLoaderDelegate
 
-static HolaCDNLog* _log;
-static HolaCDNLog* _logNetwork;
 static const char* LOADER_QUEUE = "org.hola.hola-cdn-sdk.loader";
 
 // class static methods
@@ -142,10 +127,10 @@ int req_id = 1;
 
         _loaderUUID = [[NSUUID new] UUIDString];
 
-        pending = [NSMutableDictionary new];
-        proxyRequests = [NSMutableDictionary new];
-        taskTimers = [NSMutableDictionary new];
-        taskClients = [NSMutableDictionary new];
+        _pending = [NSMutableDictionary new];
+        _proxyRequests = [NSMutableDictionary new];
+        _taskTimers = [NSMutableDictionary new];
+        _taskClients = [NSMutableDictionary new];
 
         _queue = dispatch_queue_create(LOADER_QUEUE, nil);
         _parser = [HolaHLSParser new];
@@ -185,13 +170,13 @@ int req_id = 1;
 
     _isAttached = NO;
 
-    if ([pending count] > 0) {
+    if ([_pending count] > 0) {
         NSMutableArray<AVAssetResourceLoadingRequest*>* reqs = [NSMutableArray new];
-        for (NSNumber* key in pending) {
-            [reqs addObject:[pending objectForKey:key]];
+        for (NSNumber* key in _pending) {
+            [reqs addObject:[_pending objectForKey:key]];
         }
 
-        [pending removeAllObjects];
+        [_pending removeAllObjects];
 
         for (AVAssetResourceLoadingRequest* req in reqs) {
             [self makeRequest:req];
@@ -204,7 +189,6 @@ int req_id = 1;
 // requests handling
 
 -(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
-    [_log debug:@"Loader attached, make request"];
     return [self makeRequest:loadingRequest];
 }
 
@@ -225,19 +209,21 @@ int req_id = 1;
     }
 
     NSNumber* currentId = [NSNumber numberWithInt:req_id];
-    [pending setObject:req forKey:currentId];
+    [_pending setObject:req forKey:currentId];
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
     [_logNetwork debug:[NSString stringWithFormat:@"Start request %d", [currentId intValue]]];
     [_logNetwork debug:[NSString stringWithFormat:@"URL: %@", originUrl.absoluteString]];
 
-    if (_isAttached && _cdn.playerProxy != nil) {
-        [_cdn.playerProxy execute:@"req" withValue:[JSValue valueWithObject:@{
+    if (_isAttached && _proxy != nil) {
+        [_log debug:@"Ask JS for request"];
+        [_proxy execute:@"req" withValue:[JSValue valueWithObject:@{
             @"url": originUrl.absoluteString,
             @"req_id": currentId,
             @"force": [NSNumber numberWithBool:[_parser isMedia:originUrl.absoluteString]]
         } inContext:_cdn.ctx]];
     } else {
+        [_log debug:@"Process the request without HolaLibrary"];
         [self processRequest:originUrl.absoluteString forFrag:[currentId intValue] withReq:1 isRate:NO];
     }
 
@@ -247,7 +233,7 @@ int req_id = 1;
 }
 
 -(void)processRequest:(NSString*)url forFrag:(int)frag_id withReq:(int)arg_req_id isRate:(BOOL)rate {
-    if ([pending objectForKey:[NSNumber numberWithInt:frag_id]] == nil) {
+    if ([_pending objectForKey:[NSNumber numberWithInt:frag_id]] == nil) {
         [_log warn:[NSString stringWithFormat:@"Unknown req_id %d", frag_id]];
         return;
     }
@@ -383,7 +369,7 @@ int req_id = 1;
     proxyRec[@"data"] = [NSMutableData new];
     proxyRec[@"size"] = [NSNumber numberWithInt:0];
 
-    [proxyRequests setObject:proxyRec forKey:proxyRec[@"uuid"]];
+    [_proxyRequests setObject:proxyRec forKey:proxyRec[@"uuid"]];
 
     NSString* redirectUrl = [NSString stringWithFormat:@"http://127.0.0.1:%d/%@/%@", [_cdn serverPort], _loaderUUID, proxyRec[@"uuid"]];
 
@@ -409,13 +395,13 @@ int req_id = 1;
 
 -(AVAssetResourceLoadingRequest*)getRequest:(int)arg_req_id {
     NSNumber* key = [NSNumber numberWithInt:arg_req_id];
-    AVAssetResourceLoadingRequest* req = [pending objectForKey:key];
+    AVAssetResourceLoadingRequest* req = [_pending objectForKey:key];
 
     if (req == nil) {
         return nil;
     }
 
-    [pending removeObjectForKey:key];
+    [_pending removeObjectForKey:key];
     return req;
 }
 
@@ -437,12 +423,12 @@ int req_id = 1;
     if (!_isAttached) {
         return;
     }
-    if (_cdn.playerProxy == nil) {
+    if (_proxy == nil) {
         [_log err:@"Trying to send message, but no player attached!"];
         return;
     }
 
-    [_cdn.playerProxy execute:message withValue:data];
+    [_proxy execute:message withValue:data];
 }
 
 -(NSDictionary*)getSegmentInfo:(NSString*)url {
@@ -488,7 +474,7 @@ int req_id = 1;
 // data fetching
 
 -(void)processRequestWithUUID:(NSString*)uuid completionBlock:(GCDWebServerCompletionBlock)completion {
-    NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
+    NSDictionary* proxyRec = [_proxyRequests objectForKey:uuid];
 
     if (proxyRec == nil) {
         [_log warn:@"process request: no proxy request found!"];
@@ -507,8 +493,8 @@ int req_id = 1;
     NSURLSessionDataTask* task = [_session dataTaskWithRequest:request];
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
 
-    [taskClients setObject:completion forKey:taskId];
-    [taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];
+    [_taskClients setObject:completion forKey:taskId];
+    [_taskTimers setObject:proxyRec[@"uuid"] forKey:taskId];
 
     [task resume];
 }
@@ -533,9 +519,9 @@ int req_id = 1;
     }
 
     NSString* uuid = req[@"uuid"];
-    [[proxyRequests objectForKey:uuid] setObject:[NSNumber numberWithInt:size] forKey:@"size"];
-    [[proxyRequests objectForKey:uuid] setObject:[NSNumber numberWithInteger:[resp statusCode]] forKey:@"statusCode"];
-    [[proxyRequests objectForKey:uuid] setObject:[resp MIMEType] forKey:@"contentType"];
+    [[_proxyRequests objectForKey:uuid] setObject:[NSNumber numberWithInt:size] forKey:@"size"];
+    [[_proxyRequests objectForKey:uuid] setObject:[NSNumber numberWithInteger:[resp statusCode]] forKey:@"statusCode"];
+    [[_proxyRequests objectForKey:uuid] setObject:[resp MIMEType] forKey:@"contentType"];
 
     [self sendResponse:((NSNumber*)req[@"id"]).intValue :ms :(int)[resp statusCode]];
 }
@@ -557,21 +543,21 @@ int req_id = 1;
 -(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLSessionResponseDisposition))completionHandler {
 
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:dataTask.taskIdentifier];
-    GCDWebServerCompletionBlock client = [taskClients objectForKey:taskId];
+    GCDWebServerCompletionBlock client = [_taskClients objectForKey:taskId];
 
     if (client == nil) {
         completionHandler(NSURLSessionResponseCancel);
         return;
     }
 
-    NSString* uuid  = [taskTimers objectForKey:taskId];
+    NSString* uuid  = [_taskTimers objectForKey:taskId];
     if (uuid == nil) {
         completionHandler(NSURLSessionResponseCancel);
         client([GCDWebServerDataResponse responseWithStatusCode:400]);
         return;
     }
 
-    NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
+    NSDictionary* proxyRec = [_proxyRequests objectForKey:uuid];
     if (proxyRec == nil) {
         completionHandler(NSURLSessionResponseCancel);
         client([GCDWebServerDataResponse responseWithStatusCode:400]);
@@ -585,51 +571,51 @@ int req_id = 1;
 -(void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:dataTask.taskIdentifier];
 
-    NSString* uuid = [taskTimers objectForKey:taskId];
+    NSString* uuid = [_taskTimers objectForKey:taskId];
     if (uuid == nil) {
         return;
     }
 
-    NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
+    NSDictionary* proxyRec = [_proxyRequests objectForKey:uuid];
     if (proxyRec == nil) {
         return;
     }
 
-    NSMutableData* requestData = [[proxyRequests objectForKey:proxyRec[@"uuid"]] objectForKey:@"data"];
+    NSMutableData* requestData = [[_proxyRequests objectForKey:proxyRec[@"uuid"]] objectForKey:@"data"];
 
     [requestData appendData:data];
 
-    [[proxyRequests objectForKey:proxyRec[@"uuid"]] setObject:requestData forKey:@"data"];
+    [[_proxyRequests objectForKey:proxyRec[@"uuid"]] setObject:requestData forKey:@"data"];
 }
 
 -(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
     NSNumber* taskId = [NSNumber numberWithUnsignedInteger:task.taskIdentifier];
-    GCDWebServerCompletionBlock client = [taskClients objectForKey:taskId];
+    GCDWebServerCompletionBlock client = [_taskClients objectForKey:taskId];
 
     if (client == nil) {
         return;
     }
 
-    [taskClients removeObjectForKey:taskId];
+    [_taskClients removeObjectForKey:taskId];
 
     if (error != nil) {
         [_log err:[NSString stringWithFormat:@"%@", error]];
         client([GCDWebServerDataResponse responseWithStatusCode:502]);
     }
 
-    NSString* uuid = [taskTimers objectForKey:taskId];
+    NSString* uuid = [_taskTimers objectForKey:taskId];
     if (uuid == nil) {
         return;
     }
 
-    [taskTimers removeObjectForKey:taskId];
+    [_taskTimers removeObjectForKey:taskId];
 
-    NSDictionary* proxyRec = [proxyRequests objectForKey:uuid];
+    NSDictionary* proxyRec = [_proxyRequests objectForKey:uuid];
     if (proxyRec == nil) {
         return;
     }
 
-    [proxyRequests removeObjectForKey:uuid];
+    [_proxyRequests removeObjectForKey:uuid];
     [self redirectProgress:proxyRec];
 
     if (error != nil) {

@@ -16,12 +16,12 @@
 NSString* _zone;
 NSString* _mode;
 
-AVPlayer* _player;
-
 }
 @end
 
 @implementation HolaCDN
+
+static void * const kHolaCDNContext = (void*)&kHolaCDNContext;
 
 NSString* domain = @"https://player.h-cdn.com";
 NSString* webviewUrl = @"%@/webview?customer=%@";
@@ -44,7 +44,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     self = [super init];
     if (self) {
         _serverPort = 8199;
-        _playerProxy = nil;
+        _player = nil;
         _ready = NO;
         _nextAction = HolaCDNActionNone;
         _inProgress = HolaCDNBusyNone;
@@ -270,7 +270,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)set_cdn_enabled:(NSString*)name enabled:(BOOL)enabled {
-    if (_playerProxy == nil) {
+    if (![_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
         return;
     }
 
@@ -294,6 +294,23 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 }
 
+-(void)refreshJS {
+    if (!_ready) {
+        return;
+    }
+
+    JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
+    if (ios_ready.isUndefined) {
+        [_log err:@"No ios_ready found: something is wrong with HolaCDN Library"];
+        return;
+    }
+
+    [_log info:@"Wait for HolaCDN Library"];
+    [ios_ready callWithArguments:[NSArray new]];
+
+    return;
+}
+
 -(void)didFinishLoading {
     if (_ctx == nil) {
         [_log err:@"Can't find JSContext on didFinishLoading"];
@@ -304,6 +321,9 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log info:@"Loaded"];
 
     _ready = YES;
+
+    [self refreshJS];
+
     if (_delegate != nil) {
         if ([_delegate respondsToSelector:@selector(cdnDidLoaded:)]) {
             [_delegate cdnDidLoaded:self];
@@ -342,6 +362,8 @@ NSString* hola_cdn = @"window.hola_cdn";
     return YES;
 }
 
+// player creation methods
+
 -(BOOL)canMakePlayer {
     if (_player != nil) {
         [_log warn:@"HolaCDN already attached, make `uninit` before attaching to a new player. Continue without HolaCDN."];
@@ -352,14 +374,18 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(AVPlayerItem*)playerItemWithURL:(NSURL*)url {
-    AVURLAsset* asset = (AVURLAsset*)[[HolaCDNAsset alloc] initWithURL:url andCDN:self];
-    return [AVPlayerItem playerItemWithAsset:asset];
+    return [[HolaCDNPlayerItem alloc] initWithURL:url andCDN:self];
 }
 
 -(AVPlayerItem*)playerItemFromItem:(AVPlayerItem*)item {
+    if ([item isKindOfClass:[HolaCDNPlayerItem class]]) {
+        return item;
+    }
+
     AVURLAsset* asset = (AVURLAsset*)item.asset;
 
-    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+    if (![asset isKindOfClass:[AVURLAsset class]]) {
+        [_log err:@"AVPlayerItem must be initialized with AVURLAsset or NSURL!"];
         return item;
     }
 
@@ -370,7 +396,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
     AVPlayer* player = [self makePlayerWithPlayerItem:playerItem];
-    [self attach:player];
+    //[self attach:player];
     return player;
 }
 
@@ -398,7 +424,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(AVQueuePlayer*)queuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
     AVQueuePlayer* player = [self makeQueuePlayerWithItems:items];
-    [self attach:player];
+    //[self attach:player];
     return player;
 }
 
@@ -414,31 +440,20 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 // Wrap player
 -(AVPlayer*)wrapPlayer:(AVPlayer*)player {
+    AVPlayerItem* item = player.currentItem;
 
-    AVAsset* asset = player.currentItem.asset;
-
-    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+    if ([item isKindOfClass:[HolaCDNPlayerItem class]]) {
         return player;
-    }
-
-    if (![asset isKindOfClass:[AVURLAsset class]]) {
-        [_log err:@"AVPlayer must be initialized with AVURLAsset or NSURL!"];
-        return nil;
     }
 
     return [self makePlayerWithPlayerItem:player.currentItem];
 }
 
 -(AVQueuePlayer*)wrapQueuePlayer:(AVQueuePlayer*)player {
-    AVAsset* asset = player.currentItem.asset;
+    AVPlayerItem* item = player.currentItem;
 
-    if ([asset isKindOfClass:[HolaCDNAsset class]]) {
+    if ([item isKindOfClass:[HolaCDNPlayerItem class]]) {
         return player;
-    }
-
-    if (![asset isKindOfClass:[AVURLAsset class]]) {
-        [_log err:@"AVQueuePlayer must be initialized with AVURLAsset or NSURL!"];
-        return nil;
     }
 
     return [self makeQueuePlayerWithItems:[player items]];
@@ -446,6 +461,141 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 // HolaCDN methods
 -(AVPlayer*)attach:(AVPlayer*)player {
+    //[_log warn:@"Please use HolaCDN `playerWith...` or `queuePlayerWith...` methods to create attached player directly instead of manual `attach`!"];
+
+    if (_player != nil) {
+        [_log warn:@"HolaCDN is already attached to a different player, detaching..."];
+        [self detach];
+    }
+
+    [_log info:@"Attach"];
+
+    if ([player isKindOfClass:[AVQueuePlayer class]]) {
+       _player = [self wrapQueuePlayer:player];
+    } else {
+        _player = [self wrapPlayer:player];
+    }
+
+    [self attachItem:_player.currentItem];
+
+    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(0.5, 600) queue:nil usingBlock:^(CMTime time) {
+        HolaCDNPlayerItem* item = [self currentItem];
+        if (item == nil) {
+            return;
+        }
+
+        [item onTimeupdate:time];
+    }];
+
+    [_player addObserver:self forKeyPath:@"currentItem" options:NSKeyValueObservingOptionPrior context:kHolaCDNContext];
+    [_player addObserver:self forKeyPath:@"rate" options:NSKeyValueObservingOptionNew context:kHolaCDNContext];
+    
+    return _player;
+}
+
+-(void)detach {
+    if (_player == nil) {
+        [_log warn:@"HolaCDN is not attached to any player"];
+        return;
+    }
+
+    [_log info:@"Detach"];
+    if (_timeObserver != nil) {
+        [_player removeTimeObserver:_timeObserver];
+        _timeObserver = nil;
+    }
+    [_player removeObserver:self forKeyPath:@"currentItem" context:kHolaCDNContext];
+    [_player removeObserver:self forKeyPath:@"rate" context:kHolaCDNContext];
+    [self detachItem];
+    _player = nil;
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if (context != kHolaCDNContext) {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
+    }
+
+    if (_player == nil || _player.currentItem == nil) {
+        return;
+    }
+
+    BOOL isBefore = [change objectForKey:NSKeyValueChangeOldKey] != [NSNull null];
+    BOOL isAfter = [change objectForKey:NSKeyValueChangeNewKey] != [NSNull null];
+    BOOL sameItem = [change objectForKey:NSKeyValueChangeOldKey] == [change objectForKey:NSKeyValueChangeNewKey];
+
+    if ([keyPath isEqualToString:@"currentItem"]) {
+        if (isBefore && !sameItem) {
+            [_log debug:@"detach item"];
+            [self detachItem];
+            if (isAfter) {
+                [_log debug:@"Going to attach the same item!"];
+            }
+        }
+
+        if (isAfter && !sameItem) {
+            if (isBefore) {
+                [_log debug:@"The same item, was detached!"];
+            }
+
+            [_log debug:@"attach item"];
+            [self attachItem:[change objectForKey:NSKeyValueChangeNewKey]];
+        }
+
+        return;
+    }
+
+    HolaCDNPlayerItem* item = [self currentItem];
+    if (item == nil || !isAfter) {
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"rate"]) {
+        if (_player.rate == 0) {
+            [item onPause:_player.rate];
+        } else {
+            [item onPlay:_player.rate];
+        }
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"status"]) {
+        switch (_player.status) {
+        case AVPlayerStatusReadyToPlay:
+            break;
+        case AVPlayerStatusFailed:
+            [item onPlayerError];
+            break;
+        case AVPlayerStatusUnknown:
+            [item onIdle];
+            break;
+        }
+        return;
+    }
+}
+
+-(HolaCDNPlayerItem*)currentItem {
+    if ([_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
+        return _player.currentItem;
+    }
+
+    return nil;
+}
+
+-(void)detachItem {
+    HolaCDNPlayerItem* currentItem = [self currentItem];
+    if (currentItem != nil) {
+        [currentItem detach];
+    }
+}
+
+-(void)attachItem:(AVPlayerItem*)item {
+    if ([item isKindOfClass:[HolaCDNPlayerItem class]]) {
+        [(HolaCDNPlayerItem*)item attach:_player];
+    }
+}
+
+/*-(AVPlayer*)attach:(AVPlayer*)player {
     if (player == nil) {
         [_log err:@"Player can't be nil on attach"];
         return nil;
@@ -517,25 +667,20 @@ NSString* hola_cdn = @"window.hola_cdn";
     });
 
     return player;
-}
+}*/
 
 -(void)onAttached {
-    if (_playerProxy == nil) {
+    if (![_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
         return;
     }
     _inProgress = HolaCDNBusyNone;
 
-    [_log info:@"Attached"];
+    [_log info:@"onAttached"];
 
     if (_delegate != nil) {
         if ([_delegate respondsToSelector:@selector(cdnDidAttached:)]) {
             [_log debug:@"delegate cdnDidAttached"];
             [_delegate cdnDidAttached:self];
-        }
-
-        if ([_delegate respondsToSelector:@selector(cdnDidAttached:toPlayer:)]) {
-            [_log debug:@"delegate cdnDidAttached:toPlayer:"];
-            [_delegate cdnDidAttached:self toPlayer:_player];
         }
     }
 
@@ -543,17 +688,16 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)onDetached {
-    if (_playerProxy == nil) {
+    if (![_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
         return;
     }
 
     if (_inProgress == HolaCDNBusyDetaching) {
-        _playerProxy = nil;
         _player = nil;
     }
     _inProgress = HolaCDNBusyNone;
 
-    [_log info:@"Detached"];
+    [_log info:@"onDetached"];
 
     if (_delegate != nil) {
         if ([_delegate respondsToSelector:@selector(cdnDidDetached:)]) {
@@ -577,7 +721,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    if (_playerProxy == nil) {
+    if (![_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
         [_log err:@"HolaCDN not attached!"];
         return;
     }
@@ -589,7 +733,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
 
-    [_playerProxy uninit];
+    //[_playerProxy uninit];
 }
 
 -(void)unload {
@@ -623,7 +767,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)get_stats:(void (^)(NSDictionary*))completionBlock {
-    if (_playerProxy == nil) {
+    if (![_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
         completionBlock(nil);
         return;
     }
@@ -636,7 +780,12 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)get_mode:(void (^)(NSString*))completionBlock {
-    if (_playerProxy == nil || _ctx == nil) {
+    HolaCDNPlayerItem* item = nil;
+    if ([_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
+        item = _player.currentItem;
+    }
+
+    if (item == nil || _ctx == nil) {
         completionBlock(_ready || _ctx == nil ? @"detached" : @"loading");
         return;
     }
@@ -650,10 +799,12 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)get_timeline:(void (^)(NSDictionary*))completionBlock  {
-    if (_playerProxy == nil) {
+    if (![_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
         completionBlock(nil);
         return;
     }
+
+    HolaCDNPlayerItem* item = _player.currentItem;
 
     NSString* timelineString = @"window.cdn_graph.timeline";
 
@@ -666,7 +817,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         }
 
         NSMutableDictionary* result = [[timeline toDictionary] mutableCopy];
-        [result setObject:[_playerProxy get_duration] forKey:@"duration"];
+        [result setObject:[item.proxy get_duration] forKey:@"duration"];
 
         completionBlock(result);
     });
