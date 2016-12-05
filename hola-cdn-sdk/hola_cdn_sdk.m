@@ -399,7 +399,6 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem {
     AVPlayer* player = [self makePlayerWithPlayerItem:playerItem];
-    //[self attach:player];
     return player;
 }
 
@@ -427,7 +426,6 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(AVQueuePlayer*)queuePlayerWithItems:(NSArray<AVPlayerItem*>*)items {
     AVQueuePlayer* player = [self makeQueuePlayerWithItems:items];
-    //[self attach:player];
     return player;
 }
 
@@ -464,8 +462,6 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 // HolaCDN methods
 -(AVPlayer*)attach:(AVPlayer*)player {
-    //[_log warn:@"Please use HolaCDN `playerWith...` or `queuePlayerWith...` methods to create attached player directly instead of manual `attach`!"];
-
     if (_player != nil) {
         [_log warn:@"HolaCDN is already attached to a different player, detaching..."];
         [self detach];
@@ -598,79 +594,6 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
 }
 
-/*-(AVPlayer*)attach:(AVPlayer*)player {
-    if (player == nil) {
-        [_log err:@"Player can't be nil on attach"];
-        return nil;
-    }
-
-    if (player.currentItem == nil) {
-        [_log err:@"Player.currentItem can't be nil on attach"];
-        return nil;
-    }
-
-    if ([player isKindOfClass:[AVQueuePlayer class]]) {
-        player = [self wrapQueuePlayer:player];
-    } else {
-        player = [self wrapPlayer:player];
-    }
-
-    if (player == nil) {
-        [_log err:@"Player can't be wrapped"];
-        return nil;
-    }
-
-    if ([self isBusy]) {
-        if (_inProgress == HolaCDNBusyAttaching && _nextAction != HolaCDNActionUninit) {
-            [_log err:@"Call `uninit` before new attach!"];
-            return player;
-        }
-        [_log warn:@"Will make attach automatically when ready"];
-        _nextAttach = player;
-        if (_inProgress == HolaCDNBusyAttaching) {
-            _nextAction = HolaCDNActionUninit;
-            return player;
-        }
-        _nextAction = HolaCDNActionAttach;
-        return player;
-    }
-
-    if (_playerProxy != nil) {
-        [_log err:@"HolaCDN is already attached!"];
-        return player;
-    }
-
-    if (!_ready) {
-        [_log err:@"HolaCDN is not ready on attach!"];
-        return player;
-    }
-
-    _inProgress = HolaCDNBusyAttaching;
-
-    _player = player;
-    _nextAttach = nil;
-    _nextAction = HolaCDNActionNone;
-
-    [_log info:@"Attach..."];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-        dispatch_async(backgroundQueue, ^{
-            _playerProxy = [[HolaCDNPlayerProxy alloc] initWithPlayer:_player andCDN:self];
-
-            JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
-            if (ios_ready.isUndefined) {
-                [self didFailWithError:[NSError errorWithDomain:@"org.hola.hola-cdn-sdk" code:5 userInfo:@{@"description": @"No ios_ready found: something is wrong with HolaCDN Library"}]];
-                return;
-            }
-
-            [_log info:@"Wait for HolaCDN Library"];
-            [ios_ready callWithArguments:[NSArray new]];
-        });
-    });
-
-    return player;
-}*/
 
 -(void)onAttached {
     if (![_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
@@ -735,8 +658,6 @@ NSString* hola_cdn = @"window.hola_cdn";
     _inProgress = HolaCDNBusyDetaching;
 
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
-
-    //[_playerProxy uninit];
 }
 
 -(void)unload {
