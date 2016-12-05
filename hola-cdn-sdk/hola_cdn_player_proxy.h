@@ -57,9 +57,9 @@
 @property(weak, readonly) AVPlayerItem* item;
 @property(readonly) double duration;
 
-@property(readonly)BOOL registered;
 @property(readonly)BOOL attached;
 @property(readonly)BOOL cancelled;
+@property(readonly)int bws_idx;
 @property(readonly)BOOL cache_disabled;
 
 @property(readonly) NSString* state;
@@ -73,6 +73,7 @@
 -(void)onSeeking;
 -(void)onSeeked;
 -(void)onIdle;
+-(void)onDuration:(CMTime)duration;
 -(void)onTimeupdate:(CMTime)time;
 -(void)onPlayerError;
 -(void)onItemError;

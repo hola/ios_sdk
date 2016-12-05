@@ -14,15 +14,16 @@
 
 @interface HolaCDNServer : NSObject
 
-@property(nullable, weak) HolaCDN* cdn;
-@property(nonnull, readonly) GCDWebServer* server;
+@property(readonly) HolaCDNLog* log;
+@property(weak) HolaCDN* cdn;
+@property(readonly) GCDWebServer* server;
 
-@property (nonnull) NSMutableDictionary<NSString*, HolaCDNLoaderDelegate*>* loaders;
+@property NSMutableDictionary<NSString*, HolaCDNLoaderDelegate*>* loaders;
 
--(nonnull instancetype)initWithCDN:(nonnull HolaCDN*)cdn;
+-(instancetype)initWithCDN:(HolaCDN*)cdn;
 -(void)start;
 -(void)stop;
--(void)bindLoader:(nonnull HolaCDNLoaderDelegate*)loader;
--(void)unbindLoader:(nonnull HolaCDNLoaderDelegate*)loader;
+-(void)bindLoader:(HolaCDNLoaderDelegate*)loader;
+-(void)unbindLoader:(HolaCDNLoaderDelegate*)loader;
 
 @end

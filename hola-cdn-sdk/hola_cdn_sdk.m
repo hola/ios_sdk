@@ -299,14 +299,17 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
-    if (ios_ready.isUndefined) {
-        [_log err:@"No ios_ready found: something is wrong with HolaCDN Library"];
-        return;
-    }
 
-    [_log info:@"Wait for HolaCDN Library"];
-    [ios_ready callWithArguments:[NSArray new]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
+        if (ios_ready.isUndefined) {
+            [_log err:@"No ios_ready found: something is wrong with HolaCDN Library"];
+            return;
+        }
+
+        [_log info:@"Wait for HolaCDN Library"];
+        [ios_ready callWithArguments:[NSArray new]];
+    });
 
     return;
 }

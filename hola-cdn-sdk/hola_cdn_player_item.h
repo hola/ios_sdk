@@ -20,6 +20,7 @@
 @property(weak, readonly) HolaCDN* cdn;
 @property(readonly) HolaCDNPlayerProxy* proxy;
 @property(weak, readonly) AVPlayer* player;
+@property(readonly)BOOL registered;
 @property(readonly) float rate;
 @property(readonly) BOOL attached;
 

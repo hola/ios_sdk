@@ -10,6 +10,8 @@
 
 @implementation HolaCDNPlayerItem
 
+static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
+
 -(instancetype)initWithURL:(NSURL*)URL andCDN:(HolaCDN*)cdn {
     HolaCDNAsset* asset = [[HolaCDNAsset alloc] initWithURL:URL andCDN:cdn];
 
@@ -37,6 +39,8 @@
     HolaCDNAsset* asset = [self asset];
     [asset.loader setProxy:_proxy];
 
+    [self addObservers];
+
     [_cdn refreshJS];
 }
 
@@ -48,13 +52,110 @@
     }
 }
 
+-(void)addObservers {
+    [_log debug:@"Add observers"];
+    _registered = YES;
+
+    [self addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [self addObserver:self forKeyPath:@"duration" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [self addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [self addObserver:self forKeyPath:@"playbackBufferFull" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [self addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+    [self addObserver:self forKeyPath:@"error" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidFinishPlaying) name:AVPlayerItemDidPlayToEndTimeNotification object:self];
+}
+
+-(void)removeObservers {
+    if (!_registered) {
+        [_log debug:@"Observers not registered"];
+        return;
+    }
+
+    [_log debug:[NSString stringWithFormat:@"Remove observers: %p", self]];
+    _registered = NO;
+
+    [self removeObserver:self forKeyPath:@"status" context:kHolaCDNProxyContext];
+    [self removeObserver:self forKeyPath:@"duration" context:kHolaCDNProxyContext];
+    [self removeObserver:self forKeyPath:@"loadedTimeRanges" context:kHolaCDNProxyContext];
+    [self removeObserver:self forKeyPath:@"playbackBufferFull" context:kHolaCDNProxyContext];
+    [self removeObserver:self forKeyPath:@"playbackBufferEmpty" context:kHolaCDNProxyContext];
+    [self removeObserver:self forKeyPath:@"error" context:kHolaCDNProxyContext];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:self];
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    if (context != kHolaCDNProxyContext) {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+        return;
+    }
+
+    if (_proxy == nil) {
+        [_log warn:@"No proxy found"];
+        return;
+    }
+
+    if (keyPath == nil) {
+        [_log warn:@"null keyPath"];
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
+        // on data loaded
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"status"]) {
+        if ([self status] == AVPlayerItemStatusReadyToPlay) {
+            if (_rate == 0) {
+                [_proxy onSeeked];
+            }
+        } else if ([self status] == AVPlayerItemStatusFailed) {
+            [_proxy onItemError];
+        }
+
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"playbackBufferEmpty"]) {
+        if (_rate == 0) {
+            [_proxy onSeeking];
+        }
+
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"error"]) {
+        [_log err:[NSString stringWithFormat:@"currentItem.error: %@", change]];
+
+        AVPlayerItemErrorLog* log = [self errorLog];
+        if (log != nil) {
+            AVPlayerItemErrorLogEvent* event = [log events].firstObject;
+            if (event != nil) {
+                NSLog(@"%ld: %@, %@", (long)event.errorStatusCode, event.errorDomain, event.errorComment);
+            }
+        }
+
+        [_proxy uninit];
+        return;
+    }
+
+    if ([keyPath isEqualToString:@"duration"]) {
+        [_proxy onDuration:[self duration]];
+        return;
+    }
+}
+
+
 -(void)detach {
     [_log info:@"Detach"];
     _player = nil;
 }
 
 -(void)dealloc {
-    [_log info:@"Dealloc"];
+    [_log info:[NSString stringWithFormat:@"Dealloc: %p", self]];
+    [self removeObservers];
     [_proxy uninit];
 }
 

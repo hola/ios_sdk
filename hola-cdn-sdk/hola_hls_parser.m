@@ -43,8 +43,6 @@ typedef NS_ENUM(int, HolaHLSError) {
 
 @implementation HolaHLSParser
 
-static HolaCDNLog* _log;
-
 -(instancetype)init {
     self = [super init];
 

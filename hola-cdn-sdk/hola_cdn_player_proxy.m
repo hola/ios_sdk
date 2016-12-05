@@ -13,8 +13,6 @@
 
 @implementation HolaCDNPlayerProxy
 
-static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
-
 @synthesize state = _state;
 @synthesize ready = _ready;
 @synthesize proxy_id = _proxy_id;
@@ -43,7 +41,6 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
         _attached = NO;
         _cancelled = NO;
         _cache_disabled = NO;
-        _registered = NO;
         _duration = 0;
         _req_id = 1;
         _state = @"IDLE";
@@ -66,7 +63,7 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     }
 
     AVURLAsset* asset = (AVURLAsset*)_item.asset;
-    _videoUrl = asset.URL;
+    _videoUrl = [asset.URL copy];
 }
 
 -(void)dealloc {
@@ -210,12 +207,19 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     [_log debug:@"wrapper_attached: attaching..."];
     _attached = YES;
 
+    JSValue* delegate = [self getDelegate];
+    if (delegate != nil) {
+        _bws_idx = [[delegate[@"id"] toNumber] intValue];
+    } else {
+        _bws_idx = 0;
+    }
+
     [_cdn get_mode:^(NSString* mode) {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
             if ([mode isEqual:@"cdn"]) {
                 [_log debug:@"mode: cdn, doing attach"];
                 // XXX alexeym: hack to count data correctly; need to fix cache for ios
-                [[_cdn getContext] evaluateScript:@"hola_cdn._get_bws().disable_cache()"];
+                [self callBws:@"disable_cache"];
                 [_log debug:@"cache disabled"];
                 _cache_disabled = YES;
 
@@ -245,15 +249,15 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
                             return;
                         }
 
-                        [self addObservers];
                         [self didAttached];
                     });
                 }];
 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
                     if (assetTimeout) {
                         return;
                     }
+                    [_log debug:@"Uninit by timeout (waited for the asset duration)"];
                     assetTimeout = YES;
                     [self didAttached];
                     [self uninit];
@@ -262,6 +266,7 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
                 [asset onAttached];
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    [_log debug:[NSString stringWithFormat:@"Uninit by cdn mode: %@", mode]];
                     [self didAttached];
                     [self uninit];
                 });
@@ -281,14 +286,13 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
 }
 
 -(void)didDetached {
+    [_log debug:[NSString stringWithFormat:@"didDetached: %p", _item]];
     [(HolaCDNPlayerItem*)_item onDetached];
     _item = nil;
     _cdn = nil;
 }
 
 -(void)uninit {
-    [self removeObservers];
-    
     if (!_attached) {
         [_log debug:@"proxy not attached on uninit"];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -297,7 +301,7 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
         return;
     }
 
-    [_log info:[NSString stringWithFormat:@"Proxy uninit, id: %@", _proxy_id]];
+    [_log info:[NSString stringWithFormat:@"Proxy uninit%@", [JSContext currentContext] == nil ? @"" : @" from js"]];
     _attached = NO;
 
     _duration = 0;
@@ -305,10 +309,10 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
 
     [self execute:@"on_ended"];
     if (_cache_disabled) {
-        [[_cdn getContext] evaluateScript:@"hola_cdn._get_bws().enable_cache()"];
+        [self callBws:@"enable_cache"];
         _cache_disabled = NO;
     }
-    [[_cdn getContext] setObject:nil forKeyedSubscript:@"hola_ios_proxy"];
+    [[_cdn getContext][@"hola_ios_proxy"] setObject:nil forKeyedSubscript:_proxy_id];
     [self detachAsset];
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -322,43 +326,8 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     }
 }
 
--(void)addObservers {
-    [_log debug:@"Add observers"];
-    _registered = YES;
-
-    [_item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
-    [_item addObserver:self forKeyPath:@"duration" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
-    [_item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
-    [_item addObserver:self forKeyPath:@"playbackBufferFull" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
-    [_item addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
-    [_item addObserver:self forKeyPath:@"error" options:NSKeyValueObservingOptionNew context:kHolaCDNProxyContext];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidFinishPlaying) name:AVPlayerItemDidPlayToEndTimeNotification object:_item];
-
-    _ready = YES;
-}
-
--(void)removeObservers {
-    if (!_registered) {
-        [_log debug:@"Observers not registered"];
-        return;
-    }
-
-    [_log debug:@"Remove observers"];
-    _registered = NO;
-
-    [_item removeObserver:self forKeyPath:@"status" context:kHolaCDNProxyContext];
-    [_item removeObserver:self forKeyPath:@"duration" context:kHolaCDNProxyContext];
-    [_item removeObserver:self forKeyPath:@"loadedTimeRanges" context:kHolaCDNProxyContext];
-    [_item removeObserver:self forKeyPath:@"playbackBufferFull" context:kHolaCDNProxyContext];
-    [_item removeObserver:self forKeyPath:@"playbackBufferEmpty" context:kHolaCDNProxyContext];
-    [_item removeObserver:self forKeyPath:@"error" context:kHolaCDNProxyContext];
-
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:_item];
-}
-
 -(void)onTimeupdate:(CMTime)time {
-    if ([_state  isEqual: @"SEEKED"]) {
+    if ([_state isEqual: @"SEEKED"]) {
         [self setState:@"PLAYING"];
     }
 
@@ -369,77 +338,20 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
 
 -(void)itemDidFinishPlaying {
     [self setState:@"IDLE"];
-    [self removeObservers];
     [self execute:@"on_ended"];
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
-    if (context != kHolaCDNProxyContext) {
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-        return;
+-(void)onSeeking {
+    [self executeSeeking];
+}
+
+-(void)onSeeked {
+    if ([_state isEqual: @"SEEKING"]) {
+        [self executeSeeking];
     }
 
-    if (keyPath == nil) {
-        [_log warn:@"null keyPath"];
-        return;
-    }
-
-    if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
-        // on data loaded
-        return;
-    }
-
-    if ([keyPath isEqualToString:@"status"]) {
-        if (_item.status == AVPlayerItemStatusReadyToPlay) {
-            if ([(HolaCDNPlayerItem*)_item rate] == 0) {
-                if ([_state  isEqual: @"SEEKING"]) {
-                    [self executeSeeking];
-                }
-
-                [self setState:@"SEEKED"];
-                [self execute:@"on_seeked"];
-            }
-        } else if (_item.status == AVPlayerItemStatusFailed) {
-            [self execute:@"on_error" withValue:@"status == .Failed"];
-        }
-
-        return;
-    }
-
-    if ([keyPath isEqualToString:@"playbackBufferEmpty"]) {
-        if ([(HolaCDNPlayerItem*)_item rate] == 0) {
-            [self executeSeeking];
-        }
-
-        return;
-    }
-
-    if ([keyPath isEqualToString:@"error"]) {
-        [_log err:[NSString stringWithFormat:@"currentItem.error: %@", change]];
-        [self removeObservers];
-
-        AVPlayerItemErrorLog* log = [_item errorLog];
-        if (log != nil) {
-            AVPlayerItemErrorLogEvent* event = [log events].firstObject;
-            if (event != nil) {
-                NSLog(@"%ld: %@, %@", (long)event.errorStatusCode, event.errorDomain, event.errorComment);
-            }
-        }
-
-        [self uninit];
-        return;
-    }
-
-    if ([keyPath isEqualToString:@"duration"]) {
-        CMTime duration = [_item duration];
-
-        _duration = CMTimeGetSeconds(duration);
-        if (isnan(_duration)) {
-            _duration = -1;
-        }
-
-        return;
-    }
+    [self setState:@"SEEKED"];
+    [self execute:@"on_seeked"];
 }
 
 -(void)onPlay {
@@ -459,11 +371,22 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     [self execute:@"on_idle"];
 }
 
+-(void)onDuration:(CMTime)duration {
+    _duration = CMTimeGetSeconds(duration);
+    if (isnan(_duration)) {
+        _duration = -1;
+    }
+
+}
+
+-(void)onItemError {
+    [self execute:@"on_error" withValue:@"status == .Failed"];
+}
+
 -(void)onPlayerError {
     [_log err:@"Player error"];
     [self execute:@"on_error" withValue:@"player.status == .Failed"];
 }
-
 
 -(void)executeSeeking {
     [self setState:@"SEEKING"];
@@ -492,6 +415,11 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     }
 
     return delegate;
+}
+
+-(void)callBws:(NSString*)method {
+    NSString* bws = [NSString stringWithFormat:@"hola_cdn._get_bws({idx:%d})", _bws_idx];
+    [[_cdn getContext] evaluateScript:[NSString stringWithFormat:@"%@ && %@.%@()", bws, bws, method]];
 }
 
 -(void)execute:(NSString*)method {

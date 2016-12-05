@@ -10,8 +10,6 @@
 
 @implementation HolaCDNServer
 
-static HolaCDNLog* _log;
-
 -(instancetype)initWithCDN:(HolaCDN*)cdn {
     self = [super init];
     if (self) {
