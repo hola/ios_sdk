@@ -36,6 +36,8 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     [_log info:@"Init"];
 
     _proxy = [[HolaCDNPlayerProxy alloc] initWithItem:self andCDN:_cdn];
+    [[_cdn ctx][@"hola_ios_proxy"] setObject:_proxy forKeyedSubscript:[_proxy proxy_id]];
+    
     HolaCDNAsset* asset = [self asset];
     [asset.loader setProxy:_proxy];
 
@@ -156,6 +158,8 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
 -(void)dealloc {
     [_log info:[NSString stringWithFormat:@"Dealloc: %p", self]];
     [self removeObservers];
+    [[_cdn ctx][@"hola_ios_proxy"] setObject:nil forKeyedSubscript:_proxy.proxy_id];
+    [_cdn.ctx evaluateScript:[NSString stringWithFormat:@"delete window.hola_ios_proxy['%@']", _proxy.proxy_id]];
     [_proxy uninit];
 }
 

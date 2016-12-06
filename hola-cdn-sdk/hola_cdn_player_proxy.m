@@ -51,7 +51,6 @@
         [self updateItem];
 
         _proxy_id = [[NSUUID new] UUIDString];
-        [[_cdn getContext][@"hola_ios_proxy"] setObject:self forKeyedSubscript:_proxy_id];
     }
     return self;
 }
@@ -312,7 +311,7 @@
         [self callBws:@"enable_cache"];
         _cache_disabled = NO;
     }
-    [[_cdn getContext][@"hola_ios_proxy"] setObject:nil forKeyedSubscript:_proxy_id];
+    
     [self detachAsset];
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -418,7 +417,7 @@
 }
 
 -(void)callBws:(NSString*)method {
-    NSString* bws = [NSString stringWithFormat:@"hola_cdn._get_bws({idx:%d})", _bws_idx];
+    NSString* bws = [NSString stringWithFormat:@"hola_cdn._get_bws(%d)", _bws_idx];
     [[_cdn getContext] evaluateScript:[NSString stringWithFormat:@"%@ && %@.%@()", bws, bws, method]];
 }
 
@@ -430,7 +429,7 @@
     JSValue* delegate = [self getDelegate];
 
     if (delegate == nil) {
-        [_log err:[NSString stringWithFormat:@"Trying to execute js: '%@'; no delegate found!", method]];
+        [_log warn:[NSString stringWithFormat:@"Trying to execute js: '%@'; no delegate found!", method]];
         return;
     }
 
