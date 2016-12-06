@@ -195,3 +195,36 @@ AVPlayer* player;
 
 @end
 ```
+## Logs
+
+HolaCDN logs has own format: `[LEVEL/module:instance_id] message`
+
+```
+[INFO/cdn:1] New HolaCDN instance created
+[INFO/cdn:1] Loading...
+[INFO/cdn:1] Attach
+[INFO/Item:1] Init
+[INFO/Item:2] Init
+[WARN/Proxy:1] getDelegate: delegate is undefined
+[WARN/Proxy:1] Trying to execute js: 'on_play'; no delegate found!
+[INFO/cdn:1] Use fresh-loaded HolaCDN library
+[INFO/Proxy:1] HolaCDN attaching...
+[INFO/Proxy:2] HolaCDN attaching...
+[INFO/cdn:1] Loaded
+```
+
+You can choose required level by calling this method:
+
+```swift
+HolaCDN.setLogLevel(.Debug) // Possible values are: .None, .Debug, .Info, .Warning, .Error, .Critical
+```
+
+And set modules available to output:
+
+```swift
+HolaCDN.setLogModules([]) // defaut value, all modules
+HolaCDN.setLogModules(["cdn", "loader", "network"]) // main HolaCDN logs, HolaCDNLoaderDelegate delegate logs and networking logs
+```
+
+The `instance_id` is useful when you're using `AVQueuePlayer` with multiple assets – then you can filter logs by it using XCode filter field.
+For example, filter by `:2]` will shows you logs for the second asset and related HolaCDN modules.
