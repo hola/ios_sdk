@@ -40,6 +40,10 @@ NSString* hola_cdn = @"window.hola_cdn";
     [HolaCDNLog setVerboseModules:modules];
 }
 
++(instancetype)cdnWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode {
+    return [[HolaCDN alloc] initWithCustomer:customer usingZone:zone andMode:mode];
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -650,6 +654,8 @@ NSString* hola_cdn = @"window.hola_cdn";
         [_log err:@"HolaCDN not attached!"];
         return;
     }
+
+    [(HolaCDNPlayerItem*)_player.currentItem detach];
 
     [_log info:@"Uninit..."];
 

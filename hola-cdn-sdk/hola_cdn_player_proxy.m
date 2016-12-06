@@ -67,12 +67,6 @@
 
 -(void)dealloc {
     [_log info:@"proxy dealloc"];
-
-    [self proxyUninit];
-}
-
--(void)proxyUninit {
-
 }
 
 -(HolaCDNAsset*)getAsset {
@@ -214,65 +208,52 @@
         _bws_idx = 0;
     }
 
-    [_cdn get_mode:^(NSString* mode) {
-        dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
-            if ([mode isEqual:@"cdn"]) {
-                [_log debug:@"mode: cdn, doing attach"];
-                // XXX alexeym: hack to count data correctly; need to fix cache for ios
-                [self callBws:@"disable_cache"];
-                [_log debug:@"cache disabled"];
-                _cache_disabled = YES;
+    // XXX alexeym: hack to count data correctly; need to fix cache for ios
+    [self callBws:@"disable_cache"];
+    [_log debug:@"cache disabled"];
+    _cache_disabled = YES;
 
-                HolaCDNAsset* asset = _item.asset;
+    HolaCDNAsset* asset = _item.asset;
 
-                if ([asset attachTimeoutTriggered]) {
-                    // XXX alexeym: TODO skip
-                    [_log info:@"Skip on attach (by asset timeout)"];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self didAttached];
-                        [self uninit];
-                    });
-                    return;
-                }
+    if ([asset attachTimeoutTriggered]) {
+        // XXX alexeym: TODO skip
+        [_log info:@"Skip on attach (by asset timeout)"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self didAttached];
+            [self uninit];
+        });
+        return;
+    }
 
-                [_log debug:@"Wait for asset duration..."];
-                __block BOOL assetTimeout = NO;
-                [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
-                    if (assetTimeout) {
-                        return;
-                    }
-                    assetTimeout = YES;
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [_log debug:@"...asset playable"];
-                        if (_cancelled) {
-                            [self didAttached];
-                            return;
-                        }
-
-                        [self didAttached];
-                    });
-                }];
-
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
-                    if (assetTimeout) {
-                        return;
-                    }
-                    [_log info:@"Uninit by timeout (waited for the asset duration)"];
-                    assetTimeout = YES;
-                    [self didAttached];
-                    [self uninit];
-                });
-
-                [asset onAttached];
-            } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [_log info:[NSString stringWithFormat:@"Uninit by cdn mode: %@", mode]];
-                    [self didAttached];
-                    [self uninit];
-                });
+    [_log debug:@"Wait for asset duration..."];
+    __block BOOL assetTimeout = NO;
+    [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
+        if (assetTimeout) {
+            return;
+        }
+        assetTimeout = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_log debug:@"...asset playable"];
+            if (_cancelled) {
+                [self didAttached];
+                return;
             }
+
+            [self didAttached];
         });
     }];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        if (assetTimeout) {
+            return;
+        }
+        [_log info:@"Uninit by timeout (waited for the asset duration)"];
+        assetTimeout = YES;
+        [self didAttached];
+        [self uninit];
+    });
+
+    [asset onAttached];
 }
 
 -(void)log:(NSString*)msg {

@@ -61,12 +61,8 @@ typedef NS_ENUM(int, HolaCDNAction) {
 
 @interface HolaCDN : NSObject
 
-+(void)setLogLevel:(HolaCDNLogLevel)level;
-+(void)setLogModules:(NSArray*)modules;
 @property(readonly) int serverPort;
-
 @property(readonly) HolaCDNLog* log;
-
 @property id<HolaCDNDelegate> delegate;
 @property(readonly) NSString* customer;
 @property(readonly) JSContext* ctx;
@@ -75,12 +71,14 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @property HolaCDNServer* server;
 @property BOOL graphEnabled;
 @property double loaderTimeout; // Timeout in sec before using saved HolaCDN library
-
 @property(readonly) BOOL ready;
 @property(readonly) HolaCDNBusy inProgress;
 @property(readonly) HolaCDNAction nextAction;
-
 @property(readonly) AVPlayer* nextAttach;
+
++(void)setLogLevel:(HolaCDNLogLevel)level;
++(void)setLogModules:(NSArray*)modules;
++(instancetype)cdnWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode;
 
 -(instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
 -(instancetype)initWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode;
