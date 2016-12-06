@@ -8,6 +8,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import "hola_cdn_sdk.h"
+#import "hola_cdn_player_proxy.h"
 #import "hola_cdn_loader_delegate.h"
 
 @class HolaCDN;
@@ -15,11 +16,13 @@
 
 @interface HolaCDNAsset: AVURLAsset
 
-@property(nonatomic, weak) HolaCDN* cdn;
-@property(nonatomic, retain) NSMutableArray* keysToLoad;
-@property(nonatomic, assign) BOOL isAttached;
-@property(nonatomic, assign) BOOL attachTimeoutSet;
-@property(nonatomic, assign) BOOL attachTimeoutTriggered;
+@property(readonly) HolaCDNLog* log;
+@property(readonly) HolaCDNLoaderDelegate* loader;
+@property(readonly) NSMutableArray* keysToLoad;
+@property(readonly) BOOL isAttached;
+@property(readonly) double loaderTimeout;
+@property(readonly) BOOL attachTimeoutSet;
+@property(readonly) BOOL attachTimeoutTriggered;
 
 -(instancetype)initWithURL:(NSURL*)url andCDN:(HolaCDN*)cdn;
 -(void)loadValuesAsynchronouslyForKeys:(NSArray<NSString *> *)keys completionHandler:(void (^)(void))handler;

@@ -14,14 +14,23 @@ static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
 static NSArray* verboseModules;
 
 static dispatch_once_t onceToken;
-static NSString* const defaultModules[] = {@"cdn", @"player", @"parser"};
-static int const defaultModulesCount = 3;
+static NSString* const defaultModules[] = {};
+static int const defaultModulesCount = 0;
 
-- (instancetype)init
+- (instancetype)init:(NSString*)module
 {
     self = [super init];
     if (self) {
-        _module = @"cdn";
+        _module = module == nil ? @"cdn" : module;
+
+        NSNumber* instances = [HolaCDNLog instances][_module];
+        if (instances == nil) {
+            [[HolaCDNLog instances] setObject:[NSNumber numberWithInt:1] forKey:_module];
+            _instance = 1;
+        } else {
+            _instance = [instances intValue]+1;
+            [[HolaCDNLog instances] setObject:[NSNumber numberWithInt:_instance] forKey:_module];
+        }
 
         dispatch_once(&onceToken, ^{
             if (verboseModules == nil) {
@@ -30,6 +39,19 @@ static int const defaultModulesCount = 3;
         });
     }
     return self;
+}
+
++(NSMutableDictionary*)instances {
+    static NSMutableDictionary* instances = nil;
+    if (instances == nil) {
+        instances = [NSMutableDictionary new];
+    }
+
+    return instances;
+}
+
++(instancetype)logWithModule:(NSString*)module {
+    return [[HolaCDNLog alloc] init:module];
 }
 
 +(void) setVerboseLevel:(HolaCDNLogLevel) level {
@@ -74,7 +96,8 @@ static int const defaultModulesCount = 3;
         break;
     }
 
-    return [NSString stringWithFormat:@"[%@/%@]", levelString, _module];
+    NSString* instanceID = _instance != 0 ? [NSString stringWithFormat:@":%d", _instance] : @"";
+    return [NSString stringWithFormat:@"[%@/%@%@]", levelString, _module, instanceID];
 }
 
 -(void) rawLogWithLevel:(HolaCDNLogLevel)level andMessage:(NSString *)msg {

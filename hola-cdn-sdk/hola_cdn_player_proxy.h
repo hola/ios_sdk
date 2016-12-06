@@ -52,11 +52,32 @@
 
 @interface HolaCDNPlayerProxy : NSObject <HolaPlayerExports>
 
+@property(readonly) HolaCDNLog* log;
 @property(weak, readonly) HolaCDN* cdn;
-@property(weak, readonly) AVPlayer* player;
+@property(weak, readonly) AVPlayerItem* item;
 @property(readonly) double duration;
 
--(instancetype)initWithPlayer:(AVPlayer*)player andCDN:(HolaCDN*)cdn;
+@property(readonly)BOOL attached;
+@property(readonly)BOOL cancelled;
+@property(readonly)int bws_idx;
+@property(readonly)BOOL cache_disabled;
+
+@property(readonly) NSString* state;
+@property(readonly) NSURL* videoUrl;
+@property(readonly) int req_id;
+
+-(instancetype)initWithItem:(AVPlayerItem*)item andCDN:(HolaCDN*)cdn;
+
+-(void)onPlay;
+-(void)onPause;
+-(void)onSeeking;
+-(void)onSeeked;
+-(void)onIdle;
+-(void)onEnded;
+-(void)onDuration:(CMTime)duration;
+-(void)onTimeupdate:(CMTime)time;
+-(void)onPlayerError;
+-(void)onItemError;
 
 -(void)proxyUninit;
 -(void)execute:(NSString*)method;

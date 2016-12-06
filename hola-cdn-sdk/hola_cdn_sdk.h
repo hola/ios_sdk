@@ -12,14 +12,17 @@
 @import AVFoundation;
 #import "hola_log.h"
 #import "hola_cdn_player_proxy.h"
+#import "hola_cdn_player_item.h"
 #import "hola_cdn_asset.h"
 #import "hola_cdn_loader_delegate.h"
-#import "GCDWebServer/GCDWebServer.h"
+#import "hola_cdn_server.h"
 
 @class HolaCDN;
 @class HolaCDNPlayerProxy;
+@class HolaCDNPlayerItem;
 @class HolaCDNAsset;
 @class HolaCDNLoaderDelegate;
+@class HolaCDNServer;
 
 typedef NS_ENUM(int, HolaCDNBusy) {
     HolaCDNBusyNone = 0,
@@ -40,58 +43,63 @@ typedef NS_ENUM(int, HolaCDNAction) {
 @protocol HolaCDNDelegate <NSObject>
 
 @optional
--(void)cdnDidLoaded:(nonnull HolaCDN*)cdn;
+-(void)cdnDidLoaded:(HolaCDN*)cdn;
 
 @optional
--(void)cdnDidAttached:(nonnull HolaCDN*)cdn;
+-(void)cdnDidAttached:(HolaCDN*)cdn;
 
 @optional
--(void)cdnDidAttached:(nonnull HolaCDN*)cdn toPlayer:(nonnull AVPlayer*)player;
+-(void)cdnDidDetached:(HolaCDN*)cdn;
 
 @optional
--(void)cdnDidDetached:(nonnull HolaCDN*)cdn;
+-(void)cdnStateChanged:(HolaCDN*)cdn toState:(NSString*)state;
 
 @optional
--(void)cdnStateChanged:(nonnull HolaCDN*)cdn toState:(nonnull NSString*)state;
-
-@optional
--(void)cdnExceptionOccured:(nonnull HolaCDN*)cdn withError:(nullable NSError*)error;
+-(void)cdnExceptionOccured:(HolaCDN*)cdn withError:(NSError*)error;
 
 @end
 
 @interface HolaCDN : NSObject
 
 +(void)setLogLevel:(HolaCDNLogLevel)level;
-+(void)setLogModules:(nullable NSArray*)modules;
++(void)setLogModules:(NSArray*)modules;
 @property(readonly) int serverPort;
 
-@property(nonnull, nonatomic, assign) id<HolaCDNDelegate> delegate;
-@property(nonnull, readonly) NSString* customer;
-@property(nullable, readonly) JSContext* ctx;
-@property(nullable, readonly) GCDWebServer* server;
-@property(nullable, readonly) HolaCDNPlayerProxy* playerProxy;
-@property(nonnull, retain) HolaCDNLoaderDelegate* loader;
+@property(readonly) HolaCDNLog* log;
+
+@property id<HolaCDNDelegate> delegate;
+@property(readonly) NSString* customer;
+@property(readonly) JSContext* ctx;
+@property(readonly) AVPlayer* player;
+@property(readonly) id timeObserver;
+@property HolaCDNServer* server;
 @property BOOL graphEnabled;
 @property double loaderTimeout; // Timeout in sec before using saved HolaCDN library
 
--(nonnull instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
--(nonnull instancetype)initWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode;
+@property(readonly) BOOL ready;
+@property(readonly) HolaCDNBusy inProgress;
+@property(readonly) HolaCDNAction nextAction;
 
--(void)configWithCustomer:(nonnull NSString*)customer usingZone:(nullable NSString*)zone andMode:(nullable NSString*)mode __deprecated_msg("Use `initWithCustomer:` method");
+@property(readonly) AVPlayer* nextAttach;
 
--(BOOL)load:(NSError * _Nullable * _Nullable)error __deprecated_msg("No need to use this method anymore");
--(nullable AVPlayer*)attach:(nonnull AVPlayer*)player;
+-(instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
+-(instancetype)initWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode;
 
--(nonnull AVPlayerItem*)playerItemWithURL:(nonnull NSURL*)url;
--(nonnull AVPlayerItem*)playerItemFromItem:(nonnull AVPlayerItem*)item;
--(nonnull AVPlayer*)playerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
--(nonnull AVPlayer*)playerWithURL:(nonnull NSURL*)url;
--(nonnull AVQueuePlayer*)queuePlayerWithURL:(nonnull NSURL*)url;
--(nonnull AVQueuePlayer*)queuePlayerWithPlayerItem:(nonnull AVPlayerItem*)playerItem;
--(nonnull AVQueuePlayer*)queuePlayerWithItems:(nonnull NSArray<AVPlayerItem*>*)items;
+-(void)configWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode __deprecated_msg("Use `initWithCustomer:` method");
 
--(nullable JSContext*)getContext;
--(void)set_cdn_enabled:(nonnull NSString*)name enabled:(BOOL)enabled;
+-(BOOL)load:(NSError**)error __deprecated_msg("No need to use this method anymore");
+-(AVPlayer*)attach:(AVPlayer*)player;
+
+-(AVPlayerItem*)playerItemWithURL:(NSURL*)url;
+-(AVPlayerItem*)playerItemFromItem:(AVPlayerItem*)item;
+-(AVPlayer*)playerWithPlayerItem:(AVPlayerItem*)playerItem;
+-(AVPlayer*)playerWithURL:(NSURL*)url;
+-(AVQueuePlayer*)queuePlayerWithURL:(NSURL*)url;
+-(AVQueuePlayer*)queuePlayerWithPlayerItem:(AVPlayerItem*)playerItem;
+-(AVQueuePlayer*)queuePlayerWithItems:(NSArray<AVPlayerItem*>*)items;
+
+-(JSContext*)getContext;
+-(void)set_cdn_enabled:(NSString*)name enabled:(BOOL)enabled;
 
 -(void)uninit;
 -(void)unload;
@@ -99,8 +107,10 @@ typedef NS_ENUM(int, HolaCDNAction) {
 -(void)onAttached;
 -(void)onDetached;
 
--(void)get_stats:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;
--(void)get_timeline:(nonnull void (^)(NSDictionary* _Nullable data))completionBlock;
--(void)get_mode:(nonnull void (^)(NSString* _Nonnull mode))completionBlock;
+-(void)refreshJS;
+
+-(void)get_stats:(void (^)(NSDictionary* data))completionBlock;
+-(void)get_timeline:(void (^)(NSDictionary* data))completionBlock;
+-(void)get_mode:(void (^)(NSString* mode))completionBlock;
 
 @end

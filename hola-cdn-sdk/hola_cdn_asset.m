@@ -11,23 +11,22 @@
 
 @implementation HolaCDNAsset
 
-static HolaCDNLog* _log;
-
 -(instancetype)initWithURL:(NSURL*)url andCDN:(HolaCDN*)cdn {
     NSURL* cdnURL = [HolaCDNLoaderDelegate applyCDNScheme:url andType:HolaCDNSchemeFetch];
 
     self = [super initWithURL:cdnURL options:nil];
     if (self) {
-        _log = [HolaCDNLog new];
-        [_log setModule:@"asset"];
+        _log = [HolaCDNLog logWithModule:@"Asset"];
 
-        _cdn = cdn;
+        _loaderTimeout = [cdn loaderTimeout];
         _isAttached = NO;
         _attachTimeoutSet = NO;
         _attachTimeoutTriggered = NO;
         _keysToLoad = [NSMutableArray new];
 
-        [self.resourceLoader setDelegate:_cdn.loader queue:_cdn.loader.queue];
+        _loader = [[HolaCDNLoaderDelegate alloc] initWithCDN:cdn];
+
+        [self.resourceLoader setDelegate:_loader queue:_loader.queue];
     }
 
     return self;
@@ -47,7 +46,9 @@ static HolaCDNLog* _log;
         return;
     }
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+    [_log debug:@"Timeout: set"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_loaderTimeout * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        [_log debug:@"Timeout: skip"];
         [self skip];
     });
 
@@ -56,12 +57,12 @@ static HolaCDNLog* _log;
 
 -(void)skip {
     if (_attachTimeoutTriggered) {
-        [_log debug:@"Timeout: already triggered"];
+        [_log debug:@"Skip: already triggered"];
         return;
     }
 
     if (_isAttached) {
-        [_log debug:@"Timeout: already attached"];
+        [_log debug:@"Skip: already attached"];
         return;
     }
 
@@ -92,7 +93,7 @@ static HolaCDNLog* _log;
     [_log debug:@"Attached"];
 
     _isAttached = YES;
-    [_cdn.loader attach];
+    [_loader attach];
     [self loadPendingKeys];
 }
 
@@ -103,12 +104,12 @@ static HolaCDNLog* _log;
 
     if (_isAttached) {
         _isAttached = NO;
-        [_cdn.loader uninit];
+        [_loader uninit];
     }
 }
 
 -(void)dealloc {
-    [_log debug:@"Dealloc"];
+    [_log info:@"Dealloc"];
     [self onDetached];
 }
 

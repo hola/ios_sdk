@@ -19,7 +19,8 @@ typedef NS_ENUM(int, HolaCDNLogLevel) {
 
 @interface HolaCDNLog : NSObject
 
-@property NSString* module;
+@property(readonly) NSString* module;
+@property(readonly) int instance;
 
 -(void) debug:(NSString*) msg;
 -(void) info:(NSString*) msg;
@@ -27,6 +28,7 @@ typedef NS_ENUM(int, HolaCDNLogLevel) {
 -(void) err:(NSString*) msg;
 -(void) crit:(NSString*) msg;
 
++(instancetype)logWithModule:(NSString*)module;
 +(void) setVerboseLevel:(HolaCDNLogLevel) level;
 +(void) setVerboseModules:(NSArray*) modules;
 

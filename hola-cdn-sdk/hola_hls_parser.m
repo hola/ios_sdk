@@ -43,20 +43,21 @@ typedef NS_ENUM(int, HolaHLSError) {
 
 @implementation HolaHLSParser
 
-static HolaCDNLog* _log;
-
 -(instancetype)init {
     self = [super init];
 
     if (self) {
-        _log = [HolaCDNLog new];
-        [_log setModule:@"parser"];
+        _log = [HolaCDNLog logWithModule:@"Parser"];
 
         levels = [NSMutableArray new];
         media_urls = [NSMutableArray new];
     }
 
     return self;
+}
+
+-(void)dealloc {
+    [_log info:@"Dealloc"];
 }
 
 -(NSString*)parse:(NSString*)url andData:(NSString*)data withError:(NSError**)error {
