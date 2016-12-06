@@ -406,7 +406,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(AVPlayer*)playerWithURL:(NSURL*)url {
-    AVPlayer* item = [self playerItemWithURL:url];
+    AVPlayerItem* item = [self playerItemWithURL:url];
     return [self playerWithPlayerItem:item];
 }
 
@@ -473,15 +473,16 @@ NSString* hola_cdn = @"window.hola_cdn";
     [_log info:@"Attach"];
 
     if ([player isKindOfClass:[AVQueuePlayer class]]) {
-       _player = [self wrapQueuePlayer:player];
+       _player = (AVPlayer*)[self wrapQueuePlayer:player];
     } else {
         _player = [self wrapPlayer:player];
     }
 
     [self attachItem:_player.currentItem];
 
+    __weak HolaCDN* cdn = self;
     _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(0.5, 600) queue:nil usingBlock:^(CMTime time) {
-        HolaCDNPlayerItem* item = [self currentItem];
+        HolaCDNPlayerItem* item = [cdn currentItem];
         if (item == nil) {
             return;
         }
@@ -578,7 +579,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 
 -(HolaCDNPlayerItem*)currentItem {
     if ([_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
-        return _player.currentItem;
+        return (HolaCDNPlayerItem*)_player.currentItem;
     }
 
     return nil;
@@ -655,7 +656,10 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    [(HolaCDNPlayerItem*)_player.currentItem detach];
+    HolaCDNPlayerItem* item = [self currentItem];
+    if (item != nil) {
+        [item detach];
+    }
 
     [_log info:@"Uninit..."];
 
@@ -711,7 +715,7 @@ NSString* hola_cdn = @"window.hola_cdn";
 -(void)get_mode:(void (^)(NSString*))completionBlock {
     HolaCDNPlayerItem* item = nil;
     if ([_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
-        item = _player.currentItem;
+        item = (HolaCDNPlayerItem*)_player.currentItem;
     }
 
     if (item == nil || _ctx == nil) {
@@ -733,7 +737,7 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-    HolaCDNPlayerItem* item = _player.currentItem;
+    HolaCDNPlayerItem* item = (HolaCDNPlayerItem*)_player.currentItem;
 
     NSString* timelineString = @"window.cdn_graph.timeline";
 

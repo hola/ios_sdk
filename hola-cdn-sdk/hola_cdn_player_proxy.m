@@ -213,7 +213,7 @@
     [_log debug:@"cache disabled"];
     _cache_disabled = YES;
 
-    HolaCDNAsset* asset = _item.asset;
+    HolaCDNAsset* asset = (HolaCDNAsset*)_item.asset;
 
     if ([asset attachTimeoutTriggered]) {
         // XXX alexeym: TODO skip

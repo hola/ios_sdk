@@ -79,7 +79,6 @@
 -(void)onPlayerError;
 -(void)onItemError;
 
--(void)proxyUninit;
 -(void)execute:(NSString*)method;
 -(void)execute:(NSString*)method withValue:(id)value;
 

@@ -28,17 +28,13 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     return self;
 }
 
--(NSString *)description {
-    return [NSString stringWithFormat:@"%@:%@", [_log module], [_log instance]];
-}
-
 -(void)initHolaItem {
     [_log info:@"Init"];
 
     _proxy = [[HolaCDNPlayerProxy alloc] initWithItem:self andCDN:_cdn];
     [[_cdn ctx][@"hola_ios_proxy"] setObject:_proxy forKeyedSubscript:[_proxy proxy_id]];
     
-    HolaCDNAsset* asset = [self asset];
+    HolaCDNAsset* asset = (HolaCDNAsset*)[self asset];
     [asset.loader setProxy:_proxy];
 
     [self addObservers];
