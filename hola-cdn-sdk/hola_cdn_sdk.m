@@ -299,7 +299,6 @@ NSString* hola_cdn = @"window.hola_cdn";
         return;
     }
 
-
     dispatch_async(dispatch_get_main_queue(), ^{
         JSValue* ios_ready = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"api.ios_ready"]];
         if (ios_ready.isUndefined) {
@@ -601,7 +600,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     }
     _inProgress = HolaCDNBusyNone;
 
-    [_log info:@"onAttached"];
+    [_log info:@"Attached"];
 
     if (_delegate != nil) {
         if ([_delegate respondsToSelector:@selector(cdnDidAttached:)]) {

@@ -20,6 +20,7 @@
 @property(readonly) HolaCDNLoaderDelegate* loader;
 @property(readonly) NSMutableArray* keysToLoad;
 @property(readonly) BOOL isAttached;
+@property(readonly) double loaderTimeout;
 @property(readonly) BOOL attachTimeoutSet;
 @property(readonly) BOOL attachTimeoutTriggered;
 

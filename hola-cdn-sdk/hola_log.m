@@ -14,8 +14,8 @@ static HolaCDNLogLevel verboseLevel = HolaCDNLogLevelError;
 static NSArray* verboseModules;
 
 static dispatch_once_t onceToken;
-static NSString* const defaultModules[] = {@"cdn", @"Proxy", @"Parser"};
-static int const defaultModulesCount = 3;
+static NSString* const defaultModules[] = {};
+static int const defaultModulesCount = 0;
 
 - (instancetype)init:(NSString*)module
 {

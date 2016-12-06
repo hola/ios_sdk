@@ -73,6 +73,7 @@
 -(void)onSeeking;
 -(void)onSeeked;
 -(void)onIdle;
+-(void)onEnded;
 -(void)onDuration:(CMTime)duration;
 -(void)onTimeupdate:(CMTime)time;
 -(void)onPlayerError;

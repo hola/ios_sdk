@@ -18,6 +18,7 @@
     if (self) {
         _log = [HolaCDNLog logWithModule:@"Asset"];
 
+        _loaderTimeout = [cdn loaderTimeout];
         _isAttached = NO;
         _attachTimeoutSet = NO;
         _attachTimeoutTriggered = NO;
@@ -46,7 +47,7 @@
     }
 
     [_log debug:@"Timeout: set"];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_loaderTimeout * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
         [_log debug:@"Timeout: skip"];
         [self skip];
     });

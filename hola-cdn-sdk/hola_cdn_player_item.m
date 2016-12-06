@@ -177,6 +177,10 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     [_proxy onIdle];
 }
 
+-(void)itemDidFinishPlaying {
+    [_proxy onEnded];
+}
+
 -(void)onTimeupdate:(CMTime)time {
     [_proxy onTimeupdate:time];
 }

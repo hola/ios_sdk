@@ -194,6 +194,7 @@
 }
 
 -(void)didAttached {
+    [_log info:@"HolaCDN attached"];
     [(HolaCDNPlayerItem*)_item onAttached];
 }
 
@@ -203,7 +204,7 @@
         return;
     }
 
-    [_log debug:@"wrapper_attached: attaching..."];
+    [_log info:@"HolaCDN attaching..."];
     _attached = YES;
 
     JSValue* delegate = [self getDelegate];
@@ -226,7 +227,7 @@
 
                 if ([asset attachTimeoutTriggered]) {
                     // XXX alexeym: TODO skip
-                    [_log debug:@"Skip on attach (by asset timeout)"];
+                    [_log info:@"Skip on attach (by asset timeout)"];
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self didAttached];
                         [self uninit];
@@ -252,11 +253,11 @@
                     });
                 }];
 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([_cdn loaderTimeout] * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
                     if (assetTimeout) {
                         return;
                     }
-                    [_log debug:@"Uninit by timeout (waited for the asset duration)"];
+                    [_log info:@"Uninit by timeout (waited for the asset duration)"];
                     assetTimeout = YES;
                     [self didAttached];
                     [self uninit];
@@ -265,7 +266,7 @@
                 [asset onAttached];
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [_log debug:[NSString stringWithFormat:@"Uninit by cdn mode: %@", mode]];
+                    [_log info:[NSString stringWithFormat:@"Uninit by cdn mode: %@", mode]];
                     [self didAttached];
                     [self uninit];
                 });
@@ -335,7 +336,7 @@
     [self execute:@"on_timeupdate" withValue:sec];
 }
 
--(void)itemDidFinishPlaying {
+-(void)onEnded {
     [self setState:@"IDLE"];
     [self execute:@"on_ended"];
 }
@@ -345,7 +346,7 @@
 }
 
 -(void)onSeeked {
-    if ([_state isEqual: @"SEEKING"]) {
+    if (![_state isEqual: @"SEEKING"]) {
         [self executeSeeking];
     }
 
@@ -359,7 +360,7 @@
 }
 
 -(void)onPause {
-    if ([_state isEqual: @"IDLE"]) {
+    if (![_state isEqual: @"IDLE"]) {
         [self setState:@"PAUSED"];
         [self execute:@"on_pause"];
     }
