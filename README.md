@@ -94,7 +94,7 @@ protocol HolaCDNDelegate: NSObjectProtocol {
 }
 ```
 
-- Set the delegate
+- (optional) Set the delegate
 
 ```swift
 // in case if you have implemented the protocol for the current ViewController
