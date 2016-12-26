@@ -513,7 +513,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     _player = nil;
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString*,id> *)change context:(void *)context {
     if (context != kHolaCDNContext) {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
         return;
