@@ -190,7 +190,9 @@ AVPlayer* player;
 }
 
 -(void)cdnDidAttached:(HolaCDN *)cdn {
-    NSLog(@"cdn did attached! %@", [cdn get_mode]);
+    [cdn get_mode:^(NSString *mode) {
+        NSLog(@"cdn did attached! %@", mode);
+    }];
 }
 
 @end
