@@ -179,7 +179,7 @@ AVPlayer* player;
     [super viewDidLoad];
 
     cdn = [HolaCDN cdnWithCustomer:@"demo" usingZone:nil andMode:@"cdn"];
-    [cdn setDelegate:self];
+    [cdn setDelegate:self]; // Your delegate class should be compatible with HolaCDNDelegate
 
     NSURL *url = [NSURL URLWithString:@"https://example.com/your/video.m3u8"];
     player = [cdn playerWithURL:url];
