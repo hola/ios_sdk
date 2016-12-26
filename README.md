@@ -143,11 +143,12 @@ let myPlayer2 = cdn.queuePlayerWithItems([item1, item2])
 import HolaCDN
 
 class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
-
+    var cdn: HolaCDN!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let cdn = HolaCDN(customer: "demo", usingZone: nil, andMode: "cdn")
+        cdn = HolaCDN(customer: "demo", usingZone: nil, andMode: "cdn")
         cdn.delegate = self
 
         let url = NSURL(string: "https://example.com/your/video.m3u8")!
