@@ -147,7 +147,7 @@ class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let cdn = HolaCDNcustomer: "demo", usingZone: nil, andMode: "cdn"()
+        let cdn = HolaCDN(customer: "demo", usingZone: nil, andMode: "cdn")
         cdn.delegate = self
 
         let url = NSURL(string: "https://example.com/your/video.m3u8")!
