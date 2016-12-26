@@ -27,6 +27,7 @@
 -(instancetype)initWithURL:(NSURL*)URL andCDN:(HolaCDN *)cdn;
 -(void)dealloc;
 -(void)attach:(AVPlayer*)player;
+-(void)uninit;
 -(void)detach;
 -(void)onPlay:(float)rate;
 -(void)onPause:(float)rate;

@@ -151,12 +151,17 @@ static void * const kHolaCDNProxyContext = (void*)&kHolaCDNProxyContext;
     _player = nil;
 }
 
--(void)dealloc {
-    [_log info:[NSString stringWithFormat:@"Dealloc: %p", self]];
+-(void)uninit {
+    [_log info:@"Uninit"];
     [self removeObservers];
     [_proxy uninit];
     [[_cdn ctx][@"hola_ios_proxy"] setObject:nil forKeyedSubscript:_proxy.proxy_id];
     [_cdn.ctx evaluateScript:[NSString stringWithFormat:@"delete window.hola_ios_proxy['%@']", _proxy.proxy_id]];
+}
+
+-(void)dealloc {
+    [_log info:[NSString stringWithFormat:@"Dealloc: %p", self]];
+    [self uninit];
 }
 
 -(void)onPlay:(float)rate {
