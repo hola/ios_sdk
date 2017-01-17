@@ -184,6 +184,7 @@ AVPlayer* player;
 
     NSURL *url = [NSURL URLWithString:@"https://example.com/your/video.m3u8"];
     player = [cdn playerWithURL:url];
+    [cdn attach:player];
 }
 
 -(void)cdnDidLoaded:(HolaCDN *)cdn {
