@@ -1,0 +1,385 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		97656F5B1E374882001B738F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97656F5A1E374882001B738F /* AppDelegate.swift */; };
+		97656F5D1E374882001B738F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97656F5C1E374882001B738F /* ViewController.swift */; };
+		97656F601E374882001B738F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97656F5E1E374882001B738F /* Main.storyboard */; };
+		97656F621E374882001B738F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97656F611E374882001B738F /* Assets.xcassets */; };
+		97656F651E374882001B738F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97656F631E374882001B738F /* LaunchScreen.storyboard */; };
+		CBCB7F1414F4DEEC34EB323A /* Pods_hola_cdn_example_ios_swift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 779C36237188425859653F7F /* Pods_hola_cdn_example_ios_swift.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		13F4201512298AAE2036C307 /* Pods-hola-cdn-example-ios-swift.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-hola-cdn-example-ios-swift.release.xcconfig"; path = "Pods/Target Support Files/Pods-hola-cdn-example-ios-swift/Pods-hola-cdn-example-ios-swift.release.xcconfig"; sourceTree = "<group>"; };
+		779C36237188425859653F7F /* Pods_hola_cdn_example_ios_swift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_hola_cdn_example_ios_swift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		97656F571E374882001B738F /* hola-cdn-example-ios-swift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hola-cdn-example-ios-swift.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		97656F5A1E374882001B738F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		97656F5C1E374882001B738F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		97656F5F1E374882001B738F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		97656F611E374882001B738F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		97656F641E374882001B738F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		97656F661E374882001B738F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DD41123E3A55DABEF5AA6675 /* Pods-hola-cdn-example-ios-swift.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-hola-cdn-example-ios-swift.debug.xcconfig"; path = "Pods/Target Support Files/Pods-hola-cdn-example-ios-swift/Pods-hola-cdn-example-ios-swift.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		97656F541E374882001B738F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CBCB7F1414F4DEEC34EB323A /* Pods_hola_cdn_example_ios_swift.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		736FA99602AEAF87FAC6A465 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				779C36237188425859653F7F /* Pods_hola_cdn_example_ios_swift.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		97656F4E1E374882001B738F = {
+			isa = PBXGroup;
+			children = (
+				97656F591E374882001B738F /* hola-cdn-example-ios-swift */,
+				97656F581E374882001B738F /* Products */,
+				9802DC0E4AEBF7C17DC2E950 /* Pods */,
+				736FA99602AEAF87FAC6A465 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		97656F581E374882001B738F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				97656F571E374882001B738F /* hola-cdn-example-ios-swift.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		97656F591E374882001B738F /* hola-cdn-example-ios-swift */ = {
+			isa = PBXGroup;
+			children = (
+				97656F5A1E374882001B738F /* AppDelegate.swift */,
+				97656F5C1E374882001B738F /* ViewController.swift */,
+				97656F5E1E374882001B738F /* Main.storyboard */,
+				97656F611E374882001B738F /* Assets.xcassets */,
+				97656F631E374882001B738F /* LaunchScreen.storyboard */,
+				97656F661E374882001B738F /* Info.plist */,
+			);
+			path = "hola-cdn-example-ios-swift";
+			sourceTree = "<group>";
+		};
+		9802DC0E4AEBF7C17DC2E950 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				DD41123E3A55DABEF5AA6675 /* Pods-hola-cdn-example-ios-swift.debug.xcconfig */,
+				13F4201512298AAE2036C307 /* Pods-hola-cdn-example-ios-swift.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		97656F561E374882001B738F /* hola-cdn-example-ios-swift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97656F691E374882001B738F /* Build configuration list for PBXNativeTarget "hola-cdn-example-ios-swift" */;
+			buildPhases = (
+				D5D77455D788FB261D62C575 /* [CP] Check Pods Manifest.lock */,
+				97656F531E374882001B738F /* Sources */,
+				97656F541E374882001B738F /* Frameworks */,
+				97656F551E374882001B738F /* Resources */,
+				97D934D6306CB8C17F4EBE35 /* [CP] Embed Pods Frameworks */,
+				EB7DCF3E82D7CC3CD2F5D55F /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "hola-cdn-example-ios-swift";
+			productName = "hola-cdn-example-ios-swift";
+			productReference = 97656F571E374882001B738F /* hola-cdn-example-ios-swift.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		97656F4F1E374882001B738F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0820;
+				TargetAttributes = {
+					97656F561E374882001B738F = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = H266NKJGCY;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 97656F521E374882001B738F /* Build configuration list for PBXProject "hola-cdn-example-ios-swift" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 97656F4E1E374882001B738F;
+			productRefGroup = 97656F581E374882001B738F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				97656F561E374882001B738F /* hola-cdn-example-ios-swift */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		97656F551E374882001B738F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				97656F651E374882001B738F /* LaunchScreen.storyboard in Resources */,
+				97656F621E374882001B738F /* Assets.xcassets in Resources */,
+				97656F601E374882001B738F /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		97D934D6306CB8C17F4EBE35 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-hola-cdn-example-ios-swift/Pods-hola-cdn-example-ios-swift-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D5D77455D788FB261D62C575 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		EB7DCF3E82D7CC3CD2F5D55F /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-hola-cdn-example-ios-swift/Pods-hola-cdn-example-ios-swift-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		97656F531E374882001B738F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				97656F5D1E374882001B738F /* ViewController.swift in Sources */,
+				97656F5B1E374882001B738F /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		97656F5E1E374882001B738F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				97656F5F1E374882001B738F /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		97656F631E374882001B738F /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				97656F641E374882001B738F /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		97656F671E374882001B738F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		97656F681E374882001B738F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		97656F6A1E374882001B738F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DD41123E3A55DABEF5AA6675 /* Pods-hola-cdn-example-ios-swift.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = "hola-cdn-example-ios-swift/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-cdn-example-ios-swift";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		97656F6B1E374882001B738F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 13F4201512298AAE2036C307 /* Pods-hola-cdn-example-ios-swift.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = "hola-cdn-example-ios-swift/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-cdn-example-ios-swift";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		97656F521E374882001B738F /* Build configuration list for PBXProject "hola-cdn-example-ios-swift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97656F671E374882001B738F /* Debug */,
+				97656F681E374882001B738F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		97656F691E374882001B738F /* Build configuration list for PBXNativeTarget "hola-cdn-example-ios-swift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97656F6A1E374882001B738F /* Debug */,
+				97656F6B1E374882001B738F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 97656F4F1E374882001B738F /* Project object */;
+}
