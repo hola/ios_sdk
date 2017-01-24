@@ -1,0 +1,5 @@
+use_frameworks!
+
+target 'hola-cdn-example-ios' do
+  pod 'HolaCDN', :path => '../../'
+end

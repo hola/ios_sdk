@@ -22,3 +22,6 @@ xcuserdata/
 Carthage/
 Cartfile.resolved
 *.zip
+
+Podfile.lock
+Pods/
