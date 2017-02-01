@@ -39,11 +39,11 @@ pod "HolaCDN", "~> 1.3.0" # HolaCDN API has been changed from 1.2.x versions
 - Create a new instance of `HolaCDN` with desired parameters
   - `customer`: String - required parameter, your customerId
   - `zone`: String? - optional parameter to force zone selection. In case of `nil` will be selected automatically according to your customer's HolaCDN config
-  - `mode`: String? - optional parameter to force cdn mode selection. In case of `nil` will be selected automatically according to your customer's HolaCDN config; supported options are: `nil`, `"stats"`, `"cdn"`.
+  - `mode`: String? - optional parameter to force cdn mode selection. In case of `nil` will be selected automatically according to your customer's HolaCDN config; supported options are: `nil`, `"origin_cdn"`, `"hola_cdn"`.
 
 
 ```swift
-let cdn = HolaCDN(customer: "your_customer_id", usingZone: nil, andMode: "cdn")
+let cdn = HolaCDN(customer: "your_customer_id", usingZone: nil, andMode: "hola_cdn")
 ```
 
 - (optional) You may set a timeout for loading HolaLibrary and assets
@@ -69,8 +69,8 @@ when something goes wrong while executing HolaCDN code
     - `"loading"` - CDN js code is loading
     - `"detached"` - CDN is loaded, not attached to a player
     - `"disabled"` - CDN is in automatic mode and disabled for current config
-    - `"stats"` - CDN is attached and working in stats-only mode
-    - `"cdn"` - CDN is attached and working in cdn mode
+    - `"origin_cdn"` - CDN is attached and working in Origin CDN mode
+    - `"hola_cdn"` - CDN is attached and working in HolaCDN mode
 
   - via Safari inspector:
     - Enable Safari developer mode in the preferences
@@ -148,7 +148,7 @@ class PlayerViewController: AVPlayerViewController, HolaCDNDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        cdn = HolaCDN(customer: "demo", usingZone: nil, andMode: "cdn")
+        cdn = HolaCDN(customer: "demo", usingZone: nil, andMode: "hola_cdn")
         cdn.delegate = self
 
         let url = NSURL(string: "https://example.com/your/video.m3u8")!
@@ -179,7 +179,7 @@ AVPlayer* player;
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    cdn = [HolaCDN cdnWithCustomer:@"demo" usingZone:nil andMode:@"cdn"];
+    cdn = [HolaCDN cdnWithCustomer:@"demo" usingZone:nil andMode:@"hola_cdn"];
     [cdn setDelegate:self]; // Your delegate class should be compatible with HolaCDNDelegate
 
     NSURL *url = [NSURL URLWithString:@"https://example.com/your/video.m3u8"];

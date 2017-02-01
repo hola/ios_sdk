@@ -726,8 +726,11 @@ NSString* hola_cdn = @"window.hola_cdn";
     dispatch_async(dispatch_get_main_queue(), ^{
         [_log debug:@"get mode from JS"];
         JSValue* mode = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
-        [_log debug:[mode toString]];
-        completionBlock([mode toString]);
+        NSString* mode_s = [mode toString];
+        mode_s = [mode_s isEqual:@"cdn"] ? @"hola_cdn"
+            : [mode_s isEqual:@"stats"] ? @"origin_cdn" : mode_s;
+        [_log debug:mode_s];
+        completionBlock(mode_s);
     });
 }
 

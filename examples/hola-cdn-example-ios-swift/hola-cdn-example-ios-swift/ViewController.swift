@@ -22,7 +22,7 @@ class ViewController: UIViewController {
         HolaCDN.setLogLevel(.debug)
 
         // create a HolaCDN instance for specific customer
-        cdn = HolaCDN(customer: "demo", usingZone: nil, andMode: "cdn")
+        cdn = HolaCDN(customer: "demo", usingZone: nil, andMode: "hola_cdn")
 
         // set timeout to 5 sec (default is 2 sec)
         // in case if HolaCDN JS Library is not downloaded in this timeout, the video will start to play without HolaCDN
