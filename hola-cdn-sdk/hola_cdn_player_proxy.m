@@ -266,6 +266,10 @@
     };
 }
 
+-(NSString*)get_app_label {
+    return [[NSBundle mainBundle] bundleIdentifier];
+}
+
 -(void)didDetached {
     [_log debug:[NSString stringWithFormat:@"didDetached: %p", _item]];
     [(HolaCDNPlayerItem*)_item onDetached];

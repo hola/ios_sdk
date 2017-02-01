@@ -48,6 +48,8 @@
 -(void)log:(NSString*)msg;
 
 -(NSDictionary*)settings:(NSDictionary*)opt;
+
+-(NSString*)get_app_label;
 @end
 
 @interface HolaCDNPlayerProxy : NSObject <HolaPlayerExports>
