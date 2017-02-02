@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "HolaCDN"
-  s.version      = "2.0.0"
+  s.version      = "1.3.3"
   s.summary      = "Integration for holacdn.com service"
 
   s.homepage     = "https://holacdn.com/"
@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '7.0'
   s.tvos.deployment_target = '9.0'
 
-  s.source       = { :git => "https://github.com/hola/ios_sdk.git", :tag => "2.0.0" }
+  s.source       = { :git => "https://github.com/hola/ios_sdk.git", :tag => "1.3.3" }
   s.source_files  = "hola-cdn-sdk/*.{h,m}"
 
   s.public_header_files = "hola-cdn-sdk/*.h"

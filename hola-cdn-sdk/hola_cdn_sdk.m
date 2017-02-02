@@ -113,7 +113,8 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     _customer = customer;
     _zone = zone;
-    _mode = mode;
+
+    _mode = [self convert_old_mode:mode];
 
     [self load];
 }
@@ -712,6 +713,23 @@ NSString* hola_cdn = @"window.hola_cdn";
     });
 }
 
+// XXX alexeym: backward compatibility, remove someday
+-(NSString*)convert_old_mode:(NSString*)mode {
+    [_log debug:mode];
+    
+    if ([mode isEqual:@"cdn"]) {
+        [_log warn:@"Please use \"hola_cdn\" instead of \"cdn\"!"];
+        return @"hola_cdn";
+    }
+
+    if ([mode isEqual:@"stats"]) {
+        [_log warn:@"Please use \"origin_cdn\" instead of \"stats\"!"];
+        return @"origin_cdn";
+    }
+
+    return mode;
+}
+
 -(void)get_mode:(void (^)(NSString*))completionBlock {
     HolaCDNPlayerItem* item = nil;
     if ([_player.currentItem isKindOfClass:[HolaCDNPlayerItem class]]) {
@@ -726,10 +744,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     dispatch_async(dispatch_get_main_queue(), ^{
         [_log debug:@"get mode from JS"];
         JSValue* mode = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
-        NSString* mode_s = [mode toString];
-        mode_s = [mode_s isEqual:@"cdn"] ? @"hola_cdn"
-            : [mode_s isEqual:@"stats"] ? @"origin_cdn" : mode_s;
-        [_log debug:mode_s];
+        NSString* mode_s = [self convert_old_mode:[mode toString]];
         completionBlock(mode_s);
     });
 }
