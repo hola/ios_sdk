@@ -2,8 +2,8 @@
 //  window_timers.m
 //  hola-cdn-sdk
 //
-//  Created by norlin on 04/08/16.
-//  Copyright © 2016 hola. All rights reserved.
+//  Created by alexeym on 04/08/16.
+//  Copyright © 2017 hola. All rights reserved.
 //
 
 #import "window_timers.h"

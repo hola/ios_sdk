@@ -5,7 +5,7 @@
 //  https://github.com/Lukas-Stuehrk/WindowTimers
 //
 //  Created by alexeym on 04/08/16.
-//  Copyright © 2016 hola. All rights reserved.
+//  Copyright © 2017 hola. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

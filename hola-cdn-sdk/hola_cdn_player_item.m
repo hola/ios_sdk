@@ -3,7 +3,7 @@
 //  hola-cdn-sdk
 //
 //  Created by alexeym on 01/12/2016.
-//  Copyright © 2016 hola. All rights reserved.
+//  Copyright © 2017 hola. All rights reserved.
 //
 
 #import "hola_cdn_player_item.h"
