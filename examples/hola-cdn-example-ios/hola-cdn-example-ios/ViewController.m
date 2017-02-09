@@ -48,4 +48,8 @@ AVPlayerLayer *layer;
     layer.frame = self.view.bounds;
 }
 
+- (IBAction)stopCDN:(id)sender {
+    [cdn uninit];
+}
+
 @end

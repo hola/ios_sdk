@@ -10,6 +10,8 @@
 
 @interface ViewController : UIViewController
 
+@property (weak, nonatomic) IBOutlet UIButton *stopButton;
+- (IBAction)stopCDN:(id)sender;
 
 @end
 
