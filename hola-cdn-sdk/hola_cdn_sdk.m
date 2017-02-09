@@ -41,7 +41,11 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 +(instancetype)cdnWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode {
-    return [[HolaCDN alloc] initWithCustomer:customer usingZone:zone andMode:mode];
+    return [[HolaCDN alloc] initWithCustomer:customer usingZone:zone andMode:mode withGraph:NO];
+}
+
++(instancetype)cdnWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode withGraph:(BOOL)enabled {
+    return [[HolaCDN alloc] initWithCustomer:customer usingZone:zone andMode:mode withGraph:enabled];
 }
 
 - (instancetype)init {
@@ -68,9 +72,14 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(instancetype)initWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode {
+    return [self initWithCustomer:customer usingZone:zone andMode:mode withGraph:NO];
+}
+
+-(instancetype)initWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode withGraph:(BOOL)enabled {
     self = [self init];
 
     if (self) {
+        self.graphEnabled = enabled;
         [self configWithCustomer:customer usingZone:zone andMode:mode];
     }
 
@@ -114,7 +123,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     _customer = customer;
     _zone = zone;
 
-    _mode = [self convert_old_mode:mode];
+    _mode = [self convert_old_mode:mode silent:NO];
 
     [self load];
 }
@@ -714,16 +723,20 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 // XXX alexeym: backward compatibility, remove someday
--(NSString*)convert_old_mode:(NSString*)mode {
+-(NSString*)convert_old_mode:(NSString*)mode silent:(BOOL)silent {
     [_log debug:mode];
     
     if ([mode isEqual:@"cdn"]) {
-        [_log warn:@"Please use \"hola_cdn\" instead of \"cdn\"!"];
+        if (!silent) {
+            [_log warn:@"Please use \"hola_cdn\" instead of \"cdn\"!"];
+        }
         return @"hola_cdn";
     }
 
     if ([mode isEqual:@"stats"]) {
-        [_log warn:@"Please use \"origin_cdn\" instead of \"stats\"!"];
+        if (!silent) {
+            [_log warn:@"Please use \"origin_cdn\" instead of \"stats\"!"];
+        }
         return @"origin_cdn";
     }
 
@@ -744,7 +757,7 @@ NSString* hola_cdn = @"window.hola_cdn";
     dispatch_async(dispatch_get_main_queue(), ^{
         [_log debug:@"get mode from JS"];
         JSValue* mode = [[self getContext] evaluateScript:[NSString stringWithFormat:@"%@.%@", hola_cdn, @"get_mode()"]];
-        NSString* mode_s = [self convert_old_mode:[mode toString]];
+        NSString* mode_s = [self convert_old_mode:[mode toString] silent:YES];
         completionBlock(mode_s);
     });
 }

@@ -79,9 +79,11 @@ typedef NS_ENUM(int, HolaCDNAction) {
 +(void)setLogLevel:(HolaCDNLogLevel)level;
 +(void)setLogModules:(NSArray*)modules;
 +(instancetype)cdnWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode;
++(instancetype)cdnWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode withGraph:(BOOL)enabled;
 
 -(instancetype)init __deprecated_msg("Use `initWithCustomer:` method");
 -(instancetype)initWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode;
+-(instancetype)initWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode withGraph:(BOOL)enabled;
 
 -(void)configWithCustomer:(NSString*)customer usingZone:(NSString*)zone andMode:(NSString*)mode __deprecated_msg("Use `initWithCustomer:` method");
 
