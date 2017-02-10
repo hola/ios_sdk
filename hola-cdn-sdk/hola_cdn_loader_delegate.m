@@ -215,7 +215,7 @@ int req_id = 1;
     [_logNetwork debug:[NSString stringWithFormat:@"Start request %d", [currentId intValue]]];
     [_logNetwork debug:[NSString stringWithFormat:@"URL: %@", originUrl.absoluteString]];
 
-    if (_isAttached && _proxy != nil) {
+    if (_isAttached && _proxy != nil && _cdn.ctx) {
         [_log debug:@"Ask JS for request"];
         [_proxy execute:@"req" withValue:[JSValue valueWithObject:@{
             @"url": originUrl.absoluteString,
@@ -349,6 +349,7 @@ int req_id = 1;
     NSURL* url = [NSURL URLWithString:urlString];
 
     if (!_isAttached) {
+        [_logNetwork debug:[NSString stringWithFormat:@"Redirect to %@", url]];
         dispatch_async(_queue, ^{
             NSMutableURLRequest* redirect = [req.request mutableCopy];
             [redirect setURL:url];
@@ -360,6 +361,8 @@ int req_id = 1;
         });
         return;
     }
+
+    [_logNetwork debug:[NSString stringWithFormat:@"Redirect to HolaLibrary; %d", arg_req_id]];
 
     NSMutableDictionary* proxyRec = [NSMutableDictionary new];
     proxyRec[@"uuid"] = [[NSUUID new] UUIDString];

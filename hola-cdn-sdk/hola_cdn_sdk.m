@@ -668,8 +668,10 @@ NSString* hola_cdn = @"window.hola_cdn";
 
     HolaCDNPlayerItem* item = [self currentItem];
     if (item != nil) {
-        [item detach];
+        [item uninit];
     }
+
+    [self detach];
 
     [_log info:@"Uninit..."];
 
@@ -680,7 +682,11 @@ NSString* hola_cdn = @"window.hola_cdn";
 }
 
 -(void)unload {
-    if ([self isBusy] || !_ready) {
+    if (!_ready) {
+        return;
+    }
+
+    if ([self isBusy]) {
         if (_nextAction != HolaCDNActionAttach) {
             _nextAttach = nil;
         }
