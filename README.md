@@ -10,7 +10,7 @@ At the moment, HolaCDN works with `AVPlayer` or `AVQueuePlayer`, only with `AVUR
 
 Note: An [Android version](https://github.com/hola/android_sdk) is also available.
 
-If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
+If you have any questions, email us at cdnsupport@hola.org, or skype: holacdn
 
 ## Install
 
