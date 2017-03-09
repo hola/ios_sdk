@@ -38,6 +38,7 @@ typedef NS_ENUM(int, HolaCDNErrorCode) {
 @interface HolaCDNLoaderDelegate: NSObject <AVAssetResourceLoaderDelegate, NSURLSessionDataDelegate>
 
 +(NSURL*)applyCDNScheme:(NSURL*)url andType:(HolaCDNScheme)type;
++(NSURL*)applyOriginScheme:(NSURL*)url;
 
 @property(readonly) NSString* loaderUUID;
 @property(readonly) dispatch_queue_t queue;

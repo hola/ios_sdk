@@ -118,7 +118,13 @@
 }
 
 -(NSString*)get_url {
-    return [_videoUrl absoluteString];
+    HolaCDNLoaderDelegate* loader = [self getLoader];
+
+    if (loader == nil) {
+        return [_videoUrl absoluteString];
+    }
+
+    return [[HolaCDNLoaderDelegate applyOriginScheme:_videoUrl] absoluteString];
 }
 
 -(NSNumber*)get_duration {

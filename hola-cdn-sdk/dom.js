@@ -706,7 +706,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
 
         function toCallbackOrNull(x) {
-            return x === null ? null : toCallback(x);
+            return x === null || x === undefined ? null : toCallback(x);
         }
 
         // This constructor takes a single object as its argument and looks for
