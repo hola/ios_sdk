@@ -7,6 +7,7 @@
 //
 
 #import "XMLHttpRequest.h"
+#import "hola_log.h"
 
 @implementation XMLHttpRequest
 {
@@ -16,6 +17,7 @@
     bool _async;
     NSMutableDictionary *_requestHeaders;
     NSDictionary *_responseHeaders;
+    HolaCDNLog* _log;
 }
 
 NS_ENUM(NSUInteger, XMLHttpReadyState) {
@@ -41,6 +43,7 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
 
 - (instancetype)initWithURLSession:(NSURLSession *)urlSession {
     if (self = [super init]) {
+        _log = [HolaCDNLog logWithModule:@"XHR"];
         _urlSession = urlSession;
         readyState = @(XMLHttpReadyStateUNSENT);
         _requestHeaders = [NSMutableDictionary new];
@@ -65,6 +68,8 @@ NS_ENUM(NSUInteger, XMLHttpReadyState) {
     // XXX alexeym: should throw an error if called with wrong arguments
     _httpMethod = httpMethod;
     _url = [NSURL URLWithString:url];
+
+    [_log debug:[NSString stringWithFormat:@"js request: %@", url]];
 
     if ([_url scheme] == nil) {
         NSString* location = [JSContext currentContext][@"location"][@"href"].toString;

@@ -212,8 +212,7 @@ int req_id = 1;
     [_pending setObject:req forKey:currentId];
 
     NSURL* originUrl = [HolaCDNLoaderDelegate applyOriginScheme:req.request.URL];
-    [_logNetwork debug:[NSString stringWithFormat:@"Start request %d", [currentId intValue]]];
-    [_logNetwork debug:[NSString stringWithFormat:@"URL: %@", originUrl.absoluteString]];
+    [_logNetwork debug:[NSString stringWithFormat:@"Start request %d: %@", [currentId intValue], originUrl.absoluteString]];
 
     if (_isAttached && _proxy != nil && _cdn.ctx) {
         [_log debug:@"Ask JS for request"];
@@ -234,26 +233,26 @@ int req_id = 1;
 
 -(void)processRequest:(NSString*)url forFrag:(int)frag_id withReq:(int)arg_req_id isRate:(BOOL)rate {
     if ([_pending objectForKey:[NSNumber numberWithInt:frag_id]] == nil) {
-        [_log warn:[NSString stringWithFormat:@"Unknown req_id %d", frag_id]];
+        [_log warn:[NSString stringWithFormat:@"Unknown req_id %d: %@", frag_id, url]];
         return;
     }
 
     [self sendOpen:arg_req_id];
 
     if (rate) {
-        [_logNetwork debug:[NSString stringWithFormat:@"Fetch rate request: %d", frag_id]];
+        [_logNetwork debug:[NSString stringWithFormat:@"Fetch rate request %d: %@", frag_id, url]];
         [self processExternalRequest:url :arg_req_id];
         return;
     }
 
     AVAssetResourceLoadingRequest* req = [self getRequest:frag_id];
     if (req == nil) {
-        [_logNetwork debug:[NSString stringWithFormat:@"Process external request %d", frag_id]];
+        [_logNetwork debug:[NSString stringWithFormat:@"Process external request %d: %@", frag_id, url]];
         [self processExternalRequest:url :arg_req_id];
         return;
     }
 
-    [_logNetwork debug:[NSString stringWithFormat:@"Process internal request %d", frag_id]];
+    [_logNetwork debug:[NSString stringWithFormat:@"Process internal request %d: %@", frag_id, url]];
     [self processInternalRequest:url :req :arg_req_id];
 }
 
