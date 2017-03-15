@@ -1220,6 +1220,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         return wrap(unwrap(this).getElementById(String(elementId)));
                     },
 
+                    querySelector: function querySelector(selector) {
+                        return wrap(unwrap(this).querySelector(String(selector)));
+                    },
+
+                    querySelectorAll: function querySelectorAll(selector) {
+                        return wrap(unwrap(this).querySelectorAll(String(selector)));
+                    },
+
                     createElement: function createElement(localName) {
                         return wrap(unwrap(this).createElement(StringOrEmpty(localName)));
                     },
@@ -10946,6 +10954,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
                 getElementsByName: constant(function getElementsByName(name) {
                     return new impl.FilteredElementList(this, elementNameFilter(name));
+                }),
+
+                querySelector: constant(function querySelector(selector) {
+                    // XXX alexeym: make querySelector work
+                    return null;
+                }),
+
+                querySelectorAll: constant(function querySelectorAll(selector) {
+                    // XXX alexeym: make querySelectorAll work
+                    var result = []; // Empty node list
+                    result._idlName = "NodeList";
+                    return result;
                 }),
 
                 adoptNode: constant(function adoptNode(node) {
