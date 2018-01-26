@@ -31,7 +31,7 @@ AVPlayerLayer *layer;
     [cdn setLoaderTimeout:5];
 
     // init player for specific video
-    NSURL *url = [NSURL URLWithString:@"https://player.h-cdn.org/static/hls/cdn2/master.m3u8"];
+    NSURL *url = [NSURL URLWithString:@"https://video.h-cdn.com/static/hls/cdn2/master.m3u8"];
     player = [cdn playerWithURL:url];
     [cdn attach:player];
 
