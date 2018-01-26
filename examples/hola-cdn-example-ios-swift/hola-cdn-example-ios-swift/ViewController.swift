@@ -31,7 +31,7 @@ class ViewController: UIViewController {
         cdn.loaderTimeout = 5
 
         // init player for specific video
-        let url = URL(string: "https://player.h-cdn.org/static/hls/cdn2/master.m3u8")!
+        let url = URL(string: "https://video.h-cdn.com/static/hls/cdn2/master.m3u8")!
         player = cdn.player(with: url)
         cdn.attach(player)
 
