@@ -1,0 +1,867 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2D5E214D2029DE0B00B0A2C1 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5E214C2029DE0B00B0A2C1 /* NotificationService.swift */; };
+		2D5E21512029DE0C00B0A2C1 /* spark-notification-service.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2D5E214A2029DE0B00B0A2C1 /* spark-notification-service.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2D8E44DE202B015800670D14 /* NotificationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8E44DD202B015800670D14 /* NotificationContent.swift */; };
+		2D8E44DF202B0EC900670D14 /* NotificationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8E44DD202B015800670D14 /* NotificationContent.swift */; };
+		2DC444D220245CBC0010A70A /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DC444D120245CBC0010A70A /* UserNotifications.framework */; };
+		2DC444D420245CBC0010A70A /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DC444D320245CBC0010A70A /* UserNotificationsUI.framework */; };
+		2DC444D720245CBC0010A70A /* NotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC444D620245CBC0010A70A /* NotificationViewController.swift */; };
+		2DC444DA20245CBC0010A70A /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2DC444D820245CBC0010A70A /* MainInterface.storyboard */; };
+		2DC444DE20245CBC0010A70A /* spark-notification.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2DC444CF20245CBC0010A70A /* spark-notification.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EA309E59201B555E001AD6D2 /* preview.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = EA309E58201B552C001AD6D2 /* preview.mp4 */; };
+		EAD788A8201B1D14005A917D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAD788A7201B1D14005A917D /* ViewController.swift */; };
+		EADF80A92019D96D007EF10B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADF80A82019D96D007EF10B /* AppDelegate.swift */; };
+		EADF80AE2019D96D007EF10B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EADF80AC2019D96D007EF10B /* Main.storyboard */; };
+		EADF80B02019D96D007EF10B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EADF80AF2019D96D007EF10B /* Assets.xcassets */; };
+		EADF80B32019D96D007EF10B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EADF80B12019D96D007EF10B /* LaunchScreen.storyboard */; };
+		EADF80BE2019D96D007EF10B /* demoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADF80BD2019D96D007EF10B /* demoTests.swift */; };
+		EADF80C92019D96D007EF10B /* demoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EADF80C82019D96D007EF10B /* demoUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2D5E214F2029DE0C00B0A2C1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EADF809D2019D96D007EF10B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2D5E21492029DE0B00B0A2C1;
+			remoteInfo = "spark-notification-service";
+		};
+		2DC444DC20245CBC0010A70A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EADF809D2019D96D007EF10B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2DC444CE20245CBC0010A70A;
+			remoteInfo = "spark-notification";
+		};
+		EADF80BA2019D96D007EF10B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EADF809D2019D96D007EF10B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EADF80A42019D96D007EF10B;
+			remoteInfo = demo;
+		};
+		EADF80C52019D96D007EF10B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EADF809D2019D96D007EF10B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EADF80A42019D96D007EF10B;
+			remoteInfo = demo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2DC444E220245CBC0010A70A /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2D5E21512029DE0C00B0A2C1 /* spark-notification-service.appex in Embed App Extensions */,
+				2DC444DE20245CBC0010A70A /* spark-notification.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2D5E214520299FD800B0A2C1 /* demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = demo.entitlements; sourceTree = "<group>"; };
+		2D5E214A2029DE0B00B0A2C1 /* spark-notification-service.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "spark-notification-service.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D5E214C2029DE0B00B0A2C1 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		2D5E214E2029DE0C00B0A2C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2D8E44DD202B015800670D14 /* NotificationContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationContent.swift; sourceTree = "<group>"; };
+		2DC444CF20245CBC0010A70A /* spark-notification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "spark-notification.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2DC444D120245CBC0010A70A /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		2DC444D320245CBC0010A70A /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
+		2DC444D620245CBC0010A70A /* NotificationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewController.swift; sourceTree = "<group>"; };
+		2DC444D920245CBC0010A70A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		2DC444DB20245CBC0010A70A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EA309E58201B552C001AD6D2 /* preview.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = preview.mp4; sourceTree = "<group>"; };
+		EAD788A7201B1D14005A917D /* ViewController.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; fileEncoding = 4; path = ViewController.swift; sourceTree = "<group>"; };
+		EADF80A52019D96D007EF10B /* demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EADF80A82019D96D007EF10B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		EADF80AD2019D96D007EF10B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		EADF80AF2019D96D007EF10B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EADF80B22019D96D007EF10B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		EADF80B42019D96D007EF10B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EADF80B92019D96D007EF10B /* demoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = demoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EADF80BD2019D96D007EF10B /* demoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demoTests.swift; sourceTree = "<group>"; };
+		EADF80BF2019D96D007EF10B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EADF80C42019D96D007EF10B /* demoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = demoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EADF80C82019D96D007EF10B /* demoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = demoUITests.swift; sourceTree = "<group>"; };
+		EADF80CA2019D96D007EF10B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2D5E21472029DE0B00B0A2C1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2DC444CC20245CBC0010A70A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DC444D420245CBC0010A70A /* UserNotificationsUI.framework in Frameworks */,
+				2DC444D220245CBC0010A70A /* UserNotifications.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80A22019D96D007EF10B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80B62019D96D007EF10B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80C12019D96D007EF10B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2D5E214B2029DE0B00B0A2C1 /* spark-notification-service */ = {
+			isa = PBXGroup;
+			children = (
+				2D5E214C2029DE0B00B0A2C1 /* NotificationService.swift */,
+				2D5E214E2029DE0C00B0A2C1 /* Info.plist */,
+			);
+			path = "spark-notification-service";
+			sourceTree = "<group>";
+		};
+		2DC444D020245CBC0010A70A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2DC444D120245CBC0010A70A /* UserNotifications.framework */,
+				2DC444D320245CBC0010A70A /* UserNotificationsUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2DC444D520245CBC0010A70A /* spark-notification */ = {
+			isa = PBXGroup;
+			children = (
+				2DC444D620245CBC0010A70A /* NotificationViewController.swift */,
+				2DC444D820245CBC0010A70A /* MainInterface.storyboard */,
+				2DC444DB20245CBC0010A70A /* Info.plist */,
+			);
+			path = "spark-notification";
+			sourceTree = "<group>";
+		};
+		EA309E57201B551F001AD6D2 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				EA309E58201B552C001AD6D2 /* preview.mp4 */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+		EADF809C2019D96D007EF10B = {
+			isa = PBXGroup;
+			children = (
+				EA309E57201B551F001AD6D2 /* resources */,
+				EADF80A72019D96D007EF10B /* demo */,
+				EADF80BC2019D96D007EF10B /* demoTests */,
+				EADF80C72019D96D007EF10B /* demoUITests */,
+				2DC444D520245CBC0010A70A /* spark-notification */,
+				2D5E214B2029DE0B00B0A2C1 /* spark-notification-service */,
+				2DC444D020245CBC0010A70A /* Frameworks */,
+				EADF80A62019D96D007EF10B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EADF80A62019D96D007EF10B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EADF80A52019D96D007EF10B /* demo.app */,
+				EADF80B92019D96D007EF10B /* demoTests.xctest */,
+				EADF80C42019D96D007EF10B /* demoUITests.xctest */,
+				2DC444CF20245CBC0010A70A /* spark-notification.appex */,
+				2D5E214A2029DE0B00B0A2C1 /* spark-notification-service.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EADF80A72019D96D007EF10B /* demo */ = {
+			isa = PBXGroup;
+			children = (
+				2D5E214520299FD800B0A2C1 /* demo.entitlements */,
+				EAD788A7201B1D14005A917D /* ViewController.swift */,
+				EADF80A82019D96D007EF10B /* AppDelegate.swift */,
+				EADF80AC2019D96D007EF10B /* Main.storyboard */,
+				EADF80AF2019D96D007EF10B /* Assets.xcassets */,
+				EADF80B12019D96D007EF10B /* LaunchScreen.storyboard */,
+				EADF80B42019D96D007EF10B /* Info.plist */,
+				2D8E44DD202B015800670D14 /* NotificationContent.swift */,
+			);
+			path = demo;
+			sourceTree = "<group>";
+		};
+		EADF80BC2019D96D007EF10B /* demoTests */ = {
+			isa = PBXGroup;
+			children = (
+				EADF80BD2019D96D007EF10B /* demoTests.swift */,
+				EADF80BF2019D96D007EF10B /* Info.plist */,
+			);
+			path = demoTests;
+			sourceTree = "<group>";
+		};
+		EADF80C72019D96D007EF10B /* demoUITests */ = {
+			isa = PBXGroup;
+			children = (
+				EADF80C82019D96D007EF10B /* demoUITests.swift */,
+				EADF80CA2019D96D007EF10B /* Info.plist */,
+			);
+			path = demoUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2D5E21492029DE0B00B0A2C1 /* spark-notification-service */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2D5E21522029DE0C00B0A2C1 /* Build configuration list for PBXNativeTarget "spark-notification-service" */;
+			buildPhases = (
+				2D5E21462029DE0B00B0A2C1 /* Sources */,
+				2D5E21472029DE0B00B0A2C1 /* Frameworks */,
+				2D5E21482029DE0B00B0A2C1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "spark-notification-service";
+			productName = "spark-notification-service";
+			productReference = 2D5E214A2029DE0B00B0A2C1 /* spark-notification-service.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		2DC444CE20245CBC0010A70A /* spark-notification */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2DC444E120245CBC0010A70A /* Build configuration list for PBXNativeTarget "spark-notification" */;
+			buildPhases = (
+				2DC444CB20245CBC0010A70A /* Sources */,
+				2DC444CC20245CBC0010A70A /* Frameworks */,
+				2DC444CD20245CBC0010A70A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "spark-notification";
+			productName = "spark-notification";
+			productReference = 2DC444CF20245CBC0010A70A /* spark-notification.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		EADF80A42019D96D007EF10B /* demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EADF80CD2019D96D007EF10B /* Build configuration list for PBXNativeTarget "demo" */;
+			buildPhases = (
+				EADF80A12019D96D007EF10B /* Sources */,
+				EADF80A22019D96D007EF10B /* Frameworks */,
+				EADF80A32019D96D007EF10B /* Resources */,
+				2DC444E220245CBC0010A70A /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2DC444DD20245CBC0010A70A /* PBXTargetDependency */,
+				2D5E21502029DE0C00B0A2C1 /* PBXTargetDependency */,
+			);
+			name = demo;
+			productName = demo;
+			productReference = EADF80A52019D96D007EF10B /* demo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EADF80B82019D96D007EF10B /* demoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EADF80D02019D96D007EF10B /* Build configuration list for PBXNativeTarget "demoTests" */;
+			buildPhases = (
+				EADF80B52019D96D007EF10B /* Sources */,
+				EADF80B62019D96D007EF10B /* Frameworks */,
+				EADF80B72019D96D007EF10B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EADF80BB2019D96D007EF10B /* PBXTargetDependency */,
+			);
+			name = demoTests;
+			productName = demoTests;
+			productReference = EADF80B92019D96D007EF10B /* demoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EADF80C32019D96D007EF10B /* demoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EADF80D32019D96D007EF10B /* Build configuration list for PBXNativeTarget "demoUITests" */;
+			buildPhases = (
+				EADF80C02019D96D007EF10B /* Sources */,
+				EADF80C12019D96D007EF10B /* Frameworks */,
+				EADF80C22019D96D007EF10B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EADF80C62019D96D007EF10B /* PBXTargetDependency */,
+			);
+			name = demoUITests;
+			productName = demoUITests;
+			productReference = EADF80C42019D96D007EF10B /* demoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EADF809D2019D96D007EF10B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0920;
+				LastUpgradeCheck = 0920;
+				ORGANIZATIONNAME = holaspark;
+				TargetAttributes = {
+					2D5E21492029DE0B00B0A2C1 = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
+					2DC444CE20245CBC0010A70A = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
+					EADF80A42019D96D007EF10B = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
+					};
+					EADF80B82019D96D007EF10B = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = EADF80A42019D96D007EF10B;
+					};
+					EADF80C32019D96D007EF10B = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = EADF80A42019D96D007EF10B;
+					};
+				};
+			};
+			buildConfigurationList = EADF80A02019D96D007EF10B /* Build configuration list for PBXProject "demo" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EADF809C2019D96D007EF10B;
+			productRefGroup = EADF80A62019D96D007EF10B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EADF80A42019D96D007EF10B /* demo */,
+				EADF80B82019D96D007EF10B /* demoTests */,
+				EADF80C32019D96D007EF10B /* demoUITests */,
+				2DC444CE20245CBC0010A70A /* spark-notification */,
+				2D5E21492029DE0B00B0A2C1 /* spark-notification-service */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2D5E21482029DE0B00B0A2C1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2DC444CD20245CBC0010A70A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DC444DA20245CBC0010A70A /* MainInterface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80A32019D96D007EF10B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA309E59201B555E001AD6D2 /* preview.mp4 in Resources */,
+				EADF80B32019D96D007EF10B /* LaunchScreen.storyboard in Resources */,
+				EADF80B02019D96D007EF10B /* Assets.xcassets in Resources */,
+				EADF80AE2019D96D007EF10B /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80B72019D96D007EF10B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80C22019D96D007EF10B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2D5E21462029DE0B00B0A2C1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D8E44DF202B0EC900670D14 /* NotificationContent.swift in Sources */,
+				2D5E214D2029DE0B00B0A2C1 /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2DC444CB20245CBC0010A70A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DC444D720245CBC0010A70A /* NotificationViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80A12019D96D007EF10B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAD788A8201B1D14005A917D /* ViewController.swift in Sources */,
+				EADF80A92019D96D007EF10B /* AppDelegate.swift in Sources */,
+				2D8E44DE202B015800670D14 /* NotificationContent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80B52019D96D007EF10B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EADF80BE2019D96D007EF10B /* demoTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EADF80C02019D96D007EF10B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EADF80C92019D96D007EF10B /* demoUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2D5E21502029DE0C00B0A2C1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2D5E21492029DE0B00B0A2C1 /* spark-notification-service */;
+			targetProxy = 2D5E214F2029DE0C00B0A2C1 /* PBXContainerItemProxy */;
+		};
+		2DC444DD20245CBC0010A70A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2DC444CE20245CBC0010A70A /* spark-notification */;
+			targetProxy = 2DC444DC20245CBC0010A70A /* PBXContainerItemProxy */;
+		};
+		EADF80BB2019D96D007EF10B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EADF80A42019D96D007EF10B /* demo */;
+			targetProxy = EADF80BA2019D96D007EF10B /* PBXContainerItemProxy */;
+		};
+		EADF80C62019D96D007EF10B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EADF80A42019D96D007EF10B /* demo */;
+			targetProxy = EADF80C52019D96D007EF10B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		2DC444D820245CBC0010A70A /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2DC444D920245CBC0010A70A /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+		EADF80AC2019D96D007EF10B /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EADF80AD2019D96D007EF10B /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		EADF80B12019D96D007EF10B /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EADF80B22019D96D007EF10B /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		2D5E21532029DE0C00B0A2C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = "spark-notification-service/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-spark-demo2.spark-notification-service";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2D5E21542029DE0C00B0A2C1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = "spark-notification-service/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-spark-demo2.spark-notification-service";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		2DC444DF20245CBC0010A70A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = "spark-notification/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-spark-demo2.spark-notification";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2DC444E020245CBC0010A70A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = "spark-notification/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-spark-demo2.spark-notification";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EADF80CB2019D96D007EF10B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EADF80CC2019D96D007EF10B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EADF80CE2019D96D007EF10B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = demo/demo.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-spark-demo2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EADF80CF2019D96D007EF10B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = demo/demo.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = H266NKJGCY;
+				INFOPLIST_FILE = demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.hola.hola-spark-demo2";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EADF80D12019D96D007EF10B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = demoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = holaspark.demoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/demo.app/demo";
+			};
+			name = Debug;
+		};
+		EADF80D22019D96D007EF10B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = demoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = holaspark.demoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/demo.app/demo";
+			};
+			name = Release;
+		};
+		EADF80D42019D96D007EF10B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = demoUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = holaspark.demoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = demo;
+			};
+			name = Debug;
+		};
+		EADF80D52019D96D007EF10B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = demoUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = holaspark.demoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = demo;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2D5E21522029DE0C00B0A2C1 /* Build configuration list for PBXNativeTarget "spark-notification-service" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D5E21532029DE0C00B0A2C1 /* Debug */,
+				2D5E21542029DE0C00B0A2C1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2DC444E120245CBC0010A70A /* Build configuration list for PBXNativeTarget "spark-notification" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2DC444DF20245CBC0010A70A /* Debug */,
+				2DC444E020245CBC0010A70A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EADF80A02019D96D007EF10B /* Build configuration list for PBXProject "demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EADF80CB2019D96D007EF10B /* Debug */,
+				EADF80CC2019D96D007EF10B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EADF80CD2019D96D007EF10B /* Build configuration list for PBXNativeTarget "demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EADF80CE2019D96D007EF10B /* Debug */,
+				EADF80CF2019D96D007EF10B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EADF80D02019D96D007EF10B /* Build configuration list for PBXNativeTarget "demoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EADF80D12019D96D007EF10B /* Debug */,
+				EADF80D22019D96D007EF10B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EADF80D32019D96D007EF10B /* Build configuration list for PBXNativeTarget "demoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EADF80D42019D96D007EF10B /* Debug */,
+				EADF80D52019D96D007EF10B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EADF809D2019D96D007EF10B /* Project object */;
+}
