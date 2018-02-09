@@ -35,8 +35,9 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QCh-7n-BBu">
-                                <rect key="frame" x="60" y="249" width="199" height="30"/>
+                                <rect key="frame" x="16" y="249" width="288" height="30"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="15"/>
                                 <state key="normal" title="Generate notification"/>
                                 <connections>
                                     <action selector="onGenerateNotificationWithSender:" destination="BYZ-38-t0r" eventType="touchUpInside" id="2l2-XL-Jdp"/>

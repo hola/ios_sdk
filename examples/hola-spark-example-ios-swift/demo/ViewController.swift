@@ -17,6 +17,10 @@ class ViewController: UIViewController {
     
     // MARK: Actions
     @IBAction func onGenerateNotification(sender: UIButton){
+        guard self.generateNotificationButton.isEnabled else { return }
+        self.generateNotificationButton.setTitle("loading remote attachment", for: UIControlState.disabled)
+        self.generateNotificationButton.isEnabled = false
+        let delay = TimeInterval(10)
         let url = URL(string: "https://video.h-cdn.com/static/mp4/preview_sample.mp4")!
         let category = UNNotificationCategory(identifier: "spark-preview", actions: [], intentIdentifiers: [], options: [])
         let content = UNMutableNotificationContent()
@@ -31,15 +35,18 @@ class ViewController: UIViewController {
                 let attachment = try! UNNotificationAttachment(identifier: "preview", url: backup, options: [:])
                 content.attachments = [attachment]
             }
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
             let request = UNNotificationRequest(identifier: "demo", content: content, trigger: trigger)
             let center = UNUserNotificationCenter.current()
             center.setNotificationCategories([category])
             center.add(request, withCompletionHandler: { (error) in
-                if let error = error {
-                    print("notification failed", error)
-                } else {
-                    print("notification sent, close the app and wait 10 sec")
+                DispatchQueue.main.async {
+                    let hint = error != nil ? "scheduling failed, try again" :
+                        "notification sent (close your app now)"
+                    self.generateNotificationButton.setTitle(hint, for: UIControlState.disabled)
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now()+delay) {
+                    self.generateNotificationButton.isEnabled = true
                 }
             });
         }
