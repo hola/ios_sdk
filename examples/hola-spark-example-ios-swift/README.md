@@ -1,1 +1,0 @@
-# sparkdemo_ios
